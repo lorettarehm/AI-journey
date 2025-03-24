@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -137,7 +136,7 @@ const Assessment = () => {
                 </div>
               </div>
               
-              <FadeIn key={currentQuestion.id} duration={0.3}>
+              <FadeIn key={currentQuestion.id}>
                 <QuestionnaireCard
                   question={currentQuestion}
                   onAnswer={handleAnswer}

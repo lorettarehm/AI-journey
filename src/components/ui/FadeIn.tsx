@@ -35,7 +35,7 @@ const FadeIn = ({
         animation: `fadeIn 0.8s ease-out ${delay}s forwards`
       }}
     >
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
