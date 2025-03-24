@@ -6,6 +6,7 @@ import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import { Link } from 'react-router-dom';
 import FadeIn from '@/components/ui/FadeIn';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   return (
@@ -77,8 +78,8 @@ const Index = () => {
                   Evolve is continuously adapting to provide the most effective support for your neurodivergent mind.
                   Start with a simple assessment and discover strategies tailored specifically to you.
                 </p>
-                <Link to="/assessment" className="btn-primary inline-block">
-                  Start Your Assessment
+                <Link to="/assessment">
+                  <Button size="lg">Start Your Assessment</Button>
                 </Link>
               </div>
             </FadeIn>
