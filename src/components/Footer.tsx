@@ -12,8 +12,8 @@ const Footer = () => {
               to="/" 
               className="text-2xl font-bold tracking-tight flex items-center mb-4"
             >
-              <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">E</span>
-              <span>Evolve</span>
+              <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">EU</span>
+              <span>volve</span>
             </Link>
             <p className="text-muted-foreground mt-4 max-w-xs">
               Your adaptive neurodiversity empowerment companion, evolving with you on your journey.
@@ -81,7 +81,7 @@ const Footer = () => {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Evolve. All rights reserved.
+            &copy; {new Date().getFullYear()} EUvolve. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-muted-foreground hover:text-accent transition-colors">

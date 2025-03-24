@@ -30,7 +30,7 @@ const Hero = () => {
             
             <FadeIn delay={0.2}>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl">
-                Evolve is an adaptive AI companion that helps individuals with ADHD and Autism 
+                EUvolve is an adaptive AI companion that helps individuals with ADHD and Autism 
                 thrive through personalized assessments, evidence-based techniques, and continuous learning.
               </p>
             </FadeIn>
