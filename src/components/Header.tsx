@@ -41,8 +41,8 @@ const Header = () => {
           to="/" 
           className="text-2xl font-bold tracking-tight flex items-center"
         >
-          <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">EU</span>
-          <span>volve</span>
+          <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">au</span>
+          <span>dhd.ai</span>
         </Link>
         
         {/* Desktop Navigation */}

@@ -34,7 +34,7 @@ const Features = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Adaptive Support for Your Unique Mind</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Evolve continuously learns and adapts to provide you with the most relevant support for your neurodivergent journey.
+              audhd.ai continuously learns and adapts to provide you with the most relevant support for your neurodivergent journey.
             </p>
           </div>
         </FadeIn>
@@ -61,7 +61,7 @@ const Features = () => {
                 <div>
                   <h3 className="text-2xl font-bold mb-4">Backed by Scientific Research</h3>
                   <p className="text-muted-foreground mb-6">
-                    Evolve scans and analyzes the latest scientific research on ADHD and Autism daily, 
+                    audhd.ai scans and analyzes the latest scientific research on ADHD and Autism daily, 
                     ensuring that our recommendations are always based on the most current evidence.
                   </p>
                   <div className="flex flex-wrap gap-3">

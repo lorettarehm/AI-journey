@@ -24,7 +24,7 @@ const Index = () => {
               <div className="text-center mb-16">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Making a Difference</h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  See how EUvolve has helped people on their neurodivergent journey.
+                  See how audhd.ai has helped people on their neurodivergent journey.
                 </p>
               </div>
             </FadeIn>
@@ -32,7 +32,7 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  quote: "EUvolve helped me understand my ADHD patterns and leverage my hyperfocus in productive ways.",
+                  quote: "audhd.ai helped me understand my ADHD patterns and leverage my hyperfocus in productive ways.",
                   author: "Alex K.",
                   role: "Software Developer"
                 },
@@ -75,7 +75,7 @@ const Index = () => {
                   Begin Your Personalized Journey Today
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8">
-                  EUvolve is continuously adapting to provide the most effective support for your neurodivergent mind.
+                  audhd.ai is continuously adapting to provide the most effective support for your neurodivergent mind.
                   Start with a simple assessment and discover strategies tailored specifically to you.
                 </p>
                 <Link to="/assessment">
