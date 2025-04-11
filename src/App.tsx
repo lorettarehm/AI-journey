@@ -51,6 +51,14 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/techniques/:id" 
+                element={
+                  <ProtectedRoute>
+                    <Techniques />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

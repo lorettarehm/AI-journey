@@ -90,6 +90,104 @@ export type Database = {
         }
         Relationships: []
       }
+      research_papers: {
+        Row: {
+          abstract: string
+          authors: string[]
+          created_at: string
+          doi: string | null
+          full_text: string | null
+          id: string
+          journal: string
+          publication_date: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          abstract: string
+          authors: string[]
+          created_at?: string
+          doi?: string | null
+          full_text?: string | null
+          id?: string
+          journal: string
+          publication_date: string
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          abstract?: string
+          authors?: string[]
+          created_at?: string
+          doi?: string | null
+          full_text?: string | null
+          id?: string
+          journal?: string
+          publication_date?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      research_techniques: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          difficulty_level: string | null
+          effectiveness_score: number | null
+          evidence_strength: string | null
+          id: string
+          implementation_steps: string[] | null
+          keywords: string[] | null
+          paper_id: string
+          target_condition: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          difficulty_level?: string | null
+          effectiveness_score?: number | null
+          evidence_strength?: string | null
+          id?: string
+          implementation_steps?: string[] | null
+          keywords?: string[] | null
+          paper_id: string
+          target_condition: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          difficulty_level?: string | null
+          effectiveness_score?: number | null
+          evidence_strength?: string | null
+          id?: string
+          implementation_steps?: string[] | null
+          keywords?: string[] | null
+          paper_id?: string
+          target_condition?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_techniques_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "research_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technique_interactions: {
         Row: {
           created_at: string
@@ -117,12 +215,167 @@ export type Database = {
         }
         Relationships: []
       }
+      technique_metadata: {
+        Row: {
+          ai_embeddings: string | null
+          contraindications: Json | null
+          created_at: string
+          id: string
+          related_techniques: string[] | null
+          suitable_for_profiles: Json | null
+          technique_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_embeddings?: string | null
+          contraindications?: Json | null
+          created_at?: string
+          id?: string
+          related_techniques?: string[] | null
+          suitable_for_profiles?: Json | null
+          technique_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_embeddings?: string | null
+          contraindications?: Json | null
+          created_at?: string
+          id?: string
+          related_techniques?: string[] | null
+          suitable_for_profiles?: Json | null
+          technique_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technique_metadata_technique_id_fkey"
+            columns: ["technique_id"]
+            isOneToOne: false
+            referencedRelation: "research_techniques"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technique_metadata_technique_id_fkey"
+            columns: ["technique_id"]
+            isOneToOne: false
+            referencedRelation: "technique_recommendations"
+            referencedColumns: ["technique_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      technique_recommendations: {
+        Row: {
+          category: string | null
+          contraindications: Json | null
+          description: string | null
+          difficulty_level: string | null
+          effectiveness_score: number | null
+          implementation_steps: string[] | null
+          journal: string | null
+          publication_date: string | null
+          suitable_for_profiles: Json | null
+          target_condition: string[] | null
+          technique_id: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      binary_quantize: {
+        Args: { "": unknown } | { "": string }
+        Returns: unknown
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": unknown } | { "": unknown } | { "": string }
+        Returns: unknown
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": unknown } | { "": string }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

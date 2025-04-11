@@ -1,1 +1,5 @@
+
 project_id = "sjeaxjdujzdrlkkfdzjc"
+
+[functions.fetch-research]
+verify_jwt = false
