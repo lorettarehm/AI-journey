@@ -28,6 +28,7 @@
     --green: 142 71% 45%;
     --orange: 25 95% 53%;
     --pink: 330 81% 60%;
+    --custom-color: #9b87f5;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -96,6 +97,16 @@
     --accent: 330 81% 60%;
     --accent-foreground: 0 0% 98%;
     --ring: 330 81% 60%;
+  }
+  
+  /* Custom color scheme - will be set via JavaScript */
+  .color-custom {
+    /* These values will be set dynamically via JS */
+    --primary: var(--primary);
+    --primary-foreground: 0 0% 98%;
+    --accent: var(--accent);
+    --accent-foreground: 0 0% 98%;
+    --ring: var(--ring);
   }
 }
  
