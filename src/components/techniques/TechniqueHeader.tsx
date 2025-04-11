@@ -12,6 +12,7 @@ const TechniqueHeader: React.FC = () => {
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Neurodivergent Techniques</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover and learn practical strategies tailored for your unique neurodivergent mind.
+          We suggest 4 techniques at a time that might be helpful.
         </p>
       </div>
     </FadeIn>

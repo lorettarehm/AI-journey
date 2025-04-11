@@ -17,13 +17,14 @@ export interface TechniqueType {
 export const useTechniques = () => {
   const { toast } = useToast();
   
-  // Fetch techniques from our database
+  // Fetch techniques from our database with random ordering
   const { data: techniques, isLoading, isError, refetch } = useQuery({
     queryKey: ['techniques'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('technique_recommendations')
-        .select('*');
+        .select('*')
+        .order(() => 'RANDOM()');  // Order randomly to get different suggestions each time
       
       if (error) throw error;
       return data as TechniqueType[];

@@ -1,9 +1,16 @@
 
-import React from 'react';
-import { Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/ui/FadeIn";
 import TechniqueCard from './TechniqueCard';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 interface TechniqueType {
   technique_id: string;
@@ -33,10 +40,38 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
   refetch,
   triggerResearchUpdate
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const techniquesPerPage = 4;
+  
   // Filter techniques by category
   const filteredTechniques = techniques ? 
     (filter ? techniques.filter(tech => tech.category === filter) : techniques) : 
     [];
+    
+  // Get current techniques
+  const indexOfLastTechnique = currentPage * techniquesPerPage;
+  const indexOfFirstTechnique = indexOfLastTechnique - techniquesPerPage;
+  const currentTechniques = filteredTechniques.slice(indexOfFirstTechnique, indexOfLastTechnique);
+  
+  // Change page
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredTechniques.length / techniquesPerPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  // Function to get new random suggestions
+  const getNewSuggestions = () => {
+    // Shuffle the filtered techniques and reset to page 1
+    refetch();
+    setCurrentPage(1);
+  };
 
   if (isLoading) {
     return (
@@ -77,20 +112,61 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-      {filteredTechniques.map((technique, index) => (
-        <FadeIn key={technique.technique_id} delay={0.1 * index}>
-          <TechniqueCard
-            id={technique.technique_id}
-            title={technique.title}
-            description={technique.description}
-            category={technique.category || 'focus'}
-            source={technique.journal || "Journal of Neurodiversity"}
-            researchBased={true}
-          />
-        </FadeIn>
-      ))}
-    </div>
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm text-muted-foreground">
+          Showing {indexOfFirstTechnique + 1}-{Math.min(indexOfLastTechnique, filteredTechniques.length)} of {filteredTechniques.length} techniques
+        </p>
+        <Button 
+          onClick={getNewSuggestions} 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh Suggestions
+        </Button>
+      </div>
+    
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {currentTechniques.map((technique, index) => (
+          <FadeIn key={technique.technique_id} delay={0.1 * index}>
+            <TechniqueCard
+              id={technique.technique_id}
+              title={technique.title}
+              description={technique.description}
+              category={technique.category || 'focus'}
+              source={technique.journal || "Journal of Neurodiversity"}
+              researchBased={true}
+            />
+          </FadeIn>
+        ))}
+      </div>
+      
+      {filteredTechniques.length > techniquesPerPage && (
+        <Pagination className="my-8">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={prevPage} 
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <span className="px-4">
+                Page {currentPage} of {Math.ceil(filteredTechniques.length / techniquesPerPage)}
+              </span>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext 
+                onClick={nextPage} 
+                className={currentPage >= Math.ceil(filteredTechniques.length / techniquesPerPage) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+    </>
   );
 };
 
