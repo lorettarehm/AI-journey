@@ -1,9 +1,11 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/ui/FadeIn";
-import { Brain, Zap, Lightbulb, BookOpen } from "lucide-react";
+import { Brain, Zap, Lightbulb, BookOpen, Filter } from "lucide-react";
 import TechniqueCard from './TechniqueCard';
+import ThemeSelector from '@/components/ui/ThemeSelector';
 
 interface TechniqueType {
   id: string;
@@ -83,6 +85,9 @@ const TechniquePage: React.FC = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover and learn practical strategies tailored for your unique neurodivergent mind.
           </p>
+          <div className="mt-6 flex justify-center">
+            <ThemeSelector />
+          </div>
         </div>
       </FadeIn>
 
