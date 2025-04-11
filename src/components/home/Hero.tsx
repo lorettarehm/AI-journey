@@ -2,8 +2,60 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import FadeIn from '@/components/ui/FadeIn';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format, subDays } from 'date-fns';
 
 const Hero = () => {
+  const { user } = useAuth();
+  
+  const { data: weeklyData = [] } = useQuery({
+    queryKey: ['homePageProgress', user?.id],
+    queryFn: async () => {
+      if (!user) {
+        // Return mock data for non-logged in users
+        return Array.from({ length: 7 }).map((_, i) => ({
+          date: format(subDays(new Date(), 6 - i), 'EEE'),
+          completed: i < 5, // First 5 days are "completed"
+          value: Math.random() * 50 + 30 // Random height for visual interest
+        }));
+      }
+      
+      // Fetch real data for logged in users
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('completed_at')
+        .eq('user_id', user.id)
+        .gte('completed_at', subDays(new Date(), 7).toISOString());
+        
+      if (error) throw error;
+      
+      // Create a map of dates to completion status
+      const assessmentMap = data.reduce((acc: Record<string, boolean>, result) => {
+        const date = format(new Date(result.completed_at), 'yyyy-MM-dd');
+        acc[date] = true;
+        return acc;
+      }, {});
+      
+      // Generate the last 7 days
+      const days = Array.from({ length: 7 }).map((_, i) => {
+        const date = subDays(new Date(), 6 - i);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const dayLabel = format(date, 'EEE');
+        
+        return {
+          date: dayLabel,
+          completed: !!assessmentMap[dateStr],
+          value: assessmentMap[dateStr] ? Math.random() * 50 + 30 : 10
+        };
+      });
+      
+      return days;
+    },
+    enabled: true // Always run this query to support both logged-in and non-logged-in states
+  });
+
   return (
     <section className="pt-32 pb-20 px-6 relative overflow-hidden">
       {/* Abstract Background Shapes */}
@@ -81,17 +133,17 @@ const Hero = () => {
                 <div>
                   <h3 className="text-xl font-semibold mb-3">Weekly Progress</h3>
                   <div className="flex space-x-2 mb-3">
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                    {weeklyData.map((day, i) => (
                       <div key={i} className="flex-1">
                         <div className="flex flex-col items-center">
                           <div 
-                            className={`w-full h-24 rounded-t-lg ${i < 5 ? 'bg-accent' : 'bg-secondary'}`} 
+                            className={`w-full h-24 rounded-t-lg ${day.completed ? 'bg-accent' : 'bg-secondary'}`} 
                             style={{ 
-                              height: `${(Math.random() * 50 + 30)}%`, 
-                              opacity: i < 5 ? 1 : 0.5
+                              height: `${day.value}%`, 
+                              opacity: day.completed ? 1 : 0.5
                             }}
                           ></div>
-                          <div className="text-xs mt-2 text-muted-foreground">{day}</div>
+                          <div className="text-xs mt-2 text-muted-foreground">{day.date}</div>
                         </div>
                       </div>
                     ))}

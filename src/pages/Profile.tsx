@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,6 +11,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import QuickStats from '@/components/profile/QuickStats';
 import CompletionStreak from '@/components/profile/CompletionStreak';
 import ProfileInsights from '@/components/profile/ProfileInsights';
+import WeeklyProgress from '@/components/progress/WeeklyProgress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -77,11 +79,18 @@ const Profile = () => {
             </div>
             
             <div>
-              <CompletionStreak />
-              <QuickStats 
-                assessmentCount={assessmentCount} 
-                lastAssessmentDate={latestResult?.completed_at || null} 
-              />
+              <FadeIn delay={0.2}>
+                <WeeklyProgress />
+              </FadeIn>
+              <div className="mt-8">
+                <CompletionStreak />
+              </div>
+              <div className="mt-8">
+                <QuickStats 
+                  assessmentCount={assessmentCount} 
+                  lastAssessmentDate={latestResult?.completed_at || null} 
+                />
+              </div>
             </div>
           </div>
           
