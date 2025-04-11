@@ -22,7 +22,11 @@ const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) 
           variant="outline" 
           size="sm" 
           onClick={() => handleFeedback('helpful')}
-          className={`flex items-center gap-2 ${currentFeedback === 'helpful' ? 'bg-accent/10 text-accent border-accent' : 'text-muted-foreground hover:text-accent hover:border-accent'}`}
+          className={`flex items-center gap-2 ${
+            currentFeedback === 'helpful' 
+              ? 'bg-accent/10 text-accent border-accent' 
+              : 'text-muted-foreground hover:text-white hover:bg-accent hover:border-accent'
+          }`}
         >
           <Smile className="h-4 w-4" />
           <span>Helpful</span>
@@ -32,7 +36,11 @@ const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) 
           variant="outline" 
           size="sm" 
           onClick={() => handleFeedback('not-helpful')}
-          className={`flex items-center gap-2 ${currentFeedback === 'not-helpful' ? 'bg-destructive/10 text-destructive border-destructive' : 'text-muted-foreground hover:text-destructive hover:border-destructive'}`}
+          className={`flex items-center gap-2 ${
+            currentFeedback === 'not-helpful' 
+              ? 'bg-destructive/10 text-destructive border-destructive' 
+              : 'text-muted-foreground hover:text-white hover:bg-destructive hover:border-destructive'
+          }`}
         >
           <Frown className="h-4 w-4" />
           <span>Unhelpful</span>
