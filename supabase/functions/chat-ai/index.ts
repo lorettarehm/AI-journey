@@ -46,8 +46,10 @@ serve(async (req) => {
     
     // Get the conversation history if a conversation ID is provided
     let history = [];
-    if (conversationId) {
-      history = await getConversationHistory(supabase, conversationId);
+    let currentConversationId = conversationId;
+
+    if (currentConversationId) {
+      history = await getConversationHistory(supabase, currentConversationId);
     } else {
       // Create a new conversation
       const { data: conversation, error: conversationError } = await supabase
@@ -60,14 +62,14 @@ serve(async (req) => {
         throw new Error(`Error creating conversation: ${conversationError.message}`);
       }
       
-      conversationId = conversation.id;
+      currentConversationId = conversation.id;
     }
 
     // Store the user message
     const { error: userMessageError } = await supabase
       .from("chat_messages")
       .insert({
-        conversation_id: conversationId,
+        conversation_id: currentConversationId,
         role: "user",
         content: message,
       });
@@ -127,7 +129,7 @@ serve(async (req) => {
     const { error: assistantMessageError } = await supabase
       .from("chat_messages")
       .insert({
-        conversation_id: conversationId,
+        conversation_id: currentConversationId,
         role: "assistant",
         content: aiResponse,
       });
@@ -139,7 +141,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         response: aiResponse,
-        conversationId,
+        conversationId: currentConversationId,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
