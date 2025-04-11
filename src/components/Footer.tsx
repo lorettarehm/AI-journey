@@ -15,12 +15,14 @@ const Footer = () => {
               to="/" 
               className="text-2xl font-bold tracking-tight flex items-center mb-4"
             >
-              <img 
-                src="/lovable-uploads/7ad3926c-6b1e-49e0-8dc6-5430f621384e.png" 
-                alt="Brain logo" 
-                className="h-8 w-8 mr-2" 
-              />
-              <span className="text-accent logo-font text-xl">audhd.ai</span>
+              <div className="bg-black rounded-lg p-1 mr-2">
+                <img 
+                  src="/lovable-uploads/7ad3926c-6b1e-49e0-8dc6-5430f621384e.png" 
+                  alt="Brain logo" 
+                  className="h-6 w-6" 
+                />
+              </div>
+              <span className="text-accent">audhd.ai</span>
             </Link>
             <p className="text-muted-foreground mt-4 max-w-xs">
               Your neurodiversity companion, evolving with you on your journey.
@@ -107,7 +109,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Feedback and Support Modals */}
       {feedbackOpen && (
         <TechniqueCardFeedback
           open={feedbackOpen}

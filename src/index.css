@@ -100,7 +100,6 @@
   
   /* Custom color scheme - will be set via JavaScript */
   .color-custom {
-    /* These values will be set dynamically via JS */
     --primary: var(--primary);
     --primary-foreground: 0 0% 98%;
     --accent: var(--accent);
@@ -116,11 +115,6 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-  
-  /* Font for the logo */
-  .logo-font {
-    font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", cursive;
   }
   
   /* Apply transition to theme changes */
