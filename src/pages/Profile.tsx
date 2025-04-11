@@ -1,10 +1,10 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import StrengthsWeaknessChart from '@/components/profile/StrengthsWeaknessChart';
 import ProgressChart from '@/components/profile/ProgressChart';
 import AssessmentHistory from '@/components/profile/AssessmentHistory';
+import TechniqueInteractions from '@/components/profile/TechniqueInteractions';
 import FadeIn from '@/components/ui/FadeIn';
 import { Calendar, Clock, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -178,9 +178,13 @@ const Profile = () => {
             <FadeIn delay={0.4}>
               <AssessmentHistory />
             </FadeIn>
+            
+            <FadeIn delay={0.5}>
+              <TechniqueInteractions />
+            </FadeIn>
           </div>
           
-          <FadeIn delay={0.4}>
+          <FadeIn delay={0.6}>
             <div className="mt-12 text-center">
               <h3 className="text-2xl font-bold mb-4">Insights Based on Your Profile</h3>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">

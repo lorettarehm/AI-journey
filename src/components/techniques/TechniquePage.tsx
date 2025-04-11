@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/ui/FadeIn";
 import { Brain, Zap, Lightbulb, BookOpen } from "lucide-react";
+import TechniqueCard from './TechniqueCard';
 
 interface TechniqueType {
   id: string;
@@ -89,36 +89,14 @@ const TechniquePage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {sampleTechniques.map((technique, index) => (
           <FadeIn key={technique.id} delay={0.1 * index}>
-            <div className="bg-card rounded-lg border shadow-sm p-6">
-              <div className="flex items-center gap-3 mb-4">
-                {technique.category === 'focus' && <Zap className="h-5 w-5 text-yellow-500" />}
-                {technique.category === 'organization' && <Brain className="h-5 w-5 text-blue-500" />}
-                {technique.category === 'sensory' && <Lightbulb className="h-5 w-5 text-purple-500" />}
-                {technique.category === 'social' && <BookOpen className="h-5 w-5 text-green-500" />}
-                <h3 className="text-lg font-medium">{technique.title}</h3>
-              </div>
-              <p className="text-muted-foreground mb-4">{technique.description}</p>
-              
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value={`item-${technique.id}`}>
-                  <AccordionTrigger>How to implement</AccordionTrigger>
-                  <AccordionContent>
-                    <ol className="list-decimal list-inside space-y-2 pl-2">
-                      {technique.steps.map((step, idx) => (
-                        <li key={idx}>{step}</li>
-                      ))}
-                    </ol>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              
-              <div className="flex justify-between items-center mt-4">
-                <span className="text-xs px-2 py-1 rounded-full bg-muted">
-                  {technique.difficulty}
-                </span>
-                <Button variant="outline" size="sm">Save for later</Button>
-              </div>
-            </div>
+            <TechniqueCard
+              id={technique.id}
+              title={technique.title}
+              description={technique.description}
+              category={technique.category}
+              source="Journal of Neurodiversity, 2023"
+              researchBased={true}
+            />
           </FadeIn>
         ))}
       </div>
