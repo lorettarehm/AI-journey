@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { SmileBeam, Frown } from 'lucide-react';
+import { Smile, Frown } from 'lucide-react';
 import { TechniqueCardFeedback } from './index';
 import { useTechniqueInteractions } from './useTechniqueInteractions';
 
@@ -24,7 +24,7 @@ const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) 
           onClick={() => handleFeedback('helpful')}
           className={`flex items-center gap-2 ${currentFeedback === 'helpful' ? 'bg-accent/10 text-accent border-accent' : 'text-muted-foreground hover:text-accent hover:border-accent'}`}
         >
-          <SmileBeam className="h-4 w-4" />
+          <Smile className="h-4 w-4" />
           <span>Helpful</span>
         </Button>
         
