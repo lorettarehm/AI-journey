@@ -1,7 +1,6 @@
 
 import React from 'react';
 import FadeIn from "@/components/ui/FadeIn";
-import ThemeSelector from '@/components/ui/ThemeSelector';
 
 const TechniqueHeader: React.FC = () => {
   return (
@@ -14,9 +13,6 @@ const TechniqueHeader: React.FC = () => {
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover and learn practical strategies tailored for your unique neurodivergent mind.
         </p>
-        <div className="mt-6 flex justify-center">
-          <ThemeSelector />
-        </div>
       </div>
     </FadeIn>
   );
