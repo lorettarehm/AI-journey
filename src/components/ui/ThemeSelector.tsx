@@ -66,14 +66,14 @@ const ThemeSelector = () => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="mr-2">
-          Pick your mood
+          Colour your day
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Pick your mood</SheetTitle>
+          <SheetTitle>Colour your day</SheetTitle>
           <SheetDescription>
-            Customize the appearance of the app to match your mood.
+            Customize the appearance of the app to match your style.
           </SheetDescription>
         </SheetHeader>
         
