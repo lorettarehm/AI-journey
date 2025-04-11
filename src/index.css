@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -117,6 +116,11 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Font for the logo */
+  .logo-font {
+    font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", cursive;
   }
   
   /* Apply transition to theme changes */

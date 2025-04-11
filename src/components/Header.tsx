@@ -21,8 +21,12 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-8">
           <Link to="/" className="text-2xl font-bold tracking-tight flex items-center">
-            <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">au</span>
-            <span>dhd.ai</span>
+            <img 
+              src="/lovable-uploads/7ad3926c-6b1e-49e0-8dc6-5430f621384e.png" 
+              alt="Brain logo" 
+              className="h-8 w-8 mr-2" 
+            />
+            <span className="text-accent logo-font text-xl">audhd.ai</span>
           </Link>
           
           <nav className="hidden md:flex gap-6">
