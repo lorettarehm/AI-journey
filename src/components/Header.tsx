@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MoonStar, Sun, Menu } from 'lucide-react';
+import { MoonStar, Sun, Menu, MessageCircle } from 'lucide-react';
 import ThemeSelector from '@/components/ui/ThemeSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -46,6 +46,12 @@ const Header = () => {
                   Techniques
                 </Link>
                 <Link 
+                  to="/chat" 
+                  className={`text-sm transition-colors hover:text-primary ${location.pathname === '/chat' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
+                >
+                  AI Coach
+                </Link>
+                <Link 
                   to="/profile" 
                   className={`text-sm transition-colors hover:text-primary ${location.pathname === '/profile' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
                 >
@@ -64,9 +70,16 @@ const Header = () => {
           </Button>
           
           {user ? (
-            <Button variant="outline" size="sm" onClick={signOut}>
-              Sign Out
-            </Button>
+            <>
+              <Link to="/chat">
+                <Button variant="outline" size="icon" className="mr-2">
+                  <MessageCircle className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" onClick={signOut}>
+                Sign Out
+              </Button>
+            </>
           ) : (
             <Link to="/auth">
               <Button variant="default" size="sm">

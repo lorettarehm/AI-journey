@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Techniques from "./pages/Techniques";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Chat from "./pages/Chat";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -56,6 +57,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Techniques />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/chat" 
+                element={
+                  <ProtectedRoute>
+                    <Chat />
                   </ProtectedRoute>
                 } 
               />

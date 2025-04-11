@@ -3,3 +3,6 @@ project_id = "sjeaxjdujzdrlkkfdzjc"
 
 [functions.send-feedback]
 verify_jwt = true
+
+[functions.chat-ai]
+verify_jwt = true
