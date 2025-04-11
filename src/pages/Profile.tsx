@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -18,7 +17,6 @@ import { supabase } from '@/integrations/supabase/client';
 const Profile = () => {
   const { user } = useAuth();
   
-  // Fetch the latest assessment data to show in the strengths chart
   const { data: latestResult } = useQuery({
     queryKey: ['latestAssessment', user?.id],
     queryFn: async () => {
@@ -37,7 +35,6 @@ const Profile = () => {
     enabled: !!user,
   });
 
-  // Transform data for the radar chart
   const strengthsData = [
     { area: 'Creativity', value: latestResult?.creativity_score || 90, fullMark: 100 },
     { area: 'Problem Solving', value: latestResult?.problem_solving || 80, fullMark: 100 },
@@ -49,7 +46,6 @@ const Profile = () => {
     { area: 'Time Awareness', value: latestResult?.time_awareness || 35, fullMark: 100 },
   ];
 
-  // Fetch the count of completed assessments
   const { data: assessmentCount = 0 } = useQuery({
     queryKey: ['assessmentCount', user?.id],
     queryFn: async () => {

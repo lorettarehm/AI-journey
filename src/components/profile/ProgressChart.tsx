@@ -3,18 +3,9 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
 import { format } from 'date-fns';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import LineChartDisplay from './charts/LineChartDisplay';
+import ChartEmptyState from './charts/ChartEmptyState';
 
 const ProgressChart = () => {
   const { user } = useAuth();
@@ -46,6 +37,14 @@ const ProgressChart = () => {
     enabled: !!user,
   });
 
+  const chartConfig = {
+    focus: { color: "#4338CA" },
+    energy: { color: "#F59E0B" },
+    creativity: { color: "#10B981" },
+    problemSolving: { color: "#6366F1" },
+    patternRecognition: { color: "#EC4899" },
+  };
+
   if (isLoading) {
     return (
       <div className="glass-card rounded-2xl p-6 animate-pulse">
@@ -55,28 +54,6 @@ const ProgressChart = () => {
     );
   }
 
-  if (!assessments || assessments.length < 2) {
-    return (
-      <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-xl font-semibold mb-2">Progress Over Time</h3>
-        <p className="text-muted-foreground mb-4">
-          Complete more assessments to see your progress charted over time.
-        </p>
-        <div className="bg-accent/5 rounded-lg p-8 text-center">
-          <p>Need at least 2 assessments to generate a progress chart.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const chartConfig = {
-    focus: { color: "#4338CA" },
-    energy: { color: "#F59E0B" },
-    creativity: { color: "#10B981" },
-    problemSolving: { color: "#6366F1" },
-    patternRecognition: { color: "#EC4899" },
-  };
-
   return (
     <div className="glass-card rounded-2xl p-6">
       <h3 className="text-xl font-semibold mb-4">Progress Over Time</h3>
@@ -84,24 +61,11 @@ const ProgressChart = () => {
         Track how your cognitive abilities have changed over time based on your assessments.
       </p>
       
-      <div className="h-80">
-        <ChartContainer config={chartConfig}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={assessments}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis domain={[0, 100]} />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Legend />
-              <Line type="monotone" dataKey="focus" stroke={chartConfig.focus.color} name="Focus" />
-              <Line type="monotone" dataKey="energy" stroke={chartConfig.energy.color} name="Energy" />
-              <Line type="monotone" dataKey="creativity" stroke={chartConfig.creativity.color} name="Creativity" />
-              <Line type="monotone" dataKey="problemSolving" stroke={chartConfig.problemSolving.color} name="Problem Solving" />
-              <Line type="monotone" dataKey="patternRecognition" stroke={chartConfig.patternRecognition.color} name="Pattern Recognition" />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </div>
+      {!assessments || assessments.length < 2 ? (
+        <ChartEmptyState message="Need at least 2 assessments to generate a progress chart." />
+      ) : (
+        <LineChartDisplay data={assessments} chartConfig={chartConfig} />
+      )}
     </div>
   );
 };

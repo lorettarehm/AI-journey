@@ -3,16 +3,9 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Calendar, Award } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Calendar } from 'lucide-react';
+import AssessmentTable from './assessment/AssessmentTable';
+import EmptyAssessment from './assessment/EmptyAssessment';
 
 const AssessmentHistory = () => {
   const { user } = useAuth();
@@ -50,38 +43,9 @@ const AssessmentHistory = () => {
       </h3>
       
       {assessments && assessments.length > 0 ? (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Focus</TableHead>
-                <TableHead>Energy</TableHead>
-                <TableHead>Creativity</TableHead>
-                <TableHead>Stress</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assessments.map((assessment) => (
-                <TableRow key={assessment.id}>
-                  <TableCell>
-                    {formatDistanceToNow(new Date(assessment.completed_at), { addSuffix: true })}
-                  </TableCell>
-                  <TableCell>{assessment.focus_level}/100</TableCell>
-                  <TableCell>{assessment.energy_level}/100</TableCell>
-                  <TableCell>{assessment.creativity_score}/100</TableCell>
-                  <TableCell>{assessment.stress_level}/100</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <AssessmentTable assessments={assessments} />
       ) : (
-        <div className="text-center py-6 text-muted-foreground">
-          <Award size={32} className="mx-auto mb-2 text-accent/40" />
-          <p>No assessment history yet. Complete an assessment to start tracking your progress!</p>
-          <a href="/assessment" className="btn-secondary mt-4 inline-block">Take your first assessment</a>
-        </div>
+        <EmptyAssessment />
       )}
     </div>
   );
