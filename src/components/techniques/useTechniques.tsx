@@ -24,12 +24,25 @@ export const useTechniques = () => {
       const { data, error } = await supabase
         .from('technique_recommendations')
         .select('*')
-        .order(() => 'RANDOM()');  // Order randomly to get different suggestions each time
+        .order('title', { ascending: false }) // Using a string column name instead of a function
+        .limit(20); // Limit to 20 entries that we can paginate through on the client side
       
       if (error) throw error;
-      return data as TechniqueType[];
+      
+      // Since we can't use RANDOM() directly, we'll shuffle the results in JavaScript
+      return data ? shuffleArray(data as TechniqueType[]) : [];
     }
   });
+
+  // Fisher-Yates shuffle algorithm to randomize the order of techniques
+  const shuffleArray = (array: TechniqueType[]): TechniqueType[] => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
 
   // Trigger the edge function to fetch new research
   const triggerResearchUpdate = async () => {
