@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TechniqueCardFeedback from './techniques/card/TechniqueCardFeedback';
@@ -20,7 +19,7 @@ const Footer = () => {
               <span>dhd.ai</span>
             </Link>
             <p className="text-muted-foreground mt-4 max-w-xs">
-              Your adaptive neurodiversity empowerment companion, evolving with you on your journey.
+              Your neurodiversity companion, evolving with you on your journey.
             </p>
           </div>
           
