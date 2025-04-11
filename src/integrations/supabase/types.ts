@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      assessment_results: {
+        Row: {
+          completed_at: string
+          creativity_score: number
+          emotional_regulation: number
+          emotional_state: number
+          energy_level: number
+          focus_duration: number
+          focus_level: number
+          id: string
+          organization: number
+          pattern_recognition: number
+          problem_solving: number
+          stress_level: number
+          task_switching: number
+          time_awareness: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          creativity_score: number
+          emotional_regulation: number
+          emotional_state: number
+          energy_level: number
+          focus_duration: number
+          focus_level: number
+          id?: string
+          organization: number
+          pattern_recognition: number
+          problem_solving: number
+          stress_level: number
+          task_switching: number
+          time_awareness: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          creativity_score?: number
+          emotional_regulation?: number
+          emotional_state?: number
+          energy_level?: number
+          focus_duration?: number
+          focus_level?: number
+          id?: string
+          organization?: number
+          pattern_recognition?: number
+          problem_solving?: number
+          stress_level?: number
+          task_switching?: number
+          time_awareness?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

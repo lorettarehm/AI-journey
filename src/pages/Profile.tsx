@@ -3,25 +3,51 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import StrengthsWeaknessChart from '@/components/profile/StrengthsWeaknessChart';
+import ProgressChart from '@/components/profile/ProgressChart';
+import AssessmentHistory from '@/components/profile/AssessmentHistory';
 import FadeIn from '@/components/ui/FadeIn';
 import { Calendar, Clock, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
-  // Sample data for the radar chart
+  const { user } = useAuth();
+  
+  // Fetch the latest assessment data to show in the strengths chart
+  const { data: latestResult } = useQuery({
+    queryKey: ['latestAssessment', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Transform data for the radar chart
   const strengthsData = [
-    { area: 'Creativity', value: 90, fullMark: 100 },
-    { area: 'Problem Solving', value: 80, fullMark: 100 },
-    { area: 'Pattern Recognition', value: 85, fullMark: 100 },
-    { area: 'Focus Duration', value: 40, fullMark: 100 },
-    { area: 'Task Switching', value: 45, fullMark: 100 },
-    { area: 'Emotional Regulation', value: 60, fullMark: 100 },
-    { area: 'Organization', value: 50, fullMark: 100 },
-    { area: 'Time Awareness', value: 35, fullMark: 100 },
+    { area: 'Creativity', value: latestResult?.creativity_score || 90, fullMark: 100 },
+    { area: 'Problem Solving', value: latestResult?.problem_solving || 80, fullMark: 100 },
+    { area: 'Pattern Recognition', value: latestResult?.pattern_recognition || 85, fullMark: 100 },
+    { area: 'Focus Duration', value: latestResult?.focus_duration || 40, fullMark: 100 },
+    { area: 'Task Switching', value: latestResult?.task_switching || 45, fullMark: 100 },
+    { area: 'Emotional Regulation', value: latestResult?.emotional_regulation || 60, fullMark: 100 },
+    { area: 'Organization', value: latestResult?.organization || 50, fullMark: 100 },
+    { area: 'Time Awareness', value: latestResult?.time_awareness || 35, fullMark: 100 },
   ];
 
-  // Sample data for activity over time
+  // Sample data for activity over time (will replace with real data)
   const activityData = [
-    { date: 'Mon', focus: 60, energy: 80 },
+    { date: 'Mon', focus: latestResult?.focus_level || 60, energy: latestResult?.energy_level || 80 },
     { date: 'Tue', focus: 45, energy: 70 },
     { date: 'Wed', focus: 75, energy: 65 },
     { date: 'Thu', focus: 50, energy: 50 },
@@ -29,6 +55,22 @@ const Profile = () => {
     { date: 'Sat', focus: 80, energy: 85 },
     { date: 'Sun', focus: 65, energy: 60 },
   ];
+
+  // Fetch the count of completed assessments
+  const { data: assessmentCount = 0 } = useQuery({
+    queryKey: ['assessmentCount', user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('assessment_results')
+        .select('*', { count: 'exact', head: true });
+        
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user,
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -100,7 +142,7 @@ const Profile = () => {
                         </div>
                         <span>Assessments Completed</span>
                       </div>
-                      <span className="font-semibold">23</span>
+                      <span className="font-semibold">{assessmentCount}</span>
                     </div>
                     <div className="flex justify-between items-center pb-3 border-b border-border">
                       <div className="flex items-center">
@@ -109,7 +151,9 @@ const Profile = () => {
                         </div>
                         <span>Last Assessment</span>
                       </div>
-                      <span className="font-semibold">Today</span>
+                      <span className="font-semibold">
+                        {latestResult ? new Date(latestResult.completed_at).toLocaleDateString() : 'Never'}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
@@ -126,40 +170,15 @@ const Profile = () => {
             </div>
           </div>
           
-          <FadeIn delay={0.3}>
-            <div className="glass-card rounded-2xl p-6 mt-12">
-              <h3 className="text-xl font-semibold mb-6">Weekly Patterns</h3>
-              <div className="h-64">
-                <div className="grid grid-cols-7 h-full gap-3">
-                  {activityData.map((day, index) => (
-                    <div key={index} className="flex flex-col h-full justify-end">
-                      <div className="relative h-full pt-8 flex flex-col justify-end">
-                        <div 
-                          className="bg-accent/20 rounded-t-md w-full" 
-                          style={{ height: `${day.energy}%` }}
-                        ></div>
-                        <div 
-                          className="absolute bottom-0 left-0 right-0 bg-accent rounded-t-md" 
-                          style={{ height: `${day.focus}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-center text-xs mt-2 text-muted-foreground">{day.date}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-center mt-4 space-x-8">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-accent rounded-sm mr-2"></div>
-                  <span className="text-sm">Focus Level</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-accent/20 rounded-sm mr-2"></div>
-                  <span className="text-sm">Energy Level</span>
-                </div>
-              </div>
-            </div>
-          </FadeIn>
+          <div className="grid grid-cols-1 gap-8 mt-12">
+            <FadeIn delay={0.3}>
+              <ProgressChart />
+            </FadeIn>
+            
+            <FadeIn delay={0.4}>
+              <AssessmentHistory />
+            </FadeIn>
+          </div>
           
           <FadeIn delay={0.4}>
             <div className="mt-12 text-center">

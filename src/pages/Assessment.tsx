@@ -35,7 +35,6 @@ const Assessment = () => {
   };
   
   const handleComplete = () => {
-    // In a real app, we would save the answers to the backend here
     navigate('/profile');
   };
   
@@ -54,7 +53,10 @@ const Assessment = () => {
               onNext={handleNext}
             />
           ) : (
-            <CompletionMessage onComplete={handleComplete} />
+            <CompletionMessage 
+              onComplete={handleComplete}
+              assessmentResults={answers}
+            />
           )}
         </div>
       </main>
