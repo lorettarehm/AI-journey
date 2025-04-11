@@ -1,5 +1,5 @@
 
 project_id = "sjeaxjdujzdrlkkfdzjc"
 
-[functions.fetch-research]
-verify_jwt = false
+[functions.send-feedback]
+verify_jwt = true
