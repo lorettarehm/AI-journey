@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, HelpCircle } from 'lucide-react';
+import { SmileBeam, Frown } from 'lucide-react';
 import { TechniqueCardFeedback } from './index';
+import { useTechniqueInteractions } from './useTechniqueInteractions';
 
 interface TechniqueCardFooterProps {
   id: string;
@@ -12,28 +13,29 @@ interface TechniqueCardFooterProps {
 const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const { handleFeedback, currentFeedback } = useTechniqueInteractions(id, title);
 
   return (
     <div className="p-4 mt-auto flex justify-between items-center border-t border-border">
-      <div className="flex space-x-2">
+      <div className="flex space-x-3">
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="sm" 
-          onClick={() => setFeedbackOpen(true)}
-          className="flex items-center gap-1"
+          onClick={() => handleFeedback('helpful')}
+          className={`flex items-center gap-2 ${currentFeedback === 'helpful' ? 'bg-accent/10 text-accent border-accent' : 'text-muted-foreground hover:text-accent hover:border-accent'}`}
         >
-          <MessageSquare className="h-4 w-4" />
-          <span className="hidden sm:inline">Feedback</span>
+          <SmileBeam className="h-4 w-4" />
+          <span>Helpful</span>
         </Button>
         
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="sm" 
-          onClick={() => setSupportOpen(true)}
-          className="flex items-center gap-1"
+          onClick={() => handleFeedback('not-helpful')}
+          className={`flex items-center gap-2 ${currentFeedback === 'not-helpful' ? 'bg-destructive/10 text-destructive border-destructive' : 'text-muted-foreground hover:text-destructive hover:border-destructive'}`}
         >
-          <HelpCircle className="h-4 w-4" />
-          <span className="hidden sm:inline">Support</span>
+          <Frown className="h-4 w-4" />
+          <span>Unhelpful</span>
         </Button>
       </div>
 
