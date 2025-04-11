@@ -20,8 +20,9 @@ const Header = () => {
     <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-8">
-          <Link to="/" className="font-semibold text-xl">
-            NeuroDev
+          <Link to="/" className="text-2xl font-bold tracking-tight flex items-center">
+            <span className="bg-accent text-white w-8 h-8 rounded-lg flex items-center justify-center mr-2">au</span>
+            <span>dhd.ai</span>
           </Link>
           
           <nav className="hidden md:flex gap-6">
