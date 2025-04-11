@@ -35,7 +35,7 @@ export const useTechniques = () => {
     try {
       // Call our edge function
       const response = await supabase.functions.invoke('fetch-research', {
-        body: { searchQuery: 'adhd autism interventions recent', limit: 10 }
+        body: { searchQuery: 'adhd autism interventions recent', limit: 50 }
       });
       
       if (!response.data.success) {
@@ -48,7 +48,13 @@ export const useTechniques = () => {
       });
       
       // Refetch techniques to display the latest
-      refetch();
+      await refetch();
+      
+      // Return additional data for the caller
+      return {
+        count: response.data.count || (response.data.data?.length || 0),
+        message: response.data.message
+      };
     } catch (error) {
       console.error('Error updating research:', error);
       toast({
@@ -56,6 +62,7 @@ export const useTechniques = () => {
         description: "Failed to update research data. Please try again later.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
