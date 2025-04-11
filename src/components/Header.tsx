@@ -2,12 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
   
   const handleScroll = () => {
     setIsScrolled(window.scrollY > 10);
@@ -28,6 +38,21 @@ const Header = () => {
     { name: 'Profile', path: '/profile' },
     { name: 'Techniques', path: '/techniques' },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    
+    const email = user.email || '';
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    
+    return 'U';
+  };
 
   return (
     <header 
@@ -59,22 +84,79 @@ const Header = () => {
               {link.name}
             </Link>
           ))}
-          <Link 
-            to="/assessment" 
-            className="btn-primary"
-          >
-            Start Assessment
-          </Link>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="focus:outline-none">
+                  <Avatar className="h-9 w-9 cursor-pointer">
+                    <AvatarFallback className="bg-accent text-accent-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link 
+              to="/auth" 
+              className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
         </nav>
         
         {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-foreground"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle mobile menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-4">
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="focus:outline-none">
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback className="bg-accent text-accent-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          
+          <button 
+            className="text-foreground"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
       
       {/* Mobile Navigation */}
@@ -93,12 +175,15 @@ const Header = () => {
                 {link.name}
               </Link>
             ))}
-            <Link 
-              to="/assessment" 
-              className="btn-primary text-center mt-4"
-            >
-              Start Assessment
-            </Link>
+            
+            {!user && (
+              <Link 
+                to="/auth" 
+                className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-md transition-colors text-center mt-4"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </nav>
       )}
