@@ -71,7 +71,13 @@ export const useChat = (conversationId?: string) => {
         
         if (error) throw error;
         
-        setMessages(data || []);
+        // Ensure the role is either 'user' or 'assistant'
+        const typedMessages = data?.map(msg => ({
+          ...msg,
+          role: msg.role === 'user' ? 'user' : 'assistant'
+        } as Message)) || [];
+        
+        setMessages(typedMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
         toast({
@@ -93,7 +99,12 @@ export const useChat = (conversationId?: string) => {
         table: 'chat_messages',
         filter: `conversation_id=eq.${activeConversationId}`,
       }, (payload) => {
-        setMessages((currentMessages) => [...currentMessages, payload.new as Message]);
+        const newMessage = {
+          ...payload.new,
+          role: payload.new.role === 'user' ? 'user' : 'assistant'
+        } as Message;
+        
+        setMessages((currentMessages) => [...currentMessages, newMessage]);
       })
       .subscribe();
     
