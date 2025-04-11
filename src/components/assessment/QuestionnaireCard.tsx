@@ -1,18 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-
-interface QuestionOption {
-  value: number;
-  label: string;
-}
-
-interface Question {
-  id: string;
-  text: string;
-  options: QuestionOption[];
-  type: 'scale' | 'multiple-choice';
-}
+import { Question } from './AssessmentData';
 
 interface QuestionnaireCardProps {
   question: Question;
@@ -98,7 +87,16 @@ const QuestionnaireCard = ({ question, onAnswer, currentAnswer }: QuestionnaireC
       )}
       
       <div className="text-center mt-8 text-sm text-muted-foreground">
-        <p>This question helps us understand your experience with focus and attention.</p>
+        {question.source && (
+          <p className="mb-1">
+            <span className="font-medium">Source:</span> {question.source}
+          </p>
+        )}
+        {question.category && (
+          <p>
+            <span className="font-medium">Category:</span> {question.category}
+          </p>
+        )}
       </div>
     </div>
   );

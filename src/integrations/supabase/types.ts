@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      adhd_screening_questions: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          question_text: string
+          score_type: string
+          source: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          question_text: string
+          score_type: string
+          source: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          question_text?: string
+          score_type?: string
+          source?: string
+        }
+        Relationships: []
+      }
       assessment_results: {
         Row: {
           completed_at: string

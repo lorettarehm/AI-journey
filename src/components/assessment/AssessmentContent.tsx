@@ -5,7 +5,7 @@ import QuestionnaireCard from '@/components/assessment/QuestionnaireCard';
 import AssessmentHeader from '@/components/assessment/AssessmentHeader';
 import AssessmentProgress from '@/components/assessment/AssessmentProgress';
 import AssessmentNavigation from '@/components/assessment/AssessmentNavigation';
-import { sampleQuestions } from '@/components/assessment/AssessmentData';
+import { Question } from '@/components/assessment/AssessmentData';
 
 interface AssessmentContentProps {
   currentQuestionIndex: number;
@@ -13,6 +13,7 @@ interface AssessmentContentProps {
   onAnswer: (questionId: string, answer: number) => void;
   onPrevious: () => void;
   onNext: () => void;
+  questions: Question[];
 }
 
 const AssessmentContent = ({
@@ -20,9 +21,14 @@ const AssessmentContent = ({
   answers,
   onAnswer,
   onPrevious,
-  onNext
+  onNext,
+  questions
 }: AssessmentContentProps) => {
-  const currentQuestion = sampleQuestions[currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex];
+  
+  if (!currentQuestion) {
+    return <div>No question available</div>;
+  }
   
   return (
     <>
@@ -30,7 +36,7 @@ const AssessmentContent = ({
       
       <AssessmentProgress 
         currentIndex={currentQuestionIndex} 
-        totalQuestions={sampleQuestions.length} 
+        totalQuestions={questions.length} 
       />
       
       <FadeIn key={currentQuestion.id}>
