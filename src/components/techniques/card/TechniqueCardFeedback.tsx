@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   subject: z.string().min(3, {
@@ -52,7 +52,6 @@ const TechniqueCardFeedback: React.FC<FeedbackFormProps> = ({
   type
 }) => {
   const { toast } = useToast();
-  const supabase = createClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
