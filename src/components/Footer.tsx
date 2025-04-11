@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import TechniqueCardFeedback from './techniques/card/TechniqueCardFeedback';
 
 const Footer = () => {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+
   return (
     <footer className="bg-background border-t border-border py-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -66,14 +70,20 @@ const Footer = () => {
             <h3 className="text-lg font-medium mb-4">Contact</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <button 
+                  onClick={() => setSupportOpen(true)} 
+                  className="text-muted-foreground hover:text-accent transition-colors"
+                >
                   Support
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <button 
+                  onClick={() => setFeedbackOpen(true)} 
+                  className="text-muted-foreground hover:text-accent transition-colors"
+                >
                   Feedback
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -93,6 +103,23 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Feedback and Support Modals */}
+      {feedbackOpen && (
+        <TechniqueCardFeedback
+          open={feedbackOpen}
+          setOpen={setFeedbackOpen}
+          type="feedback"
+        />
+      )}
+      
+      {supportOpen && (
+        <TechniqueCardFeedback
+          open={supportOpen}
+          setOpen={setSupportOpen}
+          type="support"
+        />
+      )}
     </footer>
   );
 };

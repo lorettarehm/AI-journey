@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   subject: z.string().min(3, {
@@ -52,12 +52,17 @@ const TechniqueCardFeedback: React.FC<FeedbackFormProps> = ({
   type
 }) => {
   const { toast } = useToast();
-  const supabase = createClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subject: type === 'feedback' ? `Feedback on ${techniqueName || 'technique'}` : 'Support Request',
+      subject: type === 'feedback' 
+        ? techniqueId 
+          ? `Feedback on ${techniqueName || 'technique'}`
+          : 'General Feedback'
+        : techniqueId
+          ? `Support Request for ${techniqueName || 'technique'}`
+          : 'Support Request',
       message: '',
     },
   });
@@ -105,7 +110,7 @@ const TechniqueCardFeedback: React.FC<FeedbackFormProps> = ({
           </DialogTitle>
           <DialogDescription>
             {type === 'feedback' 
-              ? 'Share your thoughts about this technique or suggest improvements.'
+              ? 'Share your thoughts about our service or suggest improvements.'
               : 'Describe the issue you\'re experiencing, and we\'ll get back to you.'}
           </DialogDescription>
         </DialogHeader>
