@@ -10,6 +10,26 @@ import { format, subDays } from 'date-fns';
 const Hero = () => {
   const { user } = useAuth();
   
+  // Fetch latest assessment data for daily check-in display
+  const { data: latestAssessment, isLoading: isAssessmentLoading } = useQuery({
+    queryKey: ['latestAssessment', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+  
   const { data: weeklyData = [] } = useQuery({
     queryKey: ['homePageProgress', user?.id],
     queryFn: async () => {
@@ -55,6 +75,10 @@ const Hero = () => {
     },
     enabled: !!user // Only run this query when user is logged in
   });
+
+  // Calculate focus and energy levels based on the latest assessment
+  const focusLevel = latestAssessment?.focus_level || 65;
+  const energyLevel = latestAssessment?.energy_level || 80;
 
   return (
     <section className="pt-32 pb-20 px-6 relative overflow-hidden">
@@ -110,7 +134,7 @@ const Hero = () => {
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
                         <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div className="bg-accent h-2 rounded-full" style={{ width: '65%' }}></div>
+                          <div className="bg-accent h-2 rounded-full" style={{ width: `${focusLevel}%` }}></div>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Not at all</span>
@@ -121,7 +145,7 @@ const Hero = () => {
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
                         <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div className="bg-accent h-2 rounded-full" style={{ width: '80%' }}></div>
+                          <div className="bg-accent h-2 rounded-full" style={{ width: `${energyLevel}%` }}></div>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Low</span>
