@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -18,6 +18,7 @@ const ChatContainer: React.FC = () => {
   } = useChat();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -25,6 +26,16 @@ const ChatContainer: React.FC = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Check if we have an active conversation on initial load
+  useEffect(() => {
+    if (isFirstLoad && conversations.length > 0 && !activeConversationId) {
+      setActiveConversationId(conversations[0].id);
+      setIsFirstLoad(false);
+    } else if (isFirstLoad && conversations.length === 0) {
+      setIsFirstLoad(false);
+    }
+  }, [conversations, activeConversationId, isFirstLoad, setActiveConversationId]);
 
   return (
     <div className="h-full flex flex-col">

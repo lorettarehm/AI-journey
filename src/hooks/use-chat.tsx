@@ -118,6 +118,16 @@ export const useChat = (conversationId?: string) => {
     
     setIsLoading(true);
     try {
+      // Show a temporary user message immediately
+      const tempUserMessage: Message = {
+        id: `temp-${Date.now()}`,
+        role: 'user',
+        content: message,
+        created_at: new Date().toISOString(),
+      };
+      
+      setMessages(prevMessages => [...prevMessages, tempUserMessage]);
+      
       // Use the edge function to process the message
       const { data, error } = await supabase.functions.invoke('chat-ai', {
         body: {
@@ -144,6 +154,9 @@ export const useChat = (conversationId?: string) => {
           setConversations((prev) => [convData, ...prev]);
         }
       }
+      
+      // If we display the message optimistically, no need to do anything here
+      // The real-time subscription will take care of adding the real message
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -151,6 +164,11 @@ export const useChat = (conversationId?: string) => {
         description: 'Please try again later',
         variant: 'destructive',
       });
+      
+      // Remove the temporary message if there was an error
+      setMessages(prevMessages => 
+        prevMessages.filter(msg => msg.id !== `temp-${Date.now()}`)
+      );
     } finally {
       setIsLoading(false);
     }

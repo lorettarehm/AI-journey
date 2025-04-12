@@ -111,6 +111,14 @@ serve(async (req) => {
     // Create a supabase client with the service role
     const supabase = createServiceClient();
     
+    // Validate inputs
+    if (!message) {
+      throw new Error("Message is required");
+    }
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+    
     // Get the conversation history if a conversation ID is provided
     let history = [];
     let currentConversationId = conversationId;
@@ -160,11 +168,19 @@ serve(async (req) => {
       User: ${message}
       Assistant:`;
 
+    console.log("Calling Hugging Face API with prompt:", fullPrompt);
+    
+    // Get the API key
+    const HUGGING_FACE_API_KEY = Deno.env.get("HUGGING_FACE_API_KEY");
+    if (!HUGGING_FACE_API_KEY) {
+      throw new Error("HUGGING_FACE_API_KEY is not set in environment variables");
+    }
+
     // Call the Hugging Face API
     const hfResponse = await fetch(HUGGING_FACE_API_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${Deno.env.get("HUGGING_FACE_API_KEY")}`,
+        "Authorization": `Bearer ${HUGGING_FACE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -181,16 +197,20 @@ serve(async (req) => {
     if (!hfResponse.ok) {
       const errorData = await hfResponse.text();
       console.error("Hugging Face API error:", errorData);
-      throw new Error(`Hugging Face API error: ${hfResponse.status}`);
+      throw new Error(`Hugging Face API error: ${hfResponse.status} - ${errorData}`);
     }
 
     const hfData = await hfResponse.json();
+    console.log("Hugging Face API response:", hfData);
+    
     let aiResponse = hfData[0]?.generated_text || "";
     
     // Extract only the assistant's response from the generated text
     if (aiResponse.includes("Assistant:")) {
       aiResponse = aiResponse.split("Assistant:").pop()?.trim() || "";
     }
+
+    console.log("Extracted AI response:", aiResponse);
 
     // Extract and save any techniques mentioned in the AI's response
     const techniquesCount = await extractAndSaveTechniques(supabase, aiResponse);
@@ -209,6 +229,7 @@ serve(async (req) => {
 
     if (assistantMessageError) {
       console.error("Error saving assistant message:", assistantMessageError);
+      throw new Error(`Error saving assistant message: ${assistantMessageError.message}`);
     }
 
     return new Response(
@@ -223,7 +244,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in chat-ai function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "An unknown error occurred" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
