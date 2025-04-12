@@ -268,6 +268,36 @@ export type Database = {
           },
         ]
       }
+      scraped_content: {
+        Row: {
+          created_at: string
+          id: string
+          raw_content: string | null
+          summary: string | null
+          title: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          raw_content?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          raw_content?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       technique_interactions: {
         Row: {
           created_at: string

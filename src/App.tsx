@@ -17,6 +17,7 @@ import About from "./pages/About";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import WebContent from "./pages/WebContent";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Chat />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/web-content" 
+                element={
+                  <ProtectedRoute>
+                    <WebContent />
                   </ProtectedRoute>
                 } 
               />

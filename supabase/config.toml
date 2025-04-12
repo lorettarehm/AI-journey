@@ -17,5 +17,9 @@ port = 54323
 [functions.extract-document-text]
 verify_jwt = true
 
+# Function to fetch and scrape web content
+[functions.fetch-content]
+verify_jwt = true
+
 [storage.avatars]
 # Create a bucket for storing user avatars
