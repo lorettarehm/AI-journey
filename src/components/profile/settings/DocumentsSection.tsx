@@ -13,7 +13,7 @@ import { FileUp, Trash2, FileText, Eye, Download, RefreshCw } from 'lucide-react
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 
-interface Document {
+interface UserDocument {
   id: string;
   title: string;
   description: string | null;
@@ -133,11 +133,11 @@ const DocumentsSection = () => {
 
   // Delete document
   const deleteMutation = useMutation({
-    mutationFn: async (document: Document) => {
+    mutationFn: async (doc: UserDocument) => {
       // Step 1: Delete file from storage
       const { error: storageError } = await supabase.storage
         .from('user_documents')
-        .remove([document.file_path]);
+        .remove([doc.file_path]);
       
       if (storageError) throw storageError;
       
@@ -145,11 +145,11 @@ const DocumentsSection = () => {
       const { error } = await supabase
         .from('user_documents')
         .delete()
-        .eq('id', document.id);
+        .eq('id', doc.id);
       
       if (error) throw error;
       
-      return document.id;
+      return doc.id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents', user?.id] });
@@ -260,21 +260,21 @@ const DocumentsSection = () => {
     }
   };
 
-  const viewDocumentContent = async (document: Document) => {
-    setSelectedDocTitle(document.title);
+  const viewDocumentContent = async (doc: UserDocument) => {
+    setSelectedDocTitle(doc.title);
     
-    if (document.content_text) {
-      setSelectedDocContent(document.content_text);
+    if (doc.content_text) {
+      setSelectedDocContent(doc.content_text);
     } else {
       setSelectedDocContent("This document has not been processed yet or contains no extractable text.");
     }
   };
 
-  const downloadDocument = async (document: Document) => {
+  const downloadDocument = async (doc: UserDocument) => {
     try {
       const { data, error } = await supabase.storage
         .from('user_documents')
-        .download(document.file_path);
+        .download(doc.file_path);
       
       if (error) throw error;
       
@@ -282,7 +282,7 @@ const DocumentsSection = () => {
       const url = URL.createObjectURL(data);
       const a = document.createElement('a');
       a.href = url;
-      a.download = document.title;
+      a.download = doc.title;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -416,7 +416,7 @@ const DocumentsSection = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {documents.map((doc: Document) => (
+              {documents.map((doc: UserDocument) => (
                 <div key={doc.id} className="p-4 border rounded-lg bg-card">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
