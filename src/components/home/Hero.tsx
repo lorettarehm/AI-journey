@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import FadeIn from '@/components/ui/FadeIn';
@@ -76,9 +75,12 @@ const Hero = () => {
     enabled: !!user // Only run this query when user is logged in
   });
 
-  // Calculate focus and energy levels based on the latest assessment
+  // Calculate metrics based on the latest assessment
   const focusLevel = latestAssessment?.focus_level || 65;
   const energyLevel = latestAssessment?.energy_level || 80;
+  const lastAssessmentDate = latestAssessment ? 
+    format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
+    'Not available';
 
   return (
     <section className="pt-32 pb-20 px-6 relative overflow-hidden">
@@ -129,12 +131,22 @@ const Hero = () => {
                 <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
                 <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
                   <div className="bg-accent/10 rounded-2xl p-6 mb-6">
-                    <h3 className="text-xl font-semibold mb-4">Daily Check-in</h3>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">Daily Check-in</h3>
+                      {latestAssessment && (
+                        <span className="text-xs text-muted-foreground">
+                          Last updated: {lastAssessmentDate}
+                        </span>
+                      )}
+                    </div>
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
                         <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div className="bg-accent h-2 rounded-full" style={{ width: `${focusLevel}%` }}></div>
+                          <div 
+                            className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                            style={{ width: `${focusLevel}%` }}
+                          ></div>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Not at all</span>
@@ -145,13 +157,24 @@ const Hero = () => {
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
                         <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div className="bg-accent h-2 rounded-full" style={{ width: `${energyLevel}%` }}></div>
+                          <div 
+                            className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                            style={{ width: `${energyLevel}%` }}
+                          ></div>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Low</span>
                           <span>High</span>
                         </div>
                       </div>
+                      
+                      {!latestAssessment && (
+                        <div className="mt-4 text-center">
+                          <span className="text-sm text-accent font-medium">
+                            🔜 Complete your first assessment to see your data
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -165,10 +188,13 @@ const Hero = () => {
                               className={`w-full h-24 rounded-t-lg ${day.completed ? 'bg-accent' : 'bg-secondary'}`} 
                               style={{ 
                                 height: `${day.value}%`, 
-                                opacity: day.completed ? 1 : 0.5
+                                opacity: day.completed ? 1 : 0.5,
+                                transition: 'all 0.3s ease' 
                               }}
                             ></div>
-                            <div className="text-xs mt-2 text-muted-foreground">{day.date}</div>
+                            <div className={`text-xs mt-2 ${format(new Date(), 'EEE') === day.date ? 'font-bold' : 'text-muted-foreground'}`}>
+                              {day.date}
+                            </div>
                           </div>
                         </div>
                       ))}
