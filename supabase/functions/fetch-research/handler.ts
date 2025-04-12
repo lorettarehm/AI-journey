@@ -20,11 +20,11 @@ export async function handleRequest(req, supabase, corsHeaders) {
   // Check existing techniques count
   const existingCount = await getExistingTechniquesCount(supabase);
   
-  if (existingCount >= 50) {
+  if (existingCount >= 100) {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Database already contains 50+ techniques, no new techniques added",
+        message: "Database already contains 100+ techniques, no new techniques added",
         count: existingCount
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
