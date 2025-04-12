@@ -25,7 +25,7 @@ export const useTechniques = () => {
         .from('technique_recommendations')
         .select('*')
         .order('title', { ascending: false }) // Using a string column name instead of a function
-        .limit(20); // Limit to 20 entries that we can paginate through on the client side
+        .limit(50) // Increased limit to show more techniques
       
       if (error) throw error;
       
@@ -49,7 +49,7 @@ export const useTechniques = () => {
     try {
       // Call our edge function
       const response = await supabase.functions.invoke('fetch-research', {
-        body: { searchQuery: 'adhd autism interventions recent', limit: 50 }
+        body: { searchQuery: 'adhd autism interventions recent expanded', limit: 50 }
       });
       
       if (!response.data.success) {
@@ -58,7 +58,7 @@ export const useTechniques = () => {
       
       toast({
         title: "Research Updated",
-        description: "The latest research has been fetched and analyzed.",
+        description: "The latest and expanded research has been fetched and analyzed.",
       });
       
       // Refetch techniques to display the latest

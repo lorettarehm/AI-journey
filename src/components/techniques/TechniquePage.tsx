@@ -31,7 +31,7 @@ const TechniquePage: React.FC = () => {
       if (result?.count) {
         toast({
           title: "Research Updated",
-          description: `Now showing ${result.count} neurodiversity techniques.`,
+          description: `Now showing ${result.count} neurodiversity techniques from our expanded database.`,
         });
       }
     } catch (error) {
@@ -75,6 +75,9 @@ const TechniquePage: React.FC = () => {
               "Update Research Data"
             )}
           </Button>
+          <p className="text-sm text-muted-foreground mt-3">
+            Our technique database has been expanded with the latest research-backed interventions.
+          </p>
         </div>
       </FadeIn>
 

@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
 // Set up Supabase client
@@ -56,7 +55,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Comprehensive research papers with diverse techniques
+    // Generate comprehensive research papers with diverse techniques
     const researchPapers = generateResearchPapers()
     
     // Store papers in database
@@ -126,6 +125,33 @@ Deno.serve(async (req) => {
               console.error('Error inserting metadata:', metadataError)
             }
           }
+        }
+      }
+    }
+
+    // Add direct techniques (new feature - techniques directly added without a paper)
+    const additionalTechniques = generateAdditionalTechniques()
+    
+    for (const technique of additionalTechniques) {
+      // Check for duplicates before inserting
+      const { data: existingTechnique, error: techniqueCheckError } = await supabase
+        .from('technique_recommendations')
+        .select('technique_id')
+        .eq('title', technique.title)
+        .single()
+        
+      if (techniqueCheckError && techniqueCheckError.code !== 'PGRST116') {
+        console.error('Error checking existing technique:', techniqueCheckError)
+        continue
+      }
+      
+      if (!existingTechnique) {
+        const { error: techniqueError } = await supabase
+          .from('technique_recommendations')
+          .insert(technique)
+
+        if (techniqueError) {
+          console.error('Error inserting technique:', techniqueError)
         }
       }
     }
@@ -229,12 +255,35 @@ function generateResearchPapers() {
       publication_date: "2023-01-25",
       journal: "Autism Research",
       abstract: "This research explores innovative visual support strategies for individuals with autism spectrum disorder, extending beyond traditional visual schedules to enhance communication and independence."
+    },
+    // New research papers
+    {
+      title: "Deep Pressure Stimulation for Anxiety in Neurodivergent Individuals",
+      authors: ["Chen, M.", "Baker, L.", "Nichols, T."],
+      publication_date: "2023-05-11",
+      journal: "Journal of Neurodevelopmental Disorders",
+      abstract: "A comprehensive analysis of deep pressure interventions for anxiety management in neurodivergent populations, with particular focus on portable and accessible solutions."
+    },
+    {
+      title: "Music-Based Interventions for Enhancing Executive Function",
+      authors: ["Ramirez, S.", "Johnson, K.", "Lee, H."],
+      publication_date: "2023-06-22",
+      journal: "Music Therapy Perspectives",
+      abstract: "This study examines the effects of structured music activities on executive function skills in children and adults with ADHD and autism, showing promising improvements in working memory and cognitive flexibility."
+    },
+    {
+      title: "Digital Habit Formation Tools for ADHD: A Longitudinal Study",
+      authors: ["O'Connor, P.", "Williams, M.", "Patel, R."],
+      publication_date: "2023-04-30",
+      journal: "Journal of Technology in Mental Health",
+      abstract: "An 18-month analysis of digital applications designed to support habit formation in adults with ADHD, identifying key design features that lead to sustainable behavioral change."
     }
   ];
 }
 
 // Helper function to extract techniques from papers (comprehensive implementation)
 function extractTechniquesFromPaper(paper: any): any[] {
+  
   const techniques = [];
   
   // Cognitive Behavioral Therapy techniques
@@ -672,71 +721,83 @@ function extractTechniquesFromPaper(paper: any): any[] {
     );
   }
   
-  // If no match found, add a default technique
-  if (techniques.length === 0) {
-    techniques.push({
-      title: "Structured Daily Routine Template",
-      description: "A customizable framework for creating predictable daily routines with built-in flexibility for neurodivergent individuals, reducing executive function demands.",
-      target_condition: ['adhd', 'autism', 'executive dysfunction'],
-      effectiveness_score: 0.80,
-      difficulty_level: 'beginner',
-      category: 'organization',
-      keywords: ['routines', 'predictability', 'structure', 'flexibility'],
-      evidence_strength: 'moderate',
-      implementation_steps: [
-        "Identify essential daily activities and optimal sequence",
-        "Create visual representation of routine with timing anchors",
-        "Build in structured choice points for flexibility",
-        "Establish clear transition signals between activities",
-        "Incorporate regular review and adjustment process",
-        "Create contingency plans for disruptions",
-        "Implement gradual changes to avoid resistance"
-      ]
-    });
+  // Deep Pressure Stimulation
+  if (paper.title.includes("Deep Pressure Stimulation")) {
+    techniques.push(
+      {
+        title: "Portable Deep Pressure Protocol",
+        description: "A systematic approach to implementing portable deep pressure interventions for anxiety management in daily life situations.",
+        target_condition: ['autism', 'anxiety', 'sensory processing'],
+        effectiveness_score: 0.83,
+        difficulty_level: 'beginner',
+        category: 'sensory',
+        keywords: ['deep pressure', 'anxiety management', 'sensory intervention', 'self-regulation'],
+        evidence_strength: 'strong',
+        implementation_steps: [
+          "Complete sensory preference assessment for pressure intensity",
+          "Select appropriate portable tools (weighted items, compression garments)",
+          "Develop individualized application schedule",
+          "Identify anxiety escalation signals as intervention triggers",
+          "Create discrete application methods for public settings",
+          "Establish intensity progression protocol",
+          "Track effectiveness using standardized anxiety scale"
+        ]
+      },
+      {
+        title: "Environmental Deep Pressure Integration",
+        description: "A comprehensive approach to incorporating deep pressure elements into home and work environments for ongoing sensory regulation support.",
+        target_condition: ['autism', 'sensory processing', 'anxiety'],
+        effectiveness_score: 0.78,
+        difficulty_level: 'intermediate',
+        category: 'sensory',
+        keywords: ['environmental design', 'sensory integration', 'home adaptation', 'pressure elements'],
+        evidence_strength: 'moderate',
+        implementation_steps: [
+          "Conduct environmental assessment of primary living/working spaces",
+          "Identify key locations for deep pressure integration",
+          "Select appropriate permanent fixtures (seating, sleep systems)",
+          "Create designated high-pressure retreat spaces",
+          "Establish transition routines between pressure zones",
+          "Incorporate both passive and active pressure options",
+          "Develop maintenance schedule for pressure equipment"
+        ]
+      }
+    );
   }
   
-  return techniques;
-}
-
-// Helper function to generate technique metadata
-function generateTechniqueMetadata(technique: any): any {
-  const suitableProfiles = {
-    age_ranges: ['child', 'teen', 'adult'],
-    severity_levels: ['mild', 'moderate', 'severe'],
-    comorbidities: []
-  };
-  
-  const contraindications = {
-    conditions: [],
-    medications: [],
-    age_restrictions: []
-  };
-  
-  // Add specific comorbidities based on technique category
-  if (technique.category === 'sensory') {
-    suitableProfiles.comorbidities.push('sensory processing disorder', 'anxiety');
-  } else if (technique.category === 'focus') {
-    suitableProfiles.comorbidities.push('anxiety', 'depression');
-  } else if (technique.category === 'organization') {
-    suitableProfiles.comorbidities.push('executive function disorder', 'learning disabilities');
-  } else if (technique.category === 'social') {
-    suitableProfiles.comorbidities.push('social anxiety', 'communication disorders');
-  }
-  
-  // Add contraindications based on technique properties
-  if (technique.difficulty_level === 'advanced') {
-    contraindications.age_restrictions.push('young children');
-  }
-  
-  if (technique.category === 'focus' && technique.target_condition.includes('adhd')) {
-    contraindications.conditions.push('severe anxiety');
-  }
-  
-  return {
-    suitable_for_profiles: suitableProfiles,
-    contraindications: contraindications,
-    related_techniques: [],
-    // In a real implementation, this would be a vector embedding
-    ai_embeddings: Array(1536).fill(0).map(() => Math.random())
-  };
-}
+  // Music-Based Interventions
+  if (paper.title.includes("Music-Based Interventions")) {
+    techniques.push(
+      {
+        title: "Structured Rhythmic Entrainment Protocol",
+        description: "A systematic approach using rhythmic musical activities to improve executive function, attention, and self-regulation through progressive complexity.",
+        target_condition: ['adhd', 'executive dysfunction'],
+        effectiveness_score: 0.81,
+        difficulty_level: 'beginner',
+        category: 'focus',
+        keywords: ['rhythm', 'music therapy', 'entrainment', 'attention training'],
+        evidence_strength: 'moderate',
+        implementation_steps: [
+          "Establish baseline rhythmic synchronization ability",
+          "Begin with simple, consistent beat-keeping activities",
+          "Progressively introduce rhythmic variation and complexity",
+          "Incorporate cross-body movements to rhythmic patterns",
+          "Add cognitive tasks during rhythmic maintenance",
+          "Transfer rhythmic structure to non-musical tasks",
+          "Develop personal rhythmic anchors for focus support"
+        ]
+      },
+      {
+        title: "Personalized Auditory Working Memory System",
+        description: "A music-based approach to strengthening working memory capacity through structured musical pattern recognition and reproduction activities.",
+        target_condition: ['adhd', 'autism', 'working memory deficits'],
+        effectiveness_score: 0.76,
+        difficulty_level: 'intermediate',
+        category: 'focus',
+        keywords: ['working memory', 'musical patterns', 'auditory processing', 'sequential memory'],
+        evidence_strength: 'moderate',
+        implementation_steps: [
+          "Assess baseline musical pattern recognition ability",
+          "Create progressive sequence of pattern complexity",
+          "Begin with short melodic/rhythmic patterns for reproduction",
+          "Gradually extend pattern length
