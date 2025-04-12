@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { TechniqueCardDetails, TechniqueCardFeedback, useTechniqueInteractions } from '.';
+import React from 'react';
+import { TechniqueCardDetails, useTechniqueInteractions } from '.';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 
@@ -10,7 +10,6 @@ interface TechniqueCardFooterProps {
 }
 
 const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) => {
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { handleFeedback, currentFeedback } = useTechniqueInteractions(id, title);
   
   return (
@@ -37,13 +36,6 @@ const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) 
           <ThumbsDown className="h-4 w-4 mr-1" />
           <span className="text-xs">Unhelpful</span>
         </Button>
-        <TechniqueCardFeedback 
-          open={feedbackOpen} 
-          setOpen={setFeedbackOpen} 
-          techniqueId={id} 
-          techniqueName={title} 
-          type="feedback" 
-        />
       </div>
     </div>
   );
