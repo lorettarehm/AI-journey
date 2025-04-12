@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { User } from '@supabase/supabase-js';
 import DailyCheckIn from './DailyCheckIn';
 import WeeklyProgressChart from './WeeklyProgressChart';
@@ -21,8 +21,8 @@ const UserCard = ({
   isAssessmentLoading 
 }: UserCardProps) => {
   // Calculate metrics based on the latest assessment
-  const focusLevel = latestAssessment?.focus_level || 65;
-  const energyLevel = latestAssessment?.energy_level || 80;
+  const focusLevel = latestAssessment?.focus_level || 0;
+  const energyLevel = latestAssessment?.energy_level || 0;
   const lastAssessmentDate = latestAssessment ? 
     format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
     'Not available';
