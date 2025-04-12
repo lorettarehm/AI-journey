@@ -24,8 +24,8 @@ export const useTechniques = () => {
       const { data, error } = await supabase
         .from('technique_recommendations')
         .select('*')
-        .order('title', { ascending: false }) // Using a string column name instead of a function
-        .limit(50) // Increased limit to show more techniques
+        .order('title', { ascending: false })
+        .limit(50)
       
       if (error) throw error;
       
@@ -44,7 +44,7 @@ export const useTechniques = () => {
     return newArray;
   };
 
-  // Trigger the edge function to fetch new research
+  // Trigger the refactored edge function to fetch new research
   const triggerResearchUpdate = async () => {
     try {
       // Call our edge function
@@ -58,7 +58,7 @@ export const useTechniques = () => {
       
       toast({
         title: "Research Updated",
-        description: "The latest and expanded research has been fetched and analyzed.",
+        description: "The latest research has been fetched and analyzed.",
       });
       
       // Refetch techniques to display the latest

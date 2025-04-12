@@ -11,40 +11,58 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Define API response type
-interface ApiResponse {
-  success: boolean
-  data?: any
-  error?: string
+// Type definitions
+interface ResearchPaper {
+  title: string;
+  authors: string[];
+  publication_date: string;
+  journal: string;
+  abstract: string;
 }
 
-// Handle HTTP request
+interface Technique {
+  title: string;
+  description: string;
+  target_condition: string[];
+  effectiveness_score?: number;
+  difficulty_level?: string;
+  category?: string;
+  keywords?: string[];
+  evidence_strength?: string;
+  implementation_steps?: string[];
+  journal?: string;
+  publication_date?: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: any;
+  error?: string;
+  count?: number;
+  message?: string;
+}
+
+// Main request handler
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { searchQuery, limit = 50 } = await req.json()
+    const { searchQuery, limit = 50 } = await req.json();
 
     if (!searchQuery) {
       return new Response(
         JSON.stringify({ success: false, error: 'Search query is required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      )
+      );
     }
     
-    // First, check the current count of techniques
-    const { count: existingCount, error: countError } = await supabase
-      .from('technique_recommendations')
-      .select('*', { count: 'exact', head: true })
+    // Check existing techniques count
+    const existingCount = await getExistingTechniquesCount();
     
-    if (countError) {
-      throw new Error(`Error counting techniques: ${countError.message}`)
-    }
-    
-    if (existingCount && existingCount >= 50) {
+    if (existingCount >= 50) {
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -52,119 +70,15 @@ Deno.serve(async (req) => {
           count: existingCount
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      );
     }
 
-    // Generate comprehensive research papers with diverse techniques
-    const researchPapers = generateResearchPapers()
-    
-    // Store papers in database
-    for (const paper of researchPapers) {
-      const { data: existingPaper, error: checkError } = await supabase
-        .from('research_papers')
-        .select('id')
-        .eq('title', paper.title)
-        .single()
+    // Process research papers and techniques
+    await processResearchPapers();
+    await addAdditionalTechniques();
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing paper:', checkError)
-        continue
-      }
-
-      if (!existingPaper) {
-        const { data: paperData, error: insertError } = await supabase
-          .from('research_papers')
-          .insert(paper)
-          .select()
-
-        if (insertError) {
-          console.error('Error inserting paper:', insertError)
-          continue
-        }
-
-        // Extract techniques from the paper (based on paper content)
-        const techniques = extractTechniquesFromPaper(paper)
-        
-        for (const technique of techniques) {
-          // Check for duplicates before inserting
-          const { data: existingTechnique, error: techniqueCheckError } = await supabase
-            .from('research_techniques')
-            .select('id')
-            .eq('title', technique.title)
-            .single()
-            
-          if (techniqueCheckError && techniqueCheckError.code !== 'PGRST116') {
-            console.error('Error checking existing technique:', techniqueCheckError)
-            continue
-          }
-          
-          if (!existingTechnique) {
-            const { data: techniqueData, error: techniqueError } = await supabase
-              .from('research_techniques')
-              .insert({
-                ...technique,
-                paper_id: paperData[0].id
-              })
-              .select()
-
-            if (techniqueError) {
-              console.error('Error inserting technique:', techniqueError)
-              continue
-            }
-
-            // Add metadata for the technique
-            const metadata = generateTechniqueMetadata(technique)
-            const { error: metadataError } = await supabase
-              .from('technique_metadata')
-              .insert({
-                ...metadata,
-                technique_id: techniqueData[0].id
-              })
-
-            if (metadataError) {
-              console.error('Error inserting metadata:', metadataError)
-            }
-          }
-        }
-      }
-    }
-
-    // Add direct techniques (new feature - techniques directly added without a paper)
-    const additionalTechniques = generateAdditionalTechniques()
-    
-    for (const technique of additionalTechniques) {
-      // Check for duplicates before inserting
-      const { data: existingTechnique, error: techniqueCheckError } = await supabase
-        .from('technique_recommendations')
-        .select('technique_id')
-        .eq('title', technique.title)
-        .single()
-        
-      if (techniqueCheckError && techniqueCheckError.code !== 'PGRST116') {
-        console.error('Error checking existing technique:', techniqueCheckError)
-        continue
-      }
-      
-      if (!existingTechnique) {
-        const { error: techniqueError } = await supabase
-          .from('technique_recommendations')
-          .insert(technique)
-
-        if (techniqueError) {
-          console.error('Error inserting technique:', techniqueError)
-        }
-      }
-    }
-
-    // Fetch techniques from the database
-    const { data: techniques, error: fetchError } = await supabase
-      .from('technique_recommendations')
-      .select('*')
-      .limit(limit)
-
-    if (fetchError) {
-      throw new Error(`Error fetching techniques: ${fetchError.message}`)
-    }
+    // Fetch and return updated techniques
+    const techniques = await fetchTechniques(limit);
 
     return new Response(
       JSON.stringify({ 
@@ -173,18 +87,219 @@ Deno.serve(async (req) => {
         count: techniques.length
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    );
   } catch (error) {
-    console.error('Error processing request:', error)
+    console.error('Error processing request:', error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-    )
+    );
   }
-})
+});
+
+// Function to get count of existing techniques
+async function getExistingTechniquesCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('technique_recommendations')
+    .select('*', { count: 'exact', head: true });
+  
+  if (error) {
+    throw new Error(`Error counting techniques: ${error.message}`);
+  }
+  
+  return count || 0;
+}
+
+// Function to fetch techniques with limit
+async function fetchTechniques(limit: number): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('technique_recommendations')
+    .select('*')
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Error fetching techniques: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Process and store research papers and their techniques
+async function processResearchPapers(): Promise<void> {
+  const researchPapers = generateResearchPapers();
+  
+  for (const paper of researchPapers) {
+    // Check if paper already exists
+    const existingPaper = await getPaperByTitle(paper.title);
+    
+    if (!existingPaper) {
+      // Insert new paper
+      const paperData = await insertPaper(paper);
+      
+      if (paperData) {
+        // Extract and process techniques from the paper
+        const techniques = extractTechniquesFromPaper(paper);
+        await processTechniques(techniques, paperData[0].id);
+      }
+    }
+  }
+}
+
+// Get paper by title
+async function getPaperByTitle(title: string): Promise<any> {
+  const { data, error } = await supabase
+    .from('research_papers')
+    .select('id')
+    .eq('title', title)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking existing paper:', error);
+  }
+
+  return data;
+}
+
+// Insert paper into database
+async function insertPaper(paper: ResearchPaper): Promise<any> {
+  const { data, error } = await supabase
+    .from('research_papers')
+    .insert(paper)
+    .select();
+
+  if (error) {
+    console.error('Error inserting paper:', error);
+    return null;
+  }
+
+  return data;
+}
+
+// Process techniques from a paper
+async function processTechniques(techniques: Technique[], paperId: string): Promise<void> {
+  for (const technique of techniques) {
+    // Check if technique already exists
+    const existingTechnique = await getTechniqueByTitle(technique.title);
+    
+    if (!existingTechnique) {
+      // Insert new technique
+      const techniqueData = await insertTechnique(technique, paperId);
+      
+      if (techniqueData) {
+        // Add metadata for the technique
+        const metadata = generateTechniqueMetadata(technique);
+        await insertTechniqueMetadata(metadata, techniqueData[0].id);
+      }
+    }
+  }
+}
+
+// Get technique by title
+async function getTechniqueByTitle(title: string): Promise<any> {
+  const { data, error } = await supabase
+    .from('research_techniques')
+    .select('id')
+    .eq('title', title)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking existing technique:', error);
+  }
+
+  return data;
+}
+
+// Insert technique into database
+async function insertTechnique(technique: Technique, paperId: string): Promise<any> {
+  const { data, error } = await supabase
+    .from('research_techniques')
+    .insert({
+      ...technique,
+      paper_id: paperId
+    })
+    .select();
+
+  if (error) {
+    console.error('Error inserting technique:', error);
+    return null;
+  }
+
+  return data;
+}
+
+// Insert technique metadata
+async function insertTechniqueMetadata(metadata: any, techniqueId: string): Promise<void> {
+  const { error } = await supabase
+    .from('technique_metadata')
+    .insert({
+      ...metadata,
+      technique_id: techniqueId
+    });
+
+  if (error) {
+    console.error('Error inserting metadata:', error);
+  }
+}
+
+// Add additional techniques directly to recommendations
+async function addAdditionalTechniques(): Promise<void> {
+  const additionalTechniques = generateAdditionalTechniques();
+  
+  for (const technique of additionalTechniques) {
+    // Check if technique already exists
+    const existingTechnique = await getRecommendationByTitle(technique.title);
+    
+    if (!existingTechnique) {
+      // Insert new technique recommendation
+      await insertTechniqueRecommendation(technique);
+    }
+  }
+}
+
+// Get recommendation by title
+async function getRecommendationByTitle(title: string): Promise<any> {
+  const { data, error } = await supabase
+    .from('technique_recommendations')
+    .select('technique_id')
+    .eq('title', title)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking existing technique:', error);
+  }
+
+  return data;
+}
+
+// Insert technique recommendation
+async function insertTechniqueRecommendation(technique: Technique): Promise<void> {
+  const { error } = await supabase
+    .from('technique_recommendations')
+    .insert(technique);
+
+  if (error) {
+    console.error('Error inserting technique:', error);
+  }
+}
+
+// Data generation functions
+function generateTechniqueMetadata(technique: Technique): any {
+  // Create metadata based on technique properties
+  return {
+    suitable_for_profiles: {
+      age_ranges: ["adolescent", "adult"],
+      severity_levels: ["mild", "moderate"]
+    },
+    contraindications: {
+      conditions: technique.target_condition.includes('anxiety') ? 
+        [] : ["severe_anxiety_during_implementation"]
+    },
+    related_techniques: []
+  };
+}
 
 // Function to generate diverse research papers
-function generateResearchPapers() {
+function generateResearchPapers(): ResearchPaper[] {
   return [
     {
       title: "Cognitive Behavioral Therapy for ADHD: A Meta-Analysis",
@@ -281,9 +396,8 @@ function generateResearchPapers() {
   ];
 }
 
-// Helper function to extract techniques from papers (comprehensive implementation)
-function extractTechniquesFromPaper(paper: any): any[] {
-  
+// Helper function to extract techniques from papers
+function extractTechniquesFromPaper(paper: ResearchPaper): Technique[] {
   const techniques = [];
   
   // Cognitive Behavioral Therapy techniques
@@ -800,4 +914,254 @@ function extractTechniquesFromPaper(paper: any): any[] {
           "Assess baseline musical pattern recognition ability",
           "Create progressive sequence of pattern complexity",
           "Begin with short melodic/rhythmic patterns for reproduction",
-          "Gradually extend pattern length
+          "Gradually extend pattern length and complexity",
+          "Add verbal elements to musical patterns",
+          "Implement transfer exercises to non-musical content",
+          "Create personalized musical working memory exercises"
+        ]
+      }
+    );
+  }
+  
+  // Digital Habit Formation
+  if (paper.title.includes("Digital Habit Formation")) {
+    techniques.push(
+      {
+        title: "Micro-Habit Installation Protocol",
+        description: "A structured approach to developing sustainable habits through ultra-small behavioral targets with digital tracking and reinforcement.",
+        target_condition: ['adhd', 'executive dysfunction'],
+        effectiveness_score: 0.85,
+        difficulty_level: 'beginner',
+        category: 'organization',
+        keywords: ['habit formation', 'micro-habits', 'digital tracking', 'consistency'],
+        evidence_strength: 'moderate',
+        implementation_steps: [
+          "Select high-impact behavior domains for improvement",
+          "Define micro-habits (1-2 minute behaviors)",
+          "Identify precise implementation triggers",
+          "Set up digital tracking with immediate feedback",
+          "Create consistent reinforcement schedule",
+          "Implement progressive scaling of habit complexity",
+          "Establish recovery protocols for missed days"
+        ]
+      },
+      {
+        title: "Context-Based Digital Reminder System",
+        description: "A comprehensive approach to creating context-aware digital reminders that support habit formation through environmentally-triggered cues.",
+        target_condition: ['adhd', 'working memory deficits'],
+        effectiveness_score: 0.79,
+        difficulty_level: 'beginner',
+        category: 'organization',
+        keywords: ['reminders', 'context awareness', 'environmental cues', 'location-based'],
+        evidence_strength: 'moderate',
+        implementation_steps: [
+          "Identify key contexts for habit implementation",
+          "Set up location/time/activity-based triggers",
+          "Create progressive reminder reduction schedule",
+          "Implement variable reinforcement model",
+          "Develop context-specific reminder formats",
+          "Create data visualization of context-behavior patterns",
+          "Adjust reminders based on adherence data"
+        ]
+      }
+    );
+  }
+  
+  return techniques;
+}
+
+// Function to generate additional techniques
+function generateAdditionalTechniques(): Technique[] {
+  return [
+    {
+      title: "Metacognitive Error Monitoring System",
+      description: "A systematic approach to developing personalized error awareness and correction strategies, particularly helpful for individuals who struggle with overlooked details and careless errors.",
+      target_condition: ['adhd', 'executive dysfunction'],
+      effectiveness_score: 0.87,
+      difficulty_level: 'intermediate',
+      category: 'focus',
+      keywords: ['error awareness', 'self-monitoring', 'correction strategies', 'metacognition'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Create personalized error profile through task analysis",
+        "Develop specific checklists for high-error-risk activities",
+        "Implement structured pauses at strategic points",
+        "Practice verbalization of checking process",
+        "Create visual reminders of common error types",
+        "Set up environmental modifications to support accuracy",
+        "Track error patterns to identify improvement areas"
+      ]
+    },
+    {
+      title: "Sensory Transition Preparation Protocol",
+      description: "A comprehensive approach to reducing sensory overwhelm during environment changes through pre-exposure, simulation, and graduated exposure strategies.",
+      target_condition: ['autism', 'sensory processing', 'anxiety'],
+      effectiveness_score: 0.83,
+      difficulty_level: 'beginner',
+      category: 'sensory',
+      keywords: ['transitions', 'sensory preparation', 'environmental adaptation', 'exposure'],
+      evidence_strength: 'strong',
+      implementation_steps: [
+        "Identify challenging sensory transition points",
+        "Create sensory preview materials (audio recordings, photos)",
+        "Practice with graduated exposure exercises",
+        "Develop transition timing adjustments",
+        "Create pre-transition calming routine",
+        "Implement post-transition sensory recovery protocol",
+        "Use transition objects for sensory consistency"
+      ]
+    },
+    {
+      title: "Hyperfocus Channeling Technique",
+      description: "A structured approach to productively directing intense focus states toward meaningful activities while maintaining awareness and preventing negative hyperfocus consequences.",
+      target_condition: ['adhd'],
+      effectiveness_score: 0.78,
+      difficulty_level: 'intermediate',
+      category: 'focus',
+      keywords: ['hyperfocus', 'flow state', 'productivity', 'attention management'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Identify personal hyperfocus triggers and patterns",
+        "Create environment optimized for positive hyperfocus",
+        "Set up boundary timers with physical interruptions",
+        "Develop re-entry transitions for after hyperfocus",
+        "Create pre-hyperfocus preparation checklist",
+        "Establish physical need reminders (hydration, movement)",
+        "Implement post-hyperfocus recovery protocol"
+      ]
+    },
+    {
+      title: "Rejection Sensitivity Management Framework",
+      description: "A comprehensive approach to identifying, preparing for, and processing perceived social rejection for individuals with rejection sensitive dysphoria.",
+      target_condition: ['adhd', 'anxiety', 'rejection sensitivity'],
+      effectiveness_score: 0.82,
+      difficulty_level: 'intermediate',
+      category: 'social',
+      keywords: ['rejection sensitivity', 'emotional regulation', 'social anxiety', 'resilience'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Develop personal rejection sensitivity profile",
+        "Create cognitive scripts for reframing rejection thoughts",
+        "Establish grounding techniques for emotional intensity",
+        "Implement graduated exposure to mild rejection scenarios",
+        "Develop delay protocol for responding when triggered",
+        "Create social support activation plan",
+        "Practice self-compassion exercises for rejection events"
+      ]
+    },
+    {
+      title: "Tactile Grounding System",
+      description: "A specialized approach using tactile sensory tools to maintain focus, regulate arousal, and provide sensory input for individuals with sensory seeking needs.",
+      target_condition: ['adhd', 'autism', 'sensory processing'],
+      effectiveness_score: 0.84,
+      difficulty_level: 'beginner',
+      category: 'sensory',
+      keywords: ['fidgets', 'tactile input', 'sensory tools', 'grounding techniques'],
+      evidence_strength: 'strong',
+      implementation_steps: [
+        "Conduct tactile preference assessment",
+        "Create personalized tactile tool kit",
+        "Establish specific tool-situation pairings",
+        "Develop socially appropriate access methods",
+        "Implement rotation schedule to maintain effectiveness",
+        "Create tactile anchor points in primary environments",
+        "Develop transition protocol for different settings"
+      ]
+    },
+    {
+      title: "Split-Task Attention Protocol",
+      description: "A specialized approach for managing sustained attention challenges by alternating between different tasks in structured intervals, leveraging novelty to maintain focus.",
+      target_condition: ['adhd', 'attention deficits'],
+      effectiveness_score: 0.76,
+      difficulty_level: 'intermediate',
+      category: 'focus',
+      keywords: ['task switching', 'attention management', 'novelty', 'productivity'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Identify compatible task pairs for alternation",
+        "Establish optimal task switching intervals",
+        "Create distinct environmental setups for each task",
+        "Implement transition signals and routines",
+        "Use physical movement during task transitions",
+        "Develop progress tracking for each task stream",
+        "Adjust intervals based on performance data"
+      ]
+    },
+    {
+      title: "Non-Linear Project System",
+      description: "A flexible approach to project management that accommodates variable focus, energy levels, and interest through modular project components and non-sequential execution.",
+      target_condition: ['adhd', 'executive dysfunction'],
+      effectiveness_score: 0.81,
+      difficulty_level: 'intermediate',
+      category: 'organization',
+      keywords: ['project management', 'non-linear', 'modular tasks', 'flexibility'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Break projects into independent, completable modules",
+        "Create multiple entry point options for each project",
+        "Develop clear documentation of module interdependencies",
+        "Implement visual tracking of module completion",
+        "Create energy/interest-based module selection protocol",
+        "Develop momentum-building sequence suggestions",
+        "Establish completion rituals for maintaining motivation"
+      ]
+    },
+    {
+      title: "Narrative Memory System",
+      description: "A technique for transforming abstract or detailed information into narrative structures that leverage episodic memory strengths common in many neurodivergent individuals.",
+      target_condition: ['adhd', 'autism', 'learning disabilities'],
+      effectiveness_score: 0.85,
+      difficulty_level: 'beginner',
+      category: 'focus',
+      keywords: ['memory', 'storytelling', 'information processing', 'visualization'],
+      evidence_strength: 'moderate',
+      implementation_steps: [
+        "Identify information requiring enhanced retention",
+        "Create narrative framework with emotional elements",
+        "Develop vivid sensory details for key information",
+        "Implement character/setting associations for concepts",
+        "Practice regular narrative review and elaboration",
+        "Create illustrative elements to enhance retention",
+        "Develop retrieval practice using narrative cues"
+      ]
+    },
+    {
+      title: "Energy-Matched Task Allocation System",
+      description: "A comprehensive approach to matching tasks to predictable energy patterns, leveraging peak periods and accommodating low-energy phases in daily planning.",
+      target_condition: ['adhd', 'chronic fatigue', 'executive dysfunction'],
+      effectiveness_score: 0.88,
+      difficulty_level: 'beginner',
+      category: 'organization',
+      keywords: ['energy management', 'task allocation', 'productivity', 'pacing'],
+      evidence_strength: 'strong',
+      implementation_steps: [
+        "Track energy patterns across days/weeks",
+        "Categorize tasks by cognitive/energy demands",
+        "Create energy-based task allocation template",
+        "Develop backup plans for unexpected energy fluctuations",
+        "Implement energy conservation protocols",
+        "Create transition buffers between high-demand tasks",
+        "Establish renewal activities for energy replenishment"
+      ]
+    },
+    {
+      title: "Specialized Interest Bridging Protocol",
+      description: "A structured method for connecting specialized interests to academic, professional, or functional skill development, leveraging intrinsic motivation and existing knowledge structures.",
+      target_condition: ['autism', 'adhd'],
+      effectiveness_score: 0.89,
+      difficulty_level: 'intermediate',
+      category: 'focus',
+      keywords: ['special interests', 'motivation', 'skill transfer', 'engagement'],
+      evidence_strength: 'strong',
+      implementation_steps: [
+        "Document detailed aspects of specialized interests",
+        "Identify skill targets for development",
+        "Create explicit connections between interest and skills",
+        "Develop graduated challenge sequence using interest context",
+        "Implement regular reflection on skill transferability",
+        "Create social sharing opportunities for interest-based work",
+        "Develop branching interests through structured exploration"
+      ]
+    }
+  ];
+}
