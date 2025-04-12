@@ -3,13 +3,8 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChatContainer from '@/components/chat/ChatContainer';
-import { useChat } from '@/hooks/use-chat';
 
 const Chat = () => {
-  const {
-    createNewConversation,
-  } = useChat();
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
