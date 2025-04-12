@@ -9,6 +9,7 @@ import { FormDescription } from '@/components/ui/form';
 import { Edit, Trash2, Save, X, InfoIcon, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCharacteristics } from './useCharacteristics';
+import InfoTooltip from './InfoTooltip';
 
 interface CharacteristicItemProps {
   item: Characteristic;
@@ -84,7 +85,15 @@ const CharacteristicItem: React.FC<CharacteristicItemProps> = ({ item }) => {
         // Edit mode
         <div className="space-y-4">
           <div>
-            <Label htmlFor={`edit-characteristic-${item.id}`}>Characteristic Name</Label>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Label htmlFor={`edit-characteristic-${item.id}`}>Characteristic Name</Label>
+              <InfoTooltip content={
+                <div className="text-sm">
+                  <p>The name of your neurodivergent trait or characteristic.</p>
+                  <p className="mt-1">Be specific to help us better personalize your experience.</p>
+                </div>
+              } />
+            </div>
             <Input
               id={`edit-characteristic-${item.id}`}
               value={editCharacteristic}
@@ -93,7 +102,15 @@ const CharacteristicItem: React.FC<CharacteristicItemProps> = ({ item }) => {
             />
           </div>
           <div>
-            <Label htmlFor={`edit-description-${item.id}`}>Description (Optional)</Label>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Label htmlFor={`edit-description-${item.id}`}>Description (Optional)</Label>
+              <InfoTooltip content={
+                <div className="text-sm">
+                  <p>Describe how this trait affects your daily life and experiences.</p>
+                  <p className="mt-1">Personal descriptions help us better understand your unique needs.</p>
+                </div>
+              } />
+            </div>
             <Textarea
               id={`edit-description-${item.id}`}
               value={editDescription}

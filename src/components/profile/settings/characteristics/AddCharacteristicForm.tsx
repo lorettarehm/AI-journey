@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { FormDescription } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useCharacteristics } from './useCharacteristics';
+import InfoTooltip from './InfoTooltip';
 
 interface AddCharacteristicFormProps {
   onCancel: () => void;
@@ -65,7 +66,15 @@ const AddCharacteristicForm: React.FC<AddCharacteristicFormProps> = ({ onCancel 
       <h4 className="font-medium mb-4">Add New Characteristic</h4>
       <div className="space-y-4">
         <div>
-          <Label htmlFor="characteristic">Characteristic Name</Label>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label htmlFor="characteristic">Characteristic Name</Label>
+            <InfoTooltip content={
+              <div className="text-sm">
+                <p>Enter the name of your neurodivergent trait or characteristic.</p>
+                <p className="mt-1">Examples: ADHD, Autism, Hyperfocus, Sensory Processing Sensitivity</p>
+              </div>
+            } />
+          </div>
           <Input
             id="characteristic"
             value={newCharacteristic}
@@ -74,7 +83,15 @@ const AddCharacteristicForm: React.FC<AddCharacteristicFormProps> = ({ onCancel 
           />
         </div>
         <div>
-          <Label htmlFor="description">Description (Optional)</Label>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label htmlFor="description">Description (Optional)</Label>
+            <InfoTooltip content={
+              <div className="text-sm">
+                <p>Describe how this trait affects you in your daily life.</p>
+                <p className="mt-1">If left blank, we'll generate a general description from reputable sources.</p>
+              </div>
+            } />
+          </div>
           <Textarea
             id="description"
             value={newDescription}

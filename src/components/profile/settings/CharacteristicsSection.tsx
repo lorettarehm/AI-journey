@@ -7,6 +7,7 @@ import { useCharacteristics } from './characteristics/useCharacteristics';
 import CharacteristicItem from './characteristics/CharacteristicItem';
 import AddCharacteristicForm from './characteristics/AddCharacteristicForm';
 import CommonTraits from './characteristics/CommonTraits';
+import InfoTooltip from './characteristics/InfoTooltip';
 
 const CharacteristicsSection = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -20,10 +21,28 @@ const CharacteristicsSection = () => {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Neurodivergent Characteristics</CardTitle>
-          <CardDescription>
-            Add your neurodivergent traits and characteristics to help us personalize your experience.
-          </CardDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-xl">Neurodivergent Characteristics</CardTitle>
+              <CardDescription>
+                Add your neurodivergent traits and characteristics to help us personalize your experience.
+              </CardDescription>
+            </div>
+            <InfoTooltip 
+              content={
+                <div className="text-sm space-y-2">
+                  <p>Adding your neurodivergent traits helps us:</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>Personalize content and recommendations</li>
+                    <li>Suggest relevant coping techniques</li>
+                    <li>Connect you with helpful resources</li>
+                  </ul>
+                  <p>Your information is private and only used to enhance your experience.</p>
+                </div>
+              } 
+              side="left"
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (

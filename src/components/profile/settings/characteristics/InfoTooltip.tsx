@@ -1,26 +1,30 @@
 
 import React from 'react';
-import { InfoIcon } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
+  TooltipProvider
 } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 
 interface InfoTooltipProps {
-  content: string;
+  content: React.ReactNode;
+  side?: "top" | "right" | "bottom" | "left";
 }
 
-const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
+const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, side = "right" }) => {
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
-          <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help inline-block ml-1" />
+          <button type="button" className="inline-flex text-muted-foreground hover:text-muted-foreground/80 transition-colors">
+            <HelpCircle size={14} />
+            <span className="sr-only">More information</span>
+          </button>
         </TooltipTrigger>
-        <TooltipContent>
-          <p className="max-w-xs text-xs">{content}</p>
+        <TooltipContent side={side} className="max-w-xs">
+          {content}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
