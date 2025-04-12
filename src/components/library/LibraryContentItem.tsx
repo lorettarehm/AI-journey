@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Tag } from 'lucide-react';
+import LibraryTagSelector from './LibraryTagSelector';
 
 interface LibraryContent {
   id: string;
@@ -14,9 +15,18 @@ interface LibraryContent {
 
 interface LibraryContentItemProps {
   content: LibraryContent;
+  onRefresh?: () => void;
 }
 
-const LibraryContentItem = ({ content }: LibraryContentItemProps) => {
+const LibraryContentItem = ({ content, onRefresh }: LibraryContentItemProps) => {
+  const [showTags, setShowTags] = useState(false);
+
+  const handleTagsUpdate = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   return (
     <Card key={content.id} className="w-full overflow-hidden">
       <CardHeader className="pb-2">
@@ -34,6 +44,28 @@ const LibraryContentItem = ({ content }: LibraryContentItemProps) => {
         <div className="p-4 bg-muted rounded-md mb-3">
           <p className="text-sm">{content.summary}</p>
         </div>
+        
+        <div className="mb-3">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowTags(!showTags)}
+            className="px-2 h-7 text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <Tag className="h-3.5 w-3.5" />
+            {showTags ? "Hide Tags" : "Manage Tags"}
+          </Button>
+          
+          {showTags && (
+            <div className="mt-2">
+              <LibraryTagSelector 
+                contentId={content.id}
+                onTagsUpdated={handleTagsUpdate}
+              />
+            </div>
+          )}
+        </div>
+        
         <div className="flex justify-between items-center text-xs text-muted-foreground">
           <span>{new Date(content.created_at).toLocaleString()}</span>
           <span className="truncate max-w-[230px]">{content.url}</span>

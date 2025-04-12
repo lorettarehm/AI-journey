@@ -65,7 +65,11 @@ const LibraryContentList = () => {
       ) : (
         <>
           {filteredContents.map((content) => (
-            <LibraryContentItem key={content.id} content={content} />
+            <LibraryContentItem 
+              key={content.id} 
+              content={content} 
+              onRefresh={handleRefresh}
+            />
           ))}
         </>
       )}

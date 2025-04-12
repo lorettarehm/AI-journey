@@ -9,6 +9,7 @@ interface LibraryContent {
   title: string;
   summary: string;
   created_at: string;
+  tags?: string[];
 }
 
 export function useLibraryContent() {
@@ -23,15 +24,35 @@ export function useLibraryContent() {
   const fetchLibraryContents = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch content
+      const { data: contentData, error: contentError } = await supabase
         .from('web_library_content')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (contentError) throw contentError;
       
-      setContents(data || []);
-      setFilteredContents(data || []);
+      // Fetch tags for all content
+      const { data: tagData, error: tagError } = await supabase
+        .from('web_content_tags')
+        .select('*');
+      
+      if (tagError) throw tagError;
+      
+      // Map tags to content
+      const contentWithTags = contentData?.map(content => {
+        const contentTags = tagData
+          ?.filter(tag => tag.content_id === content.id)
+          ?.map(tag => tag.tag_name) || [];
+        
+        return {
+          ...content,
+          tags: contentTags
+        };
+      }) || [];
+      
+      setContents(contentWithTags);
+      setFilteredContents(contentWithTags);
     } catch (error) {
       console.error('Error fetching library contents:', error);
       toast({
@@ -59,7 +80,8 @@ export function useLibraryContent() {
         item => 
           item.title?.toLowerCase().includes(query) || 
           item.summary?.toLowerCase().includes(query) ||
-          item.url?.toLowerCase().includes(query)
+          item.url?.toLowerCase().includes(query) ||
+          item.tags?.some(tag => tag.toLowerCase().includes(query))
       );
     }
     
