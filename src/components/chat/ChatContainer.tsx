@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { useChat } from '@/hooks/use-chat';
+import { useChat } from '@/hooks/chat'; // Updated import path
 import { Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent } from '@/components/ui/card';
