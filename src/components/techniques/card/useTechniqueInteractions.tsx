@@ -30,9 +30,9 @@ export const useTechniqueInteractions = (id: string, title: string) => {
     enabled: !!id,
   });
 
-  // Check if user has interacted with this technique
-  const { data: userInteraction, refetch: refetchUserInteraction } = useQuery({
-    queryKey: ['userTechniqueInteraction', id, user?.id],
+  // Get the user's most recent interaction with this technique (for UI display purposes only)
+  const { data: userRecentInteraction, refetch: refetchUserInteraction } = useQuery({
+    queryKey: ['userRecentTechniqueInteraction', id, user?.id],
     queryFn: async () => {
       if (!user) return null;
       
@@ -41,6 +41,8 @@ export const useTechniqueInteractions = (id: string, title: string) => {
         .select('id, feedback')
         .eq('technique_id', id)
         .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
         
       if (error) return null;
@@ -59,48 +61,21 @@ export const useTechniqueInteractions = (id: string, title: string) => {
       return;
     }
 
-    // If user already gave this feedback, remove it (toggle)
-    const shouldRemove = userInteraction?.feedback === feedback;
-    
     try {
-      if (shouldRemove) {
-        // Delete the interaction
-        const { error } = await supabase
-          .from('technique_interactions')
-          .delete()
-          .eq('id', userInteraction.id);
-          
-        if (error) throw error;
-        setFeedbackSubmitted(null);
-      } else {
-        if (userInteraction?.id) {
-          // Update existing interaction
-          const { error } = await supabase
-            .from('technique_interactions')
-            .update({
-              feedback: feedback,
-              created_at: new Date().toISOString(),
-            })
-            .eq('id', userInteraction.id);
-            
-          if (error) throw error;
-        } else {
-          // Insert new interaction
-          const { error } = await supabase
-            .from('technique_interactions')
-            .insert({
-              user_id: user.id,
-              technique_id: id,
-              technique_title: title,
-              feedback: feedback,
-              created_at: new Date().toISOString(),
-            });
-            
-          if (error) throw error;
-        }
+      // Always insert a new interaction record
+      const { error } = await supabase
+        .from('technique_interactions')
+        .insert({
+          user_id: user.id,
+          technique_id: id,
+          technique_title: title,
+          feedback: feedback,
+          created_at: new Date().toISOString(),
+        });
         
-        setFeedbackSubmitted(feedback);
-      }
+      if (error) throw error;
+      
+      setFeedbackSubmitted(feedback);
       
       // Refetch stats and user interaction
       refetchStats();
@@ -110,10 +85,8 @@ export const useTechniqueInteractions = (id: string, title: string) => {
       queryClient.invalidateQueries({ queryKey: ['techniqueInteractions'] });
       
       toast({
-        title: shouldRemove ? "Feedback removed" : "Feedback submitted",
-        description: shouldRemove 
-          ? "Your feedback has been removed" 
-          : `You marked this technique as ${feedback}`,
+        title: "Feedback submitted",
+        description: `You marked this technique as ${feedback}`,
       });
     } catch (error) {
       console.error("Error saving feedback:", error);
@@ -125,8 +98,8 @@ export const useTechniqueInteractions = (id: string, title: string) => {
     }
   };
 
-  // Use feedback from server or local state
-  const currentFeedback = userInteraction?.feedback || feedbackSubmitted;
+  // Use feedback from server or local state (for UI display only)
+  const currentFeedback = userRecentInteraction?.feedback || feedbackSubmitted;
 
   return {
     interactionStats,
