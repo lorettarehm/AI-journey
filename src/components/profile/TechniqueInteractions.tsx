@@ -89,7 +89,9 @@ const TechniqueInteractions = () => {
             notHelpfulCount={getFeedbackCount('not-helpful')}
           />
           
-          <TechniqueSummaryTable techniqueSummary={techniqueSummary} />
+          {techniqueSummary.length > 0 && (
+            <TechniqueSummaryTable techniqueSummary={techniqueSummary} />
+          )}
           
           <RecentInteractions interactions={interactions} />
         </FadeIn>
