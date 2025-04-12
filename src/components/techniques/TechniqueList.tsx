@@ -11,17 +11,7 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-
-interface TechniqueType {
-  technique_id: string;
-  title: string;
-  description: string;
-  implementation_steps?: string[];
-  category?: 'focus' | 'organization' | 'sensory' | 'social' | null;
-  difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | null;
-  journal?: string;
-  publication_date?: string;
-}
+import { TechniqueType } from './useTechniques';
 
 interface TechniqueListProps {
   techniques: TechniqueType[] | undefined;
@@ -132,12 +122,7 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
         {currentTechniques.map((technique, index) => (
           <FadeIn key={technique.technique_id} delay={0.1 * index}>
             <TechniqueCard
-              id={technique.technique_id}
-              title={technique.title}
-              description={technique.description}
-              category={technique.category || 'focus'}
-              source={technique.journal || "Journal of Neurodiversity"}
-              researchBased={true}
+              technique={technique}
             />
           </FadeIn>
         ))}
