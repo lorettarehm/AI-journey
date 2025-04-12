@@ -1238,7 +1238,8 @@ npm test
 
 ## 📜 License
 
-Evolve-empowerment-journey is protected under the [LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
+evolve-empowerment-journey © 2025 by Loretta Rehm is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+[https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en]
 
 ---
 
