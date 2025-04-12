@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Message } from '@/hooks/use-chat';
+import { Message } from '@/hooks/chat/types';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Bot, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
