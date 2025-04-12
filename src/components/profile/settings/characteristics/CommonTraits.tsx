@@ -107,7 +107,7 @@ const CommonTraits: React.FC<CommonTraitsProps> = ({ onSelectTrait }) => {
   };
 
   return (
-    <div className="border-t p-6">
+    <div className="w-full border-t pt-6">
       <div className="flex items-center gap-2 mb-3">
         <h4 className="font-medium">Common Neurodivergent Traits</h4>
         <InfoTooltip content={
@@ -119,43 +119,45 @@ const CommonTraits: React.FC<CommonTraitsProps> = ({ onSelectTrait }) => {
         } />
       </div>
       
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Trait</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead className="w-[100px] text-right">Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allTraits.map((trait) => (
-            <TableRow key={trait}>
-              <TableCell className="font-medium">{trait}</TableCell>
-              <TableCell>
-                {traitDescriptions[trait as keyof typeof traitDescriptions] || 
-                 "A neurodivergent trait that affects how individuals process information and interact with the world."}
-              </TableCell>
-              <TableCell className="text-right">
-                <HoverCard openDelay={300} closeDelay={100}>
-                  <HoverCardTrigger asChild>
-                    <Badge 
-                      variant="outline" 
-                      className="cursor-pointer hover:bg-accent/10"
-                      onClick={() => handleSelectTrait(trait)}
-                    >
-                      <PlusCircle size={12} className="mr-1" />
-                      Add
-                    </Badge>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-80 text-sm">
-                    <p>Click to add this trait to your profile.</p>
-                  </HoverCardContent>
-                </HoverCard>
-              </TableCell>
+      <div className="w-full overflow-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Trait</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="w-[100px] text-right">Action</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {allTraits.map((trait) => (
+              <TableRow key={trait}>
+                <TableCell className="font-medium">{trait}</TableCell>
+                <TableCell>
+                  {traitDescriptions[trait as keyof typeof traitDescriptions] || 
+                  "A neurodivergent trait that affects how individuals process information and interact with the world."}
+                </TableCell>
+                <TableCell className="text-right">
+                  <HoverCard openDelay={300} closeDelay={100}>
+                    <HoverCardTrigger asChild>
+                      <Badge 
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-accent/10"
+                        onClick={() => handleSelectTrait(trait)}
+                      >
+                        <PlusCircle size={12} className="mr-1" />
+                        Add
+                      </Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80 text-sm">
+                      <p>Click to add this trait to your profile.</p>
+                    </HoverCardContent>
+                  </HoverCard>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
