@@ -61,9 +61,9 @@ const TechniqueInteractions = () => {
         .eq('user_id', user.id)
         .order('completed_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
         
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+      if (error) throw error;
       return data as LatestAssessment;
     },
     enabled: !!user,
