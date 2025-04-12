@@ -12,6 +12,8 @@ export interface TechniqueType {
   difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | null;
   journal?: string;
   publication_date?: string;
+  url?: string;
+  doi?: string;
 }
 
 export const useTechniques = () => {
@@ -58,7 +60,7 @@ export const useTechniques = () => {
       
       toast({
         title: "Research Updated",
-        description: "The latest research has been fetched and analyzed.",
+        description: "The latest research has been fetched with verified URLs and DOIs.",
       });
       
       // Refetch techniques to display the latest
