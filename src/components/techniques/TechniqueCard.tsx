@@ -25,7 +25,7 @@ interface TechniqueCardProps {
 
 const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const { saveInteraction } = useTechniqueInteractions();
+  const { handleInteraction } = useTechniqueInteractions();
 
   const handleOpenSection = (section: string) => {
     if (openSection === section) {
@@ -33,7 +33,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
     } else {
       setOpenSection(section);
       // Record interaction only when opening a section
-      saveInteraction(technique.technique_id, technique.title);
+      handleInteraction(technique.technique_id, technique.title);
     }
   };
 
@@ -42,12 +42,12 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
       <CardContent className="p-0">
         <TechniqueCardHeader 
           title={technique.title}
-          difficulty={technique.difficulty_level}
+          difficultyLevel={technique.difficulty_level}
           category={technique.category}
         />
         
         <div className="px-6 py-4">
-          <TechniqueNutshell description={technique.description} />
+          <TechniqueNutshell descriptionText={technique.description} />
           
           <Accordion type="single" collapsible className="mt-4">
             <AccordionItem value="implementation" className="border-b-0">
@@ -58,7 +58,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
                 Implementation Steps
               </AccordionTrigger>
               <AccordionContent>
-                <TechniqueCardDetails steps={technique.implementation_steps} />
+                <TechniqueCardDetails implementationSteps={technique.implementation_steps} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -116,7 +116,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
           )}
         </div>
         
-        <TechniqueCardFooter techniqueId={technique.technique_id} />
+        <TechniqueCardFooter techniqueId={technique.technique_id || ''} />
       </CardContent>
     </Card>
   );

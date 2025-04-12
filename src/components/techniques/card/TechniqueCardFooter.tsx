@@ -1,43 +1,39 @@
 
 import React from 'react';
-import { TechniqueCardDetails, useTechniqueInteractions } from '.';
-import { Button } from '@/components/ui/button';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { useTechniqueInteractions } from './useTechniqueInteractions';
 
 interface TechniqueCardFooterProps {
-  id: string;
-  title: string;
+  techniqueId: string;
 }
 
-const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) => {
-  const { handleFeedback, currentFeedback, interactionStats } = useTechniqueInteractions(id, title);
-  
+const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ techniqueId }) => {
+  const { handleFeedback, currentFeedback } = useTechniqueInteractions();
+
   return (
-    <div className="p-6 pt-0 flex items-center justify-between">
-      <div className="flex space-x-2">
-        <TechniqueCardDetails id={id} title={title} />
-        <span className="text-xs text-accent font-medium flex items-center px-2">
-          🔜 Video demos
-        </span>
+    <div className="p-4 border-t border-border flex justify-between items-center">
+      <div className="text-sm text-muted-foreground">
+        Was this technique helpful?
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex gap-2">
         <Button 
-          variant="ghost" 
-          size="sm" 
-          className={`flex items-center ${currentFeedback === 'helpful' ? 'text-green-500' : ''}`} 
+          variant={currentFeedback === 'helpful' ? 'default' : 'outline'} 
+          size="sm"
           onClick={() => handleFeedback('helpful')}
+          className="flex items-center gap-1"
         >
-          <ThumbsUp className="h-4 w-4 mr-1" />
-          <span className="text-xs">Helpful</span>
+          <ThumbsUp className="h-4 w-4" />
+          <span className="hidden sm:inline">Helpful</span>
         </Button>
         <Button 
-          variant="ghost" 
-          size="sm" 
-          className={`flex items-center ${currentFeedback === 'not-helpful' ? 'text-red-500' : ''}`} 
+          variant={currentFeedback === 'not-helpful' ? 'default' : 'outline'} 
+          size="sm"
           onClick={() => handleFeedback('not-helpful')}
+          className="flex items-center gap-1"
         >
-          <ThumbsDown className="h-4 w-4 mr-1" />
-          <span className="text-xs">Unhelpful</span>
+          <ThumbsDown className="h-4 w-4" />
+          <span className="hidden sm:inline">Not helpful</span>
         </Button>
       </div>
     </div>
