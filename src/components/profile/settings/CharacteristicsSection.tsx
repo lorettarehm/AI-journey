@@ -11,10 +11,22 @@ import InfoTooltip from './characteristics/InfoTooltip';
 
 const CharacteristicsSection = () => {
   const [isAdding, setIsAdding] = useState(false);
-  const { characteristics, isLoading } = useCharacteristics();
+  const { characteristics, isLoading, addMutation } = useCharacteristics();
 
   const handleSelectCommonTrait = (trait: string) => {
     setIsAdding(true);
+    
+    // Automatically add the selected trait
+    const existingTrait = characteristics.find(
+      item => item.characteristic.toLowerCase() === trait.toLowerCase()
+    );
+    
+    if (!existingTrait) {
+      addMutation.mutate({
+        characteristic: trait,
+        description: '',
+      });
+    }
   };
 
   return (
