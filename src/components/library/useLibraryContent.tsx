@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ContentTag } from './LibraryTagSelector';
 
 interface LibraryContent {
   id: string;
@@ -35,7 +36,7 @@ export function useLibraryContent() {
       // Fetch tags for all content
       const { data: tagData, error: tagError } = await supabase
         .from('web_content_tags')
-        .select('*');
+        .select('*') as { data: ContentTag[] | null, error: any };
       
       if (tagError) throw tagError;
       

@@ -17,6 +17,7 @@ export interface ContentTag {
   id: string;
   content_id: string;
   tag_name: string;
+  created_at?: string;
 }
 
 const LibraryTagSelector = ({ contentId, onTagsUpdated }: LibraryTagSelectorProps) => {
@@ -34,7 +35,7 @@ const LibraryTagSelector = ({ contentId, onTagsUpdated }: LibraryTagSelectorProp
       const { data, error } = await supabase
         .from('web_content_tags')
         .select('*')
-        .eq('content_id', contentId);
+        .eq('content_id', contentId) as { data: ContentTag[] | null, error: any };
       
       if (error) throw error;
       setTags(data || []);
@@ -55,8 +56,7 @@ const LibraryTagSelector = ({ contentId, onTagsUpdated }: LibraryTagSelectorProp
     try {
       const { data, error } = await supabase
         .from('web_content_tags')
-        .select('tag_name')
-        .order('tag_name');
+        .select('tag_name') as { data: { tag_name: string }[] | null, error: any };
       
       if (error) throw error;
       
@@ -82,7 +82,7 @@ const LibraryTagSelector = ({ contentId, onTagsUpdated }: LibraryTagSelectorProp
         .insert({
           content_id: contentId,
           tag_name: tagName.trim()
-        });
+        }) as { error: any };
       
       if (error) throw error;
       
@@ -111,7 +111,7 @@ const LibraryTagSelector = ({ contentId, onTagsUpdated }: LibraryTagSelectorProp
       const { error } = await supabase
         .from('web_content_tags')
         .delete()
-        .eq('id', tagId);
+        .eq('id', tagId) as { error: any };
       
       if (error) throw error;
       
