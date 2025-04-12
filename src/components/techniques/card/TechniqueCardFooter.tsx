@@ -16,6 +16,9 @@ const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) 
     <div className="p-6 pt-0 flex items-center justify-between">
       <div className="flex space-x-2">
         <TechniqueCardDetails id={id} title={title} />
+        <span className="text-xs text-accent font-medium flex items-center px-2">
+          🔜 Video demos
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <Button 

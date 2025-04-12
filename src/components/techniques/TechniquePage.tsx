@@ -77,6 +77,7 @@ const TechniquePage: React.FC = () => {
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
             Our technique database has been expanded with the latest research-backed interventions.
+            <span className="ml-1 text-accent font-medium">🔜 AI-powered technique analysis coming soon!</span>
           </p>
         </div>
       </FadeIn>

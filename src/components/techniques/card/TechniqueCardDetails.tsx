@@ -133,6 +133,15 @@ const TechniqueCardDetails: React.FC<TechniqueCardDetailsProps> = ({ id, title }
               </p>
             </div>
           )}
+          
+          <div className="border-t border-border pt-4 mt-4">
+            <h4 className="text-sm font-medium mb-2">Expert Commentary 
+              <span className="ml-1 text-accent font-medium">🔜</span>
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Expert analysis and practical application insights coming soon.
+            </p>
+          </div>
         </div>
         
         <SheetFooter>

@@ -13,6 +13,7 @@ const TechniqueHeader: React.FC = () => {
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover and learn practical strategies tailored for your unique neurodivergent mind.
           We suggest 4 techniques at a time that might be helpful.
+          <span className="ml-1 text-accent font-medium">🔜 More personalized recommendations coming soon!</span>
         </p>
       </div>
     </FadeIn>
