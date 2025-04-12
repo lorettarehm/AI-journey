@@ -1,8 +1,21 @@
 
+# This file is responsible for configuring your Supabase project.
 project_id = "sjeaxjdujzdrlkkfdzjc"
 
-[functions.send-feedback]
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+# Function that extracts text from uploaded documents
+[functions.extract-document-text]
 verify_jwt = true
 
-[functions.chat-ai]
-verify_jwt = true
+[storage.avatars]
+# Create a bucket for storing user avatars
