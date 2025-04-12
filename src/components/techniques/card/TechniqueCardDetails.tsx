@@ -38,6 +38,12 @@ const TechniqueCardDetails: React.FC<TechniqueCardDetailsProps> = ({ id, title }
     enabled: !!id,
   });
 
+  // Function to create a search URL for the journal
+  const getJournalSearchUrl = (journalName: string) => {
+    const encodedJournal = encodeURIComponent(journalName);
+    return `https://scholar.google.com/scholar?q=${encodedJournal}`;
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -91,9 +97,21 @@ const TechniqueCardDetails: React.FC<TechniqueCardDetailsProps> = ({ id, title }
           
           <div className="border-t border-border pt-4 mt-4">
             <h4 className="text-sm font-medium mb-2">Research Source</h4>
-            <p className="text-sm text-muted-foreground mb-1">
-              {techniqueDetails?.journal || "Journal of Neurodiversity"}
-            </p>
+            {techniqueDetails?.journal ? (
+              <a 
+                href={getJournalSearchUrl(techniqueDetails.journal)}
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="text-sm text-accent hover:underline flex items-center mb-1"
+              >
+                <ExternalLink size={14} className="mr-1" />
+                {techniqueDetails.journal}
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground mb-1">
+                Journal of Neurodiversity
+              </p>
+            )}
             {techniqueDetails?.publication_date && (
               <p className="text-xs text-muted-foreground">
                 Published: {new Date(techniqueDetails.publication_date).toLocaleDateString()}

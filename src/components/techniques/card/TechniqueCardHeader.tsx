@@ -24,6 +24,12 @@ const TechniqueCardHeader: React.FC<TechniqueCardHeaderProps> = ({
   source,
   researchBased = false,
 }) => {
+  // Function to create a search URL for the journal
+  const getJournalSearchUrl = (journalName: string) => {
+    const encodedJournal = encodeURIComponent(journalName);
+    return `https://scholar.google.com/scholar?q=${encodedJournal}`;
+  };
+
   return (
     <div className="p-6 flex-grow">
       <div className="flex justify-between items-start mb-3">
@@ -39,9 +45,14 @@ const TechniqueCardHeader: React.FC<TechniqueCardHeaderProps> = ({
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground text-sm mb-4">{description}</p>
       {source && (
-        <p className="text-xs text-muted-foreground flex items-center mt-auto">
+        <a 
+          href={getJournalSearchUrl(source)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-accent hover:underline flex items-center mt-auto transition-colors"
+        >
           <ExternalLink size={12} className="mr-1" /> {source}
-        </p>
+        </a>
       )}
     </div>
   );
