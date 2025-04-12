@@ -125,11 +125,18 @@ export const useMessageOperations = (
       });
       
       // Remove the temporary messages on error
-      setMessages(prevMessages => 
-        prevMessages.filter(msg => 
-          msg.id !== tempUserMessage.id && msg.id !== tempAssistantMessage.id
-        )
-      );
+      setMessages(prevMessages => {
+        // Create filtered messages array by removing temporary messages
+        const filteredMessages = prevMessages.filter(msg => {
+          // We need to identify the specific temp messages to remove
+          // from this specific send operation
+          return !(
+            (msg.id === `temp-${Date.now()}`) || 
+            (msg.id === `temp-assistant-${Date.now()}`)
+          );
+        });
+        return filteredMessages;
+      });
     } finally {
       setIsLoading(false);
     }

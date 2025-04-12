@@ -6,7 +6,7 @@ import { Conversation } from './types';
 export const useConversationOperations = (
   activeConversationId: string | undefined,
   setActiveConversationId: (id: string | undefined) => void,
-  setConversations: (conversations: Conversation[]) => void
+  setConversations: (conversations: Conversation[] | ((prev: Conversation[]) => Conversation[])) => void
 ) => {
   const { toast } = useToast();
 
@@ -37,7 +37,7 @@ export const useConversationOperations = (
     try {
       const data = await createConversation(userId);
       
-      setConversations((prev) => [data, ...prev]);
+      setConversations((prev: Conversation[]) => [data, ...prev]);
       setActiveConversationId(data.id);
       return data.id;
     } catch (error) {
