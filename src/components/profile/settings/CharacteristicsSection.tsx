@@ -9,13 +9,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tag, Trash2, Plus, Save, Edit, X } from 'lucide-react';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Tag, Trash2, Plus, Save, Edit, X, InfoIcon, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Characteristic {
   id: string;
   characteristic: string;
   description: string | null;
+  source_url?: string | null;
 }
 
 const CharacteristicsSection = () => {
@@ -29,6 +32,8 @@ const CharacteristicsSection = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editCharacteristic, setEditCharacteristic] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [traitSources, setTraitSources] = useState<Record<string, string>>({});
 
   // Fetch user characteristics
   const { data: characteristics = [], isLoading } = useQuery({
@@ -50,7 +55,7 @@ const CharacteristicsSection = () => {
 
   // Add new characteristic
   const addMutation = useMutation({
-    mutationFn: async (newItem: { characteristic: string; description: string }) => {
+    mutationFn: async (newItem: { characteristic: string; description: string; source_url?: string }) => {
       if (!user) throw new Error('User not authenticated');
       
       const { data, error } = await supabase
@@ -58,7 +63,8 @@ const CharacteristicsSection = () => {
         .insert({
           user_id: user.id,
           characteristic: newItem.characteristic,
-          description: newItem.description || null
+          description: newItem.description || null,
+          source_url: newItem.source_url || null
         })
         .select();
         
@@ -87,12 +93,13 @@ const CharacteristicsSection = () => {
 
   // Update characteristic
   const updateMutation = useMutation({
-    mutationFn: async (item: { id: string; characteristic: string; description: string | null }) => {
+    mutationFn: async (item: { id: string; characteristic: string; description: string | null; source_url?: string | null }) => {
       const { error } = await supabase
         .from('user_characteristics')
         .update({
           characteristic: item.characteristic,
           description: item.description,
+          source_url: item.source_url,
           updated_at: new Date().toISOString()
         })
         .eq('id', item.id);
@@ -146,7 +153,41 @@ const CharacteristicsSection = () => {
     },
   });
 
-  const handleAddCharacteristic = () => {
+  // Generate description for a trait
+  const generateDescription = async (trait: string): Promise<{description: string, source: string}> => {
+    setIsGeneratingDescription(true);
+    
+    try {
+      const response = await fetch(`https://sjeaxjdujzdrlkkfdzjc.supabase.co/functions/v1/fetch-trait-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.getSession()}`
+        },
+        body: JSON.stringify({ trait }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate description');
+      }
+      
+      const data = await response.json();
+      return {
+        description: data.description || '',
+        source: data.source || ''
+      };
+    } catch (error) {
+      console.error('Error generating description:', error);
+      return {
+        description: `${trait} is a neurodivergent characteristic that affects how individuals process information and interact with the world.`,
+        source: 'https://www.understood.org/'
+      };
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
+  const handleAddCharacteristic = async () => {
     if (!newCharacteristic.trim()) {
       toast({
         title: "Validation Error",
@@ -156,9 +197,36 @@ const CharacteristicsSection = () => {
       return;
     }
 
+    let description = newDescription.trim();
+    let sourceUrl = '';
+    
+    // If no description is provided, generate one
+    if (!description) {
+      try {
+        const { description: generatedDesc, source } = await generateDescription(newCharacteristic);
+        description = generatedDesc;
+        sourceUrl = source;
+        
+        // Store the source for this trait
+        setTraitSources(prev => ({
+          ...prev,
+          [newCharacteristic]: source
+        }));
+        
+        toast({
+          title: "Description Generated",
+          description: "A description has been automatically generated for this characteristic.",
+        });
+      } catch (error) {
+        console.error('Error generating description:', error);
+        // Continue with empty description if generation fails
+      }
+    }
+
     addMutation.mutate({
       characteristic: newCharacteristic.trim(),
-      description: newDescription.trim()
+      description,
+      source_url: sourceUrl
     });
   };
 
@@ -172,7 +240,7 @@ const CharacteristicsSection = () => {
     setEditingId(null);
   };
 
-  const handleUpdateCharacteristic = (id: string) => {
+  const handleUpdateCharacteristic = async (id: string) => {
     if (!editCharacteristic.trim()) {
       toast({
         title: "Validation Error",
@@ -182,10 +250,43 @@ const CharacteristicsSection = () => {
       return;
     }
 
+    let description = editDescription.trim();
+    let sourceUrl = '';
+    
+    // Get the current item to check if we need to generate a description
+    const currentItem = characteristics.find(item => item.id === id);
+    
+    // If description is being removed or was never provided, generate one
+    if (!description && currentItem) {
+      try {
+        const { description: generatedDesc, source } = await generateDescription(editCharacteristic);
+        description = generatedDesc;
+        sourceUrl = source;
+        
+        // Store the source for this trait
+        setTraitSources(prev => ({
+          ...prev,
+          [editCharacteristic]: source
+        }));
+        
+        toast({
+          title: "Description Generated",
+          description: "A description has been automatically generated for this characteristic.",
+        });
+      } catch (error) {
+        console.error('Error generating description:', error);
+        // Continue with empty description if generation fails
+      }
+    } else if (currentItem && currentItem.source_url) {
+      // Preserve the existing source URL if we're not generating a new description
+      sourceUrl = currentItem.source_url;
+    }
+
     updateMutation.mutate({
       id,
       characteristic: editCharacteristic.trim(),
-      description: editDescription.trim() || null
+      description,
+      source_url: sourceUrl
     });
   };
 
@@ -201,6 +302,21 @@ const CharacteristicsSection = () => {
     "Hyperfocus", "Sensory Sensitivity", "Pattern Recognition",
     "Creative Thinking", "Hyperlexia", "Synesthesia"
   ];
+
+  // Load sources for existing characteristics on component mount
+  useEffect(() => {
+    const newSources: Record<string, string> = {};
+    
+    characteristics.forEach(item => {
+      if (item.source_url) {
+        newSources[item.characteristic] = item.source_url;
+      }
+    });
+    
+    if (Object.keys(newSources).length > 0) {
+      setTraitSources(prev => ({...prev, ...newSources}));
+    }
+  }, [characteristics]);
 
   return (
     <div className="space-y-8">
@@ -257,6 +373,9 @@ const CharacteristicsSection = () => {
                               placeholder="Describe how this trait affects you..."
                               rows={3}
                             />
+                            <FormDescription className="mt-1 text-xs">
+                              Leave blank to automatically generate a description from reputable sources.
+                            </FormDescription>
                           </div>
                           <div className="flex justify-end space-x-2">
                             <Button 
@@ -303,7 +422,24 @@ const CharacteristicsSection = () => {
                             </div>
                           </div>
                           {item.description && (
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                            <div className="text-sm text-muted-foreground">
+                              <p>{item.description}</p>
+                              {item.source_url && (
+                                <div className="flex items-center mt-2 text-xs text-muted-foreground/80">
+                                  <InfoIcon size={12} className="mr-1" />
+                                  <span>Source: </span>
+                                  <a 
+                                    href={item.source_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="ml-1 text-accent hover:underline flex items-center"
+                                  >
+                                    {new URL(item.source_url).hostname.replace('www.', '')}
+                                    <ExternalLink size={10} className="ml-1" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </>
                       )}
@@ -333,6 +469,9 @@ const CharacteristicsSection = () => {
                             placeholder="Describe how this trait affects you..."
                             rows={3}
                           />
+                          <FormDescription className="mt-1 text-xs">
+                            Leave blank to automatically generate a description from reputable sources.
+                          </FormDescription>
                         </div>
                         <div className="flex justify-end space-x-2">
                           <Button 
@@ -342,14 +481,15 @@ const CharacteristicsSection = () => {
                               setNewCharacteristic('');
                               setNewDescription('');
                             }}
+                            disabled={addMutation.isPending || isGeneratingDescription}
                           >
                             Cancel
                           </Button>
                           <Button 
                             onClick={handleAddCharacteristic}
-                            disabled={!newCharacteristic.trim() || addMutation.isPending}
+                            disabled={!newCharacteristic.trim() || addMutation.isPending || isGeneratingDescription}
                           >
-                            {addMutation.isPending ? "Adding..." : "Add Characteristic"}
+                            {addMutation.isPending || isGeneratingDescription ? "Processing..." : "Add Characteristic"}
                           </Button>
                         </div>
                       </div>
