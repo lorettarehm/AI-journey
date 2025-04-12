@@ -92,7 +92,7 @@ const ProgressChart = () => {
           {Object.entries(METRIC_GROUPS).map(([groupName, metrics]) => (
             <Button
               key={groupName}
-              variant={selectedMetrics === metrics ? "secondary" : "outline"}
+              variant={JSON.stringify(selectedMetrics) === JSON.stringify(metrics) ? "secondary" : "outline"}
               size="sm"
               onClick={() => setSelectedMetrics(metrics)}
               className="text-xs"

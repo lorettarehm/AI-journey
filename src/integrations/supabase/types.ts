@@ -343,6 +343,72 @@ export type Database = {
           },
         ]
       }
+      user_characteristics: {
+        Row: {
+          characteristic: string
+          created_at: string
+          description: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          characteristic: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          characteristic?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_documents: {
+        Row: {
+          content_text: string | null
+          created_at: string
+          description: string | null
+          file_path: string
+          file_type: string
+          id: string
+          processed: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_text?: string | null
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_type: string
+          id?: string
+          processed?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_text?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_type?: string
+          id?: string
+          processed?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       technique_recommendations: {

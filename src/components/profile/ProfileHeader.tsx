@@ -2,6 +2,8 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
 import FadeIn from '@/components/ui/FadeIn';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const ProfileHeader = () => {
   return (
@@ -16,10 +18,12 @@ const ProfileHeader = () => {
             Explore your neurodivergent strengths and patterns based on your assessments.
           </p>
         </div>
-        <button className="mt-6 md:mt-0 btn-secondary flex items-center">
-          <Settings size={16} className="mr-2" />
-          Profile Settings
-        </button>
+        <Link to="/profile/settings">
+          <Button className="mt-6 md:mt-0 flex items-center">
+            <Settings size={16} className="mr-2" />
+            Profile Settings
+          </Button>
+        </Link>
       </div>
     </FadeIn>
   );
