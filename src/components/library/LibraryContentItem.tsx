@@ -11,6 +11,7 @@ interface LibraryContent {
   title: string;
   summary: string;
   created_at: string;
+  tags?: string[];
 }
 
 interface LibraryContentItemProps {
@@ -44,6 +45,19 @@ const LibraryContentItem = ({ content, onRefresh }: LibraryContentItemProps) => 
         <div className="p-4 bg-muted rounded-md mb-3">
           <p className="text-sm">{content.summary}</p>
         </div>
+        
+        {content.tags && content.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {content.tags.map(tagName => (
+              <span 
+                key={tagName} 
+                className="inline-flex items-center bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full"
+              >
+                {tagName}
+              </span>
+            ))}
+          </div>
+        )}
         
         <div className="mb-3">
           <Button 

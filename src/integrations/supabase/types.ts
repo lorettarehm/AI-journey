@@ -412,6 +412,35 @@ export type Database = {
         }
         Relationships: []
       }
+      web_content_tags: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          tag_name: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          tag_name: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          tag_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_content_tags_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "web_library_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       web_library_content: {
         Row: {
           created_at: string
