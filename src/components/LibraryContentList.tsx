@@ -7,7 +7,7 @@ import LoadingSkeleton from "@/components/profile/settings/personal-info/Loading
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
-interface ScrapedContent {
+interface LibraryContent {
   id: string;
   url: string;
   title: string;
@@ -15,12 +15,12 @@ interface ScrapedContent {
   created_at: string;
 }
 
-const ScrapedContentList = () => {
-  const [contents, setContents] = useState<ScrapedContent[]>([]);
+const LibraryContentList = () => {
+  const [contents, setContents] = useState<LibraryContent[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
-  const fetchScrapedContents = async () => {
+  const fetchLibraryContents = async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -32,7 +32,7 @@ const ScrapedContentList = () => {
       
       setContents(data || []);
     } catch (error) {
-      console.error('Error fetching scraped contents:', error);
+      console.error('Error fetching library contents:', error);
       toast({
         title: "Failed to Fetch Content",
         description: error instanceof Error ? error.message : "An unexpected error occurred",
@@ -44,7 +44,7 @@ const ScrapedContentList = () => {
   };
 
   useEffect(() => {
-    fetchScrapedContents();
+    fetchLibraryContents();
   }, []);
 
   if (isLoading) {
@@ -62,9 +62,9 @@ const ScrapedContentList = () => {
       <Card className="w-full">
         <CardContent className="pt-6">
           <div className="text-center p-6">
-            <h3 className="text-lg font-semibold mb-2">No content scraped yet</h3>
+            <h3 className="text-lg font-semibold mb-2">Your library is empty</h3>
             <p className="text-muted-foreground">
-              Use the scraper above to gather content from websites.
+              Use the form above to add content from websites to your library.
             </p>
           </div>
         </CardContent>
@@ -74,7 +74,7 @@ const ScrapedContentList = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Scraped Content ({contents.length})</h2>
+      <h2 className="text-2xl font-bold">Library Contents ({contents.length})</h2>
       
       {contents.map((content) => (
         <Card key={content.id} className="w-full overflow-hidden">
@@ -104,4 +104,4 @@ const ScrapedContentList = () => {
   );
 };
 
-export default ScrapedContentList;
+export default LibraryContentList;

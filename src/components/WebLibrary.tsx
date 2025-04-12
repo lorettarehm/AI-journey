@@ -16,7 +16,7 @@ interface ScrapeResult {
   created_at: string;
 }
 
-const WebScraper = () => {
+const WebLibrary = () => {
   const [url, setUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [scrapedContent, setScrapedContent] = useState<ScrapeResult | null>(null);
@@ -28,7 +28,7 @@ const WebScraper = () => {
     if (!url) {
       toast({
         title: "URL Required",
-        description: "Please enter a URL to scrape.",
+        description: "Please enter a URL to add to your library.",
         variant: "destructive",
       });
       return;
@@ -48,13 +48,13 @@ const WebScraper = () => {
       setScrapedContent(data.data);
       
       toast({
-        title: "Content Scraped Successfully",
-        description: `${data.data.title || 'Content'} has been scraped and stored.`,
+        title: "Content Added Successfully",
+        description: `${data.data.title || 'Content'} has been added to your library.`,
       });
     } catch (error) {
-      console.error('Error scraping content:', error);
+      console.error('Error adding content:', error);
       toast({
-        title: "Scraping Failed",
+        title: "Content Addition Failed",
         description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
@@ -66,7 +66,7 @@ const WebScraper = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Web Content Scraper</CardTitle>
+        <CardTitle>Web Content Library</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleScrape} className="space-y-4">
@@ -74,7 +74,7 @@ const WebScraper = () => {
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Enter URL to scrape (e.g., https://example.com)"
+              placeholder="Enter URL to add to library (e.g., https://example.com)"
               className="flex-1"
               disabled={isLoading}
             />
@@ -82,10 +82,10 @@ const WebScraper = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Scraping...
+                  Processing...
                 </>
               ) : (
-                "Scrape Content"
+                "Add to Library"
               )}
             </Button>
           </div>
@@ -106,14 +106,14 @@ const WebScraper = () => {
           <div className="mt-4 space-y-4">
             <h3 className="text-lg font-semibold">{scrapedContent.title}</h3>
             <p className="text-sm text-muted-foreground">
-              Scraped from: <a href={scrapedContent.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{scrapedContent.url}</a>
+              Source: <a href={scrapedContent.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{scrapedContent.url}</a>
             </p>
             <div className="p-4 bg-muted rounded-md">
               <h4 className="text-sm font-medium mb-2">Summary:</h4>
               <p className="text-sm">{scrapedContent.summary}</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Scraped on: {new Date(scrapedContent.created_at).toLocaleString()}
+              Added on: {new Date(scrapedContent.created_at).toLocaleString()}
             </p>
           </div>
         )}
@@ -122,4 +122,4 @@ const WebScraper = () => {
   );
 };
 
-export default WebScraper;
+export default WebLibrary;

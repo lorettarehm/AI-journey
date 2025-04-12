@@ -1,19 +1,19 @@
 
 import React from 'react';
-import WebScraper from '@/components/WebScraper';
-import ScrapedContentList from '@/components/ScrapedContentList';
+import WebLibrary from '@/components/WebLibrary';
+import LibraryContentList from '@/components/LibraryContentList';
 
 const WebContent = () => {
   return (
     <div className="container max-w-4xl py-8">
-      <h1 className="text-3xl font-bold mb-6">Web Content Management</h1>
+      <h1 className="text-3xl font-bold mb-6">Web Content Library</h1>
       
       <div className="mb-10">
-        <WebScraper />
+        <WebLibrary />
       </div>
       
       <div>
-        <ScrapedContentList />
+        <LibraryContentList />
       </div>
     </div>
   );
