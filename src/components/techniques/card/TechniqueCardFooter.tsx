@@ -10,7 +10,7 @@ interface TechniqueCardFooterProps {
 }
 
 const TechniqueCardFooter: React.FC<TechniqueCardFooterProps> = ({ id, title }) => {
-  const { handleFeedback, currentFeedback } = useTechniqueInteractions(id, title);
+  const { handleFeedback, currentFeedback, interactionStats } = useTechniqueInteractions(id, title);
   
   return (
     <div className="p-6 pt-0 flex items-center justify-between">

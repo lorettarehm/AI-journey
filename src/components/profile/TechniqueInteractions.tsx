@@ -28,6 +28,7 @@ const TechniqueInteractions = () => {
       const { data, error } = await supabase
         .from('technique_interactions')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -78,19 +79,19 @@ const TechniqueInteractions = () => {
       
       {isLoading ? (
         <div className="text-center py-6">Loading...</div>
-      ) : !techniqueSummary || techniqueSummary.length === 0 ? (
+      ) : !interactions || interactions.length === 0 ? (
         <EmptyInteractions />
       ) : (
         <FadeIn>
           <TechniqueStats 
-            totalInteractions={interactions?.length || 0} 
+            totalInteractions={interactions.length} 
             helpfulCount={getFeedbackCount('helpful')}
             notHelpfulCount={getFeedbackCount('not-helpful')}
           />
           
           <TechniqueSummaryTable techniqueSummary={techniqueSummary} />
           
-          <RecentInteractions interactions={interactions || []} />
+          <RecentInteractions interactions={interactions} />
         </FadeIn>
       )}
     </div>

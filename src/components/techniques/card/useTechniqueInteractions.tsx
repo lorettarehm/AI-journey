@@ -37,12 +37,12 @@ export const useTechniqueInteractions = (id: string, title: string) => {
       
       const { data, error } = await supabase
         .from('technique_interactions')
-        .select('feedback')
+        .select('id, feedback')
         .eq('technique_id', id)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
         
-      if (error && error.code !== 'PGRST116') return null;
+      if (error) return null;
       return data;
     },
     enabled: !!id && !!user,
@@ -66,21 +66,32 @@ export const useTechniqueInteractions = (id: string, title: string) => {
         await supabase
           .from('technique_interactions')
           .delete()
-          .eq('technique_id', id)
-          .eq('user_id', user.id);
+          .eq('id', userInteraction.id);
           
         setFeedbackSubmitted(null);
       } else {
-        // Upsert to handle both insert and update cases
-        await supabase
-          .from('technique_interactions')
-          .upsert({
-            user_id: user.id,
-            technique_id: id,
-            technique_title: title,
-            feedback: feedback,
-            created_at: new Date().toISOString(),
-          }, { onConflict: 'user_id,technique_id' });
+        // Check if the user has any existing interaction with this technique
+        if (userInteraction?.id) {
+          // Update existing interaction
+          await supabase
+            .from('technique_interactions')
+            .update({
+              feedback: feedback,
+              created_at: new Date().toISOString(),
+            })
+            .eq('id', userInteraction.id);
+        } else {
+          // Insert new interaction
+          await supabase
+            .from('technique_interactions')
+            .insert({
+              user_id: user.id,
+              technique_id: id,
+              technique_title: title,
+              feedback: feedback,
+              created_at: new Date().toISOString(),
+            });
+        }
           
         setFeedbackSubmitted(feedback);
       }
