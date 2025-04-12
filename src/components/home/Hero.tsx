@@ -1,10 +1,11 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
-import FadeIn from '@/components/ui/FadeIn';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays } from 'date-fns';
+import HeroContent from './HeroContent';
+import UserCard from './UserCard';
 
 const Hero = () => {
   const { user } = useAuth();
@@ -75,13 +76,6 @@ const Hero = () => {
     enabled: !!user // Only run this query when user is logged in
   });
 
-  // Calculate metrics based on the latest assessment
-  const focusLevel = latestAssessment?.focus_level || 65;
-  const energyLevel = latestAssessment?.energy_level || 80;
-  const lastAssessmentDate = latestAssessment ? 
-    format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
-    'Not available';
-
   return (
     <section className="pt-32 pb-20 px-6 relative overflow-hidden">
       {/* Abstract Background Shapes */}
@@ -93,138 +87,13 @@ const Hero = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <div>
-            <FadeIn>
-              <span className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-                Your Neurodiversity Companion
-              </span>
-            </FadeIn>
-            
-            <FadeIn delay={0.1}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-balance mb-6">
-                Empowering your unique <span className="text-accent">neurodivergent</span> journey
-              </h1>
-            </FadeIn>
-            
-            <FadeIn delay={0.2}>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl">
-                audhd.ai is an adaptive AI companion that helps individuals with ADHD and Autism 
-                thrive through personalized assessments, evidence-based techniques, and continuous learning.
-              </p>
-            </FadeIn>
-            
-            <FadeIn delay={0.3}>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/assessment" className="btn-primary text-center">
-                  Start Your Assessment
-                </Link>
-                <Link to="#features" className="btn-secondary text-center">
-                  Learn More
-                </Link>
-              </div>
-            </FadeIn>
-          </div>
-          
-          {user ? (
-            <FadeIn delay={0.3} direction="left">
-              <div className="relative">
-                <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
-                <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
-                  <div className="bg-accent/10 rounded-2xl p-6 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-semibold">Daily Check-in</h3>
-                      {latestAssessment && (
-                        <span className="text-xs text-muted-foreground">
-                          Last updated: {lastAssessmentDate}
-                        </span>
-                      )}
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
-                        <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div 
-                            className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
-                            style={{ width: `${focusLevel}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Not at all</span>
-                          <span>Very focused</span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
-                        <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                          <div 
-                            className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
-                            style={{ width: `${energyLevel}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Low</span>
-                          <span>High</span>
-                        </div>
-                      </div>
-                      
-                      {!latestAssessment && (
-                        <div className="mt-4 text-center">
-                          <span className="text-sm text-accent font-medium">
-                            🔜 Complete your first assessment to see your data
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">Weekly Progress</h3>
-                    <div className="flex space-x-2 mb-3">
-                      {weeklyData.map((day, i) => (
-                        <div key={i} className="flex-1">
-                          <div className="flex flex-col items-center">
-                            <div 
-                              className={`w-full h-24 rounded-t-lg ${day.completed ? 'bg-accent' : 'bg-secondary'}`} 
-                              style={{ 
-                                height: `${day.value}%`, 
-                                opacity: day.completed ? 1 : 0.5,
-                                transition: 'all 0.3s ease' 
-                              }}
-                            ></div>
-                            <div className={`text-xs mt-2 ${format(new Date(), 'EEE') === day.date ? 'font-bold' : 'text-muted-foreground'}`}>
-                              {day.date}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="text-right text-sm text-muted-foreground">
-                      <div className="inline-flex items-center">
-                        <span className="w-2 h-2 bg-accent rounded-full mr-2"></span>
-                        <span>Completed</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </FadeIn>
-          ) : (
-            <FadeIn delay={0.3} direction="left">
-              <div className="relative">
-                <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
-                <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
-                  <h3 className="text-xl font-semibold mb-4">Start Your Journey</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Sign in to access personalized assessments, track your progress, and discover strategies tailored to your neurodivergent mind.
-                  </p>
-                  <Link to="/auth" className="btn-primary w-full text-center block">
-                    Sign In or Register
-                  </Link>
-                </div>
-              </div>
-            </FadeIn>
-          )}
+          <HeroContent />
+          <UserCard 
+            user={user}
+            latestAssessment={latestAssessment}
+            weeklyData={weeklyData}
+            isAssessmentLoading={isAssessmentLoading}
+          />
         </div>
       </div>
     </section>
