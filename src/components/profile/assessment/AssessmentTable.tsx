@@ -24,6 +24,11 @@ interface AssessmentTableProps {
 }
 
 const AssessmentTable = ({ assessments }: AssessmentTableProps) => {
+  // Create a Map to deduplicate assessments by ID if needed
+  const uniqueAssessments = Array.from(
+    new Map(assessments.map(assessment => [assessment.id, assessment])).values()
+  );
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -37,7 +42,7 @@ const AssessmentTable = ({ assessments }: AssessmentTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assessments.map((assessment) => (
+          {uniqueAssessments.map((assessment) => (
             <TableRow key={assessment.id}>
               <TableCell>
                 {formatDistanceToNow(new Date(assessment.completed_at), { addSuffix: true })}
