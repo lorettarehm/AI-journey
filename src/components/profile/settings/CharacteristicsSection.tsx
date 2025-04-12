@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tag, Trash2, Plus, Save } from 'lucide-react';
+import { Tag, Trash2, Plus, Save, Edit, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Characteristic {
@@ -26,6 +26,9 @@ const CharacteristicsSection = () => {
   const [newCharacteristic, setNewCharacteristic] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editCharacteristic, setEditCharacteristic] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   // Fetch user characteristics
   const { data: characteristics = [], isLoading } = useQuery({
@@ -82,6 +85,39 @@ const CharacteristicsSection = () => {
     },
   });
 
+  // Update characteristic
+  const updateMutation = useMutation({
+    mutationFn: async (item: { id: string; characteristic: string; description: string | null }) => {
+      const { error } = await supabase
+        .from('user_characteristics')
+        .update({
+          characteristic: item.characteristic,
+          description: item.description,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id);
+        
+      if (error) throw error;
+      return item;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characteristics', user?.id] });
+      setEditingId(null);
+      toast({
+        title: "Characteristic Updated",
+        description: "Your characteristic has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating characteristic:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update characteristic. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete characteristic
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -123,6 +159,33 @@ const CharacteristicsSection = () => {
     addMutation.mutate({
       characteristic: newCharacteristic.trim(),
       description: newDescription.trim()
+    });
+  };
+
+  const handleEditClick = (item: Characteristic) => {
+    setEditingId(item.id);
+    setEditCharacteristic(item.characteristic);
+    setEditDescription(item.description || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+  };
+
+  const handleUpdateCharacteristic = (id: string) => {
+    if (!editCharacteristic.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a characteristic name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateMutation.mutate({
+      id,
+      characteristic: editCharacteristic.trim(),
+      description: editDescription.trim() || null
     });
   };
 
@@ -173,18 +236,76 @@ const CharacteristicsSection = () => {
                   {/* List of existing characteristics */}
                   {characteristics.map((item: Characteristic) => (
                     <div key={item.id} className="p-4 border rounded-lg bg-card">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium">{item.characteristic}</h4>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteCharacteristic(item.id)}
-                        >
-                          <Trash2 size={16} className="text-destructive" />
-                        </Button>
-                      </div>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                      {editingId === item.id ? (
+                        // Edit mode
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor={`edit-characteristic-${item.id}`}>Characteristic Name</Label>
+                            <Input
+                              id={`edit-characteristic-${item.id}`}
+                              value={editCharacteristic}
+                              onChange={(e) => setEditCharacteristic(e.target.value)}
+                              placeholder="E.g., ADHD, Autism, Hyperfocus"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`edit-description-${item.id}`}>Description (Optional)</Label>
+                            <Textarea
+                              id={`edit-description-${item.id}`}
+                              value={editDescription}
+                              onChange={(e) => setEditDescription(e.target.value)}
+                              placeholder="Describe how this trait affects you..."
+                              rows={3}
+                            />
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              onClick={handleCancelEdit}
+                              disabled={updateMutation.isPending}
+                            >
+                              <X size={16} className="mr-2" />
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={() => handleUpdateCharacteristic(item.id)}
+                              disabled={!editCharacteristic.trim() || updateMutation.isPending}
+                            >
+                              {updateMutation.isPending ? "Updating..." : (
+                                <>
+                                  <Save size={16} className="mr-2" />
+                                  Save Changes
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        // View mode
+                        <>
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium">{item.characteristic}</h4>
+                            <div className="flex space-x-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleEditClick(item)}
+                              >
+                                <Edit size={16} className="text-muted-foreground" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleDeleteCharacteristic(item.id)}
+                              >
+                                <Trash2 size={16} className="text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                          {item.description && (
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
