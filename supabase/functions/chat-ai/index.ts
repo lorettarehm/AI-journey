@@ -32,6 +32,73 @@ async function getConversationHistory(supabase: any, conversationId: string) {
   return data || [];
 }
 
+// Function to extract technique suggestions from AI response
+async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
+  // Define patterns to identify technique suggestions
+  const techniquePatterns = [
+    /technique:\s*([^\.]+)/gi,
+    /strategy called\s*["']([^"']+)["']/gi,
+    /recommend (using|trying)\s*["']([^"']+)["']/gi,
+    /suggested technique:\s*([^\.]+)/gi
+  ];
+  
+  const extractedTechniques = [];
+  
+  // Process each pattern to find techniques
+  for (const pattern of techniquePatterns) {
+    let match;
+    while ((match = pattern.exec(aiResponse)) !== null) {
+      // Get the technique name based on which pattern matched
+      const techniqueName = pattern === techniquePatterns[2] ? match[2] : match[1];
+      if (techniqueName && techniqueName.length > 3) {
+        extractedTechniques.push(techniqueName.trim());
+      }
+    }
+  }
+  
+  // If techniques were found, save them to the database
+  for (const technique of extractedTechniques) {
+    // Extract a brief description - take the sentence containing the technique
+    const sentences = aiResponse.split(/\.\s+/);
+    let description = "";
+    
+    for (const sentence of sentences) {
+      if (sentence.toLowerCase().includes(technique.toLowerCase())) {
+        description = sentence.trim() + ".";
+        break;
+      }
+    }
+    
+    // If no description found in a specific sentence, use a generic one
+    if (!description) {
+      description = `A technique for neurodivergent individuals mentioned in AI coaching.`;
+    }
+    
+    // Check if technique already exists to avoid duplicates
+    const { data: existingTechnique } = await supabase
+      .from("technique_recommendations")
+      .select("technique_id")
+      .ilike("title", technique)
+      .maybeSingle();
+      
+    if (!existingTechnique) {
+      // Save the new technique
+      await supabase.from("technique_recommendations").insert({
+        title: technique,
+        description: description,
+        category: "focus", // Default category
+        difficulty_level: "beginner", // Default difficulty
+        journal: "AI Coach Suggestion",
+        publication_date: new Date().toISOString().split('T')[0]
+      });
+      
+      console.log(`New technique saved: ${technique}`);
+    }
+  }
+  
+  return extractedTechniques.length;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -125,6 +192,12 @@ serve(async (req) => {
       aiResponse = aiResponse.split("Assistant:").pop()?.trim() || "";
     }
 
+    // Extract and save any techniques mentioned in the AI's response
+    const techniquesCount = await extractAndSaveTechniques(supabase, aiResponse);
+    if (techniquesCount > 0) {
+      console.log(`Saved ${techniquesCount} new techniques from chat response`);
+    }
+    
     // Store the AI response
     const { error: assistantMessageError } = await supabase
       .from("chat_messages")
