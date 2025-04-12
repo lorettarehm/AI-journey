@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Clock, Brain, Battery, Zap } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TechniqueSummary {
   id: string;
@@ -17,6 +18,7 @@ interface TechniqueSummary {
   interactions: TechniqueInteraction[];
   helpful: number;
   notHelpful: number;
+  assessment: LatestAssessment | null;
 }
 
 interface TechniqueInteraction {
@@ -27,11 +29,26 @@ interface TechniqueInteraction {
   created_at: string;
 }
 
-interface TechniqueSummaryTableProps {
-  techniqueSummary: TechniqueSummary[];
+interface LatestAssessment {
+  id: string;
+  completed_at: string;
+  focus_level: number;
+  energy_level: number;
+  creativity_score: number;
+  stress_level: number;
+  emotional_regulation: number;
+  organization: number;
+  pattern_recognition: number;
+  problem_solving: number;
+  time_awareness: number;
 }
 
-const TechniqueSummaryTable = ({ techniqueSummary }: TechniqueSummaryTableProps) => {
+interface TechniqueSummaryTableProps {
+  techniqueSummary: TechniqueSummary[];
+  latestAssessment: LatestAssessment | null;
+}
+
+const TechniqueSummaryTable = ({ techniqueSummary, latestAssessment }: TechniqueSummaryTableProps) => {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -42,6 +59,46 @@ const TechniqueSummaryTable = ({ techniqueSummary }: TechniqueSummaryTableProps)
             <TableHead>Helpful</TableHead>
             <TableHead>Not Helpful</TableHead>
             <TableHead>Last Interaction</TableHead>
+            {latestAssessment && (
+              <>
+                <TableHead>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="flex items-center">
+                        <Brain className="h-4 w-4 mr-1" /> Focus
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Current focus level from latest assessment</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
+                <TableHead>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="flex items-center">
+                        <Battery className="h-4 w-4 mr-1" /> Energy
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Current energy level from latest assessment</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
+                <TableHead>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="flex items-center">
+                        <Zap className="h-4 w-4 mr-1" /> Creativity
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Current creativity score from latest assessment</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
+              </>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,6 +124,49 @@ const TechniqueSummaryTable = ({ techniqueSummary }: TechniqueSummaryTableProps)
                   {format(new Date(technique.interactions[0].created_at), 'MMM d, yyyy - h:mm a')}
                 </div>
               </TableCell>
+              {latestAssessment && (
+                <>
+                  <TableCell>
+                    <div className="flex items-center justify-center">
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style={{
+                          backgroundColor: `rgba(67, 56, 202, ${latestAssessment.focus_level / 100})`,
+                          color: latestAssessment.focus_level > 50 ? 'white' : 'black'
+                        }}
+                      >
+                        {latestAssessment.focus_level}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center">
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style={{
+                          backgroundColor: `rgba(245, 158, 11, ${latestAssessment.energy_level / 100})`,
+                          color: latestAssessment.energy_level > 50 ? 'white' : 'black'
+                        }}
+                      >
+                        {latestAssessment.energy_level}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center">
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style={{
+                          backgroundColor: `rgba(16, 185, 129, ${latestAssessment.creativity_score / 100})`,
+                          color: latestAssessment.creativity_score > 50 ? 'white' : 'black'
+                        }}
+                      >
+                        {latestAssessment.creativity_score}
+                      </div>
+                    </div>
+                  </TableCell>
+                </>
+              )}
             </TableRow>
           ))}
         </TableBody>

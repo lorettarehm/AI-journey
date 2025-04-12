@@ -16,10 +16,24 @@ type TechniqueInteraction = {
   created_at: string;
 };
 
+type LatestAssessment = {
+  id: string;
+  completed_at: string;
+  focus_level: number;
+  energy_level: number;
+  creativity_score: number;
+  stress_level: number;
+  emotional_regulation: number;
+  organization: number;
+  pattern_recognition: number;
+  problem_solving: number;
+  time_awareness: number;
+};
+
 const TechniqueInteractions = () => {
   const { user } = useAuth();
 
-  const { data: interactions, isLoading } = useQuery({
+  const { data: interactions, isLoading: isLoadingInteractions } = useQuery({
     queryKey: ['techniqueInteractions', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -36,6 +50,27 @@ const TechniqueInteractions = () => {
     enabled: !!user,
   });
 
+  const { data: latestAssessment, isLoading: isLoadingAssessment } = useQuery({
+    queryKey: ['latestAssessment', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+      return data as LatestAssessment;
+    },
+    enabled: !!user,
+  });
+
+  const isLoading = isLoadingInteractions || isLoadingAssessment;
+
   const getFeedbackCount = (type: 'helpful' | 'not-helpful' | null) => {
     if (!interactions) return 0;
     return interactions.filter(interaction => interaction.feedback === type).length;
@@ -49,7 +84,8 @@ const TechniqueInteractions = () => {
         title: interaction.technique_title,
         interactions: [],
         helpful: 0,
-        notHelpful: 0
+        notHelpful: 0,
+        assessment: latestAssessment || null
       };
     }
     
@@ -68,6 +104,7 @@ const TechniqueInteractions = () => {
     interactions: TechniqueInteraction[];
     helpful: number;
     notHelpful: number;
+    assessment: LatestAssessment | null;
   }>);
 
   const techniqueSummary = groupedInteractions ? Object.values(groupedInteractions) : [];
@@ -89,7 +126,10 @@ const TechniqueInteractions = () => {
           />
           
           {techniqueSummary.length > 0 && (
-            <TechniqueSummaryTable techniqueSummary={techniqueSummary} />
+            <TechniqueSummaryTable 
+              techniqueSummary={techniqueSummary} 
+              latestAssessment={latestAssessment}
+            />
           )}
         </FadeIn>
       )}
