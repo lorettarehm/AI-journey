@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { FormDescription } from '@/components/ui/form';
 import { Edit, Trash2, Save, X, InfoIcon, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCharacteristics } from './useCharacteristics';
@@ -118,9 +117,9 @@ const CharacteristicItem: React.FC<CharacteristicItemProps> = ({ item }) => {
               placeholder="Describe how this trait affects you..."
               rows={3}
             />
-            <FormDescription className="mt-1 text-xs">
+            <p className="mt-1 text-xs text-muted-foreground">
               Leave blank to automatically generate a description from reputable sources.
-            </FormDescription>
+            </p>
           </div>
           <div className="flex justify-end space-x-2">
             <Button 
