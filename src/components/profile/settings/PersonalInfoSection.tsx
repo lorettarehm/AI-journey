@@ -48,16 +48,18 @@ const PersonalInfoSection = () => {
       if (error) throw error;
       return data as Profile;
     },
-    enabled: !!user,
-    onSuccess: (data) => {
-      if (data) {
-        form.reset({
-          full_name: data.full_name || '',
-          email: data.email || user?.email || ''
-        });
-      }
-    }
+    enabled: !!user
   });
+
+  // Set form values when profile data is loaded
+  React.useEffect(() => {
+    if (profile) {
+      form.reset({
+        full_name: profile.full_name || '',
+        email: profile.email || user?.email || ''
+      });
+    }
+  }, [profile, form, user?.email]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
