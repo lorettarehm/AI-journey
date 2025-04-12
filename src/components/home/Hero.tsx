@@ -53,7 +53,7 @@ const Hero = () => {
       
       return days;
     },
-    enabled: true // Always run this query to support both logged-in and non-logged-in states
+    enabled: !!user // Only run this query when user is logged in
   });
 
   return (
@@ -99,65 +99,82 @@ const Hero = () => {
             </FadeIn>
           </div>
           
-          <FadeIn delay={0.3} direction="left">
-            <div className="relative">
-              <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
-              <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
-                <div className="bg-accent/10 rounded-2xl p-6 mb-6">
-                  <h3 className="text-xl font-semibold mb-4">Daily Check-in</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
-                      <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                        <div className="bg-accent h-2 rounded-full" style={{ width: '65%' }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Not at all</span>
-                        <span>Very focused</span>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
-                      <div className="w-full bg-secondary rounded-full h-2 mb-1">
-                        <div className="bg-accent h-2 rounded-full" style={{ width: '80%' }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Low</span>
-                        <span>High</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Weekly Progress</h3>
-                  <div className="flex space-x-2 mb-3">
-                    {weeklyData.map((day, i) => (
-                      <div key={i} className="flex-1">
-                        <div className="flex flex-col items-center">
-                          <div 
-                            className={`w-full h-24 rounded-t-lg ${day.completed ? 'bg-accent' : 'bg-secondary'}`} 
-                            style={{ 
-                              height: `${day.value}%`, 
-                              opacity: day.completed ? 1 : 0.5
-                            }}
-                          ></div>
-                          <div className="text-xs mt-2 text-muted-foreground">{day.date}</div>
+          {user ? (
+            <FadeIn delay={0.3} direction="left">
+              <div className="relative">
+                <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
+                <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
+                  <div className="bg-accent/10 rounded-2xl p-6 mb-6">
+                    <h3 className="text-xl font-semibold mb-4">Daily Check-in</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
+                        <div className="w-full bg-secondary rounded-full h-2 mb-1">
+                          <div className="bg-accent h-2 rounded-full" style={{ width: '65%' }}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Not at all</span>
+                          <span>Very focused</span>
                         </div>
                       </div>
-                    ))}
+                      
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
+                        <div className="w-full bg-secondary rounded-full h-2 mb-1">
+                          <div className="bg-accent h-2 rounded-full" style={{ width: '80%' }}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Low</span>
+                          <span>High</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right text-sm text-muted-foreground">
-                    <div className="inline-flex items-center">
-                      <span className="w-2 h-2 bg-accent rounded-full mr-2"></span>
-                      <span>Completed</span>
+                  
+                  <div>
+                    <h3 className="text-xl font-semibold mb-3">Weekly Progress</h3>
+                    <div className="flex space-x-2 mb-3">
+                      {weeklyData.map((day, i) => (
+                        <div key={i} className="flex-1">
+                          <div className="flex flex-col items-center">
+                            <div 
+                              className={`w-full h-24 rounded-t-lg ${day.completed ? 'bg-accent' : 'bg-secondary'}`} 
+                              style={{ 
+                                height: `${day.value}%`, 
+                                opacity: day.completed ? 1 : 0.5
+                              }}
+                            ></div>
+                            <div className="text-xs mt-2 text-muted-foreground">{day.date}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-right text-sm text-muted-foreground">
+                      <div className="inline-flex items-center">
+                        <span className="w-2 h-2 bg-accent rounded-full mr-2"></span>
+                        <span>Completed</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          ) : (
+            <FadeIn delay={0.3} direction="left">
+              <div className="relative">
+                <div className="absolute inset-0 bg-accent/10 blur-3xl rounded-full"></div>
+                <div className="relative glass-card rounded-3xl p-8 shadow-2xl">
+                  <h3 className="text-xl font-semibold mb-4">Start Your Journey</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Sign in to access personalized assessments, track your progress, and discover strategies tailored to your neurodivergent mind.
+                  </p>
+                  <Link to="/auth" className="btn-primary w-full text-center block">
+                    Sign In or Register
+                  </Link>
+                </div>
+              </div>
+            </FadeIn>
+          )}
         </div>
       </div>
     </section>
