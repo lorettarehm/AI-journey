@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import FadeIn from '@/components/ui/FadeIn';
 import TechniqueStats from './techniques/TechniqueStats';
 import TechniqueSummaryTable from './techniques/TechniqueSummaryTable';
-import RecentInteractions from './techniques/RecentInteractions';
 import EmptyInteractions from './techniques/EmptyInteractions';
 
 type TechniqueInteraction = {
@@ -92,8 +91,6 @@ const TechniqueInteractions = () => {
           {techniqueSummary.length > 0 && (
             <TechniqueSummaryTable techniqueSummary={techniqueSummary} />
           )}
-          
-          <RecentInteractions interactions={interactions} />
         </FadeIn>
       )}
     </div>

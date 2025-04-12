@@ -64,7 +64,7 @@ const TechniqueSummaryTable = ({ techniqueSummary }: TechniqueSummaryTableProps)
               <TableCell>
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 text-muted-foreground mr-2" />
-                  {format(new Date(technique.interactions[0].created_at), 'MMM d, yyyy')}
+                  {format(new Date(technique.interactions[0].created_at), 'MMM d, yyyy - h:mm a')}
                 </div>
               </TableCell>
             </TableRow>
