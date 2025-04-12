@@ -24,7 +24,7 @@ const LibraryContentList = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('scraped_content')
+        .from('web_library_content')
         .select('*')
         .order('created_at', { ascending: false });
       

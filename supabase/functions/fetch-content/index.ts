@@ -155,7 +155,7 @@ serve(async (req) => {
     
     // Check if we already have this URL in the database
     const { data: existingData } = await supabase
-      .from("scraped_content")
+      .from("web_library_content")
       .select("*")
       .eq("url", url)
       .maybeSingle();
@@ -196,7 +196,7 @@ serve(async (req) => {
     
     // Store in the database
     const { data, error } = await supabase
-      .from("scraped_content")
+      .from("web_library_content")
       .insert({
         url,
         title,
