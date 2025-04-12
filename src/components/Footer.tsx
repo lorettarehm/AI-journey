@@ -48,6 +48,11 @@ const Footer = () => {
                   Technique Recommendations
                 </Link>
               </li>
+              <li>
+                <Link to="/web-content" className="text-muted-foreground hover:text-accent transition-colors">
+                  Web Resources
+                </Link>
+              </li>
             </ul>
           </div>
           
