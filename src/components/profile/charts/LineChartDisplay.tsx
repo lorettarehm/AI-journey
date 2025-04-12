@@ -14,35 +14,53 @@ import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
 interface ChartData {
   date: string;
-  focus: number;
-  energy: number;
-  creativity: number;
-  problemSolving: number;
-  patternRecognition: number;
   [key: string]: any;
 }
 
 interface LineChartDisplayProps {
   data: ChartData[];
   chartConfig: Record<string, { color: string }>;
+  metrics?: string[];
 }
 
-const LineChartDisplay = ({ data, chartConfig }: LineChartDisplayProps) => {
+const LineChartDisplay = ({ data, chartConfig, metrics }: LineChartDisplayProps) => {
+  // If metrics aren't provided, use all available metrics from chartConfig
+  const metricsToDisplay = metrics || Object.keys(chartConfig);
+
   return (
     <div className="h-80">
       <ChartContainer config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis domain={[0, 100]} />
+          <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis 
+              dataKey="date" 
+              stroke="var(--muted-foreground)"
+              tickLine={false}
+              axisLine={false}
+              dy={10}
+            />
+            <YAxis 
+              domain={[0, 100]} 
+              stroke="var(--muted-foreground)"
+              tickLine={false}
+              axisLine={false}
+              dx={-10}
+            />
             <Tooltip content={<ChartTooltipContent />} />
             <Legend />
-            <Line type="monotone" dataKey="focus" stroke={chartConfig.focus.color} name="Focus" />
-            <Line type="monotone" dataKey="energy" stroke={chartConfig.energy.color} name="Energy" />
-            <Line type="monotone" dataKey="creativity" stroke={chartConfig.creativity.color} name="Creativity" />
-            <Line type="monotone" dataKey="problemSolving" stroke={chartConfig.problemSolving.color} name="Problem Solving" />
-            <Line type="monotone" dataKey="patternRecognition" stroke={chartConfig.patternRecognition.color} name="Pattern Recognition" />
+            {metricsToDisplay.map((metric) => (
+              <Line 
+                key={metric}
+                type="monotone" 
+                dataKey={metric} 
+                stroke={chartConfig[metric]?.color} 
+                name={metric.charAt(0).toUpperCase() + metric.slice(1).replace(/([A-Z])/g, ' $1')} 
+                strokeWidth={2}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </ChartContainer>
