@@ -7,6 +7,7 @@ import {
   PolarAngleAxis,
   ResponsiveContainer,
 } from 'recharts';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface StrengthData {
   area: string;
@@ -19,6 +20,23 @@ interface RadarChartProps {
 }
 
 const RadarChartComponent = ({ data }: RadarChartProps) => {
+  const { colorScheme, customColor } = useTheme();
+  
+  // Determine the chart color based on the current theme
+  const getChartColor = () => {
+    switch (colorScheme) {
+      case 'purple': return '#9b87f5';
+      case 'blue': return '#0EA5E9';
+      case 'green': return '#10B981';
+      case 'orange': return '#F97316';
+      case 'pink': return '#EC4899';
+      case 'custom': return customColor;
+      default: return '#9b87f5'; // Default purple
+    }
+  };
+
+  const chartColor = getChartColor();
+
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -31,8 +49,8 @@ const RadarChartComponent = ({ data }: RadarChartProps) => {
           <Radar
             name="Strengths"
             dataKey="value"
-            stroke="#4338CA"
-            fill="#4338CA"
+            stroke={chartColor}
+            fill={chartColor}
             fillOpacity={0.3}
           />
         </RadarChart>
