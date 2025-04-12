@@ -61,6 +61,7 @@ export const useChat = (conversationId?: string) => {
     
     const loadMessages = async () => {
       try {
+        // Fetch all messages but we'll only render the last 10 in the component
         const typedMessages = await fetchMessages(activeConversationId);
         setMessages(typedMessages);
       } catch (error) {

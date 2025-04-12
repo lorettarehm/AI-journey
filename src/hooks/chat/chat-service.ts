@@ -57,6 +57,7 @@ export const subscribeToConversation = (
       table: 'chat_messages',
       filter: `conversation_id=eq.${conversationId}`,
     }, (payload) => {
+      // Immediately format and handle the new message
       const newMessage = {
         ...payload.new,
         role: payload.new.role === 'user' ? 'user' : 'assistant'

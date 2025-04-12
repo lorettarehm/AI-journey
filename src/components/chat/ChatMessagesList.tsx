@@ -21,11 +21,14 @@ const ChatMessagesList: React.FC<ChatMessagesListProps> = ({ messages, isLoading
     }
   }, [messages]);
 
+  // Get only the last 10 messages
+  const recentMessages = messages.slice(-10);
+
   return (
     <ScrollArea className="flex-1 p-4">
       {messages.length === 0 && !isLoading && <ChatWelcome />}
       
-      {messages.map((message) => (
+      {recentMessages.map((message) => (
         <ChatMessage key={message.id} message={message} />
       ))}
       
