@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import FadeIn from '@/components/ui/FadeIn';
-
 const HeroContent = () => {
-  return (
-    <div>
+  return <div>
       <FadeIn>
         <span className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-medium mb-6">
           Your Neurodiversity Companion
@@ -30,13 +27,9 @@ const HeroContent = () => {
           <Link to="/assessment" className="btn-primary text-center">
             Start Your Assessment
           </Link>
-          <Link to="#features" className="btn-secondary text-center">
-            Learn More
-          </Link>
+          
         </div>
       </FadeIn>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroContent;
