@@ -12,6 +12,7 @@ import Techniques from "./pages/Techniques";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
+import AboutPrivacy from "./pages/AboutPrivacy";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/about-privacy" element={<AboutPrivacy />} />
               <Route 
                 path="/assessment" 
                 element={

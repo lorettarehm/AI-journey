@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TechniqueCardFeedback from './techniques/card/TechniqueCardFeedback';
@@ -54,9 +55,9 @@ const Footer = () => {
             <h3 className="text-lg font-medium mb-4">About</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                  Our Approach
-                </a>
+                <Link to="/about-privacy" className="text-muted-foreground hover:text-accent transition-colors">
+                  About & Privacy
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
@@ -99,9 +100,9 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} audhd.ai. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
+            <Link to="/about-privacy" className="text-muted-foreground hover:text-accent transition-colors">
               Privacy Policy
-            </a>
+            </Link>
             <a href="#" className="text-muted-foreground hover:text-accent transition-colors">
               Terms of Service
             </a>
