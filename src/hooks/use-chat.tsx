@@ -17,6 +17,13 @@ export type Conversation = {
   updated_at: string;
 };
 
+export type DebugInfo = {
+  processingTime?: string;
+  status?: 'idle' | 'processing' | 'complete' | 'error';
+  error?: string;
+  requestLog?: string;
+};
+
 export const useChat = (conversationId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -24,6 +31,11 @@ export const useChat = (conversationId?: string) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(conversationId);
   const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
+    status: 'idle',
+    processingTime: 'N/A',
+    requestLog: 'No requests yet'
+  });
 
   // Fetch user's conversations
   useEffect(() => {
@@ -117,6 +129,14 @@ export const useChat = (conversationId?: string) => {
     if (!message.trim() || !user) return;
     
     setIsLoading(true);
+    setDebugInfo({
+      status: 'processing',
+      processingTime: 'Calculating...',
+      requestLog: `Sending message: "${message}"\n`
+    });
+
+    const startTime = Date.now();
+    
     try {
       // Show a temporary user message immediately
       const tempUserMessage: Message = {
@@ -126,7 +146,18 @@ export const useChat = (conversationId?: string) => {
         created_at: new Date().toISOString(),
       };
       
+      // Add optimistic user message
       setMessages(prevMessages => [...prevMessages, tempUserMessage]);
+      
+      // Also add an optimistic "thinking" assistant message
+      const tempAssistantMessage: Message = {
+        id: `temp-assistant-${Date.now()}`,
+        role: 'assistant',
+        content: '...',
+        created_at: new Date().toISOString(),
+      };
+      
+      setMessages(prevMessages => [...prevMessages, tempAssistantMessage]);
       
       // Use the edge function to process the message
       const { data, error } = await supabase.functions.invoke('chat-ai', {
@@ -138,6 +169,14 @@ export const useChat = (conversationId?: string) => {
       });
       
       if (error) throw error;
+      
+      // Update debug info with response time
+      const processingTime = `${((Date.now() - startTime) / 1000).toFixed(2)}s`;
+      setDebugInfo(prev => ({
+        status: 'complete',
+        processingTime,
+        requestLog: prev.requestLog + `Response received in ${processingTime}\n`
+      }));
       
       // If a new conversation was created, update the active conversation ID
       if (data.conversationId && !activeConversationId) {
@@ -155,19 +194,36 @@ export const useChat = (conversationId?: string) => {
         }
       }
       
-      // If we display the message optimistically, no need to do anything here
-      // The real-time subscription will take care of adding the real message
+      // Replace the optimistic assistant message with the real content
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === `temp-assistant-${Date.now()}` 
+            ? { ...msg, content: data.response, id: `real-${Date.now()}` } 
+            : msg
+        )
+      );
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Update debug info with error
+      setDebugInfo(prev => ({
+        status: 'error',
+        processingTime: `${((Date.now() - startTime) / 1000).toFixed(2)}s`,
+        requestLog: prev.requestLog + `Error: ${error.message}\n`,
+        error: error.message
+      }));
+      
       toast({
         title: 'Failed to send message',
         description: 'Please try again later',
         variant: 'destructive',
       });
       
-      // Remove the temporary message if there was an error
+      // Remove the optimistic messages if there was an error
       setMessages(prevMessages => 
-        prevMessages.filter(msg => msg.id !== `temp-${Date.now()}`)
+        prevMessages.filter(msg => 
+          msg.id !== `temp-${Date.now()}` && msg.id !== `temp-assistant-${Date.now()}`
+        )
       );
     } finally {
       setIsLoading(false);
@@ -204,6 +260,7 @@ export const useChat = (conversationId?: string) => {
     conversations,
     activeConversationId,
     isLoading,
+    debugInfo,
     sendMessage,
     createNewConversation,
     setActiveConversationId,

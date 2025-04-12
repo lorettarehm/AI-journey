@@ -29,7 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t p-4 bg-background">
+    <form onSubmit={handleSubmit} className="p-4 bg-background">
       <div className="flex items-center gap-2">
         <Input
           ref={inputRef}
