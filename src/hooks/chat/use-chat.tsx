@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +27,6 @@ export const useChat = (conversationId?: string) => {
     setDebugInfo
   } = useChatState(conversationId);
 
-  // Fetch user's conversations
   useEffect(() => {
     if (!user) return;
     
@@ -38,7 +36,6 @@ export const useChat = (conversationId?: string) => {
         
         setConversations(data || []);
         
-        // If no active conversation is set, use the most recent one
         if (!activeConversationId && data && data.length > 0) {
           setActiveConversationId(data[0].id);
         }
@@ -55,13 +52,11 @@ export const useChat = (conversationId?: string) => {
     loadConversations();
   }, [user, toast, activeConversationId, setActiveConversationId, setConversations]);
 
-  // Fetch messages for the active conversation
   useEffect(() => {
     if (!activeConversationId) return;
     
     const loadMessages = async () => {
       try {
-        // Fetch all messages but we'll only render the last 10 in the component
         const typedMessages = await fetchMessages(activeConversationId);
         setMessages(typedMessages);
       } catch (error) {
@@ -76,7 +71,6 @@ export const useChat = (conversationId?: string) => {
     
     loadMessages();
     
-    // Set up real-time subscription for new messages
     const handleNewMessage = (newMessage: Message) => {
       setMessages((currentMessages) => [...currentMessages, newMessage]);
     };
@@ -101,7 +95,6 @@ export const useChat = (conversationId?: string) => {
     const startTime = Date.now();
     
     try {
-      // Show a temporary user message immediately
       const tempUserMessage: Message = {
         id: `temp-${Date.now()}`,
         role: 'user',
@@ -109,10 +102,8 @@ export const useChat = (conversationId?: string) => {
         created_at: new Date().toISOString(),
       };
       
-      // Add optimistic user message
       setMessages(prevMessages => [...prevMessages, tempUserMessage]);
       
-      // Also add an optimistic "thinking" assistant message
       const tempAssistantMessage: Message = {
         id: `temp-assistant-${Date.now()}`,
         role: 'assistant',
@@ -122,22 +113,19 @@ export const useChat = (conversationId?: string) => {
       
       setMessages(prevMessages => [...prevMessages, tempAssistantMessage]);
       
-      // Use the edge function to process the message
       const data = await sendMessageToAI(message, activeConversationId, user.id);
       
-      // Update debug info with response time
       const processingTime = `${((Date.now() - startTime) / 1000).toFixed(2)}s`;
       setDebugInfo(prev => ({
         status: 'complete',
         processingTime,
-        requestLog: prev.requestLog + `Response received in ${processingTime}\n`
+        requestLog: prev.requestLog + `Response received in ${processingTime}\n`,
+        responseData: data
       }));
       
-      // If a new conversation was created, update the active conversation ID
       if (data.conversationId && !activeConversationId) {
         setActiveConversationId(data.conversationId);
         
-        // Add the new conversation to the list
         try {
           const { data: convData, error: convError } = await supabase
             .from('chat_conversations')
@@ -153,7 +141,6 @@ export const useChat = (conversationId?: string) => {
         }
       }
       
-      // Replace the optimistic assistant message with the real content
       setMessages(prevMessages => 
         prevMessages.map(msg => 
           msg.id === `temp-assistant-${Date.now()}` 
@@ -164,7 +151,6 @@ export const useChat = (conversationId?: string) => {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Update debug info with error
       setDebugInfo(prev => ({
         status: 'error',
         processingTime: `${((Date.now() - startTime) / 1000).toFixed(2)}s`,
@@ -178,7 +164,6 @@ export const useChat = (conversationId?: string) => {
         variant: 'destructive',
       });
       
-      // Remove the optimistic messages if there was an error
       setMessages(prevMessages => 
         prevMessages.filter(msg => 
           msg.id !== `temp-${Date.now()}` && msg.id !== `temp-assistant-${Date.now()}`
@@ -220,8 +205,6 @@ export const useChat = (conversationId?: string) => {
   };
 };
 
-// Re-export the types for convenience
 export * from './types';
 
-// Import supabase for the channel removal
 import { supabase } from '@/integrations/supabase/client';

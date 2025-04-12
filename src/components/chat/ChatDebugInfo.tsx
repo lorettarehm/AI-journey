@@ -42,6 +42,14 @@ const ChatDebugInfo: React.FC<ChatDebugInfoProps> = ({ debugInfo }) => {
                   {debugInfo?.requestLog || 'No requests logged'}
                 </pre>
               </div>
+              {debugInfo?.responseData && (
+                <div>
+                  <span className="font-medium">Response Data:</span>
+                  <pre className="mt-1 p-2 bg-slate-100 rounded overflow-x-auto max-h-40">
+                    {JSON.stringify(debugInfo.responseData, null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

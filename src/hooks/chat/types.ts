@@ -18,4 +18,5 @@ export type DebugInfo = {
   status?: 'idle' | 'processing' | 'complete' | 'error';
   error?: string;
   requestLog?: string;
+  responseData?: any; // Store the complete response data
 };
