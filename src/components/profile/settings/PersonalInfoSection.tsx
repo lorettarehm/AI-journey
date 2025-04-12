@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -11,12 +12,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Camera, Loader2, Save, User } from 'lucide-react';
+
 interface Profile {
   id: string;
   full_name: string | null;
   email: string;
   avatar_url: string | null;
 }
+
 const PersonalInfoSection = () => {
   const {
     user
@@ -148,6 +151,7 @@ const PersonalInfoSection = () => {
       });
     }
   });
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
       return;
@@ -177,11 +181,13 @@ const PersonalInfoSection = () => {
     setIsUploading(true);
     await uploadAvatarMutation.mutate(file);
   };
+
   const onSubmit = async (values: {
     full_name: string;
   }) => {
     await updateProfileMutation.mutate(values);
   };
+
   if (isLoading) {
     return <Card>
         <CardContent className="p-6">
@@ -191,6 +197,7 @@ const PersonalInfoSection = () => {
         </CardContent>
       </Card>;
   }
+
   return <div className="space-y-8">
       <Card>
         <CardHeader>
@@ -209,7 +216,24 @@ const PersonalInfoSection = () => {
                     {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1.5 rounded-full cursor-pointer shadow-md hover:bg-primary/90 transition-colors"
+                >
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={isUploading}
+                  />
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                </label>
               </div>
               <div>
                 <h3 className="font-medium text-lg mb-1">{profile?.full_name || 'User'}</h3>
@@ -261,4 +285,5 @@ const PersonalInfoSection = () => {
       </Card>
     </div>;
 };
+
 export default PersonalInfoSection;
