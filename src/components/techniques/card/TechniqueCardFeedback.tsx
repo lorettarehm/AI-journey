@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Send } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
@@ -102,63 +102,75 @@ const TechniqueCardFeedback: React.FC<FeedbackFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            {type === 'feedback' ? 'Provide Feedback' : 'Request Support'}
-          </DialogTitle>
-          <DialogDescription>
-            {type === 'feedback' 
-              ? 'Share your thoughts about our service or suggest improvements.'
-              : 'Describe the issue you\'re experiencing, and we\'ll get back to you.'}
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Subject of your message" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Message</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Write your message here..." 
-                      className="min-h-[150px]" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Please be as detailed as possible.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button type="submit" className="gap-2">
-                <Send className="h-4 w-4" />
-                {type === 'feedback' ? 'Send Feedback' : 'Send Request'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="flex items-center" 
+        onClick={() => setOpen(true)}
+      >
+        <MessageSquare className="h-4 w-4 mr-1" />
+        <span className="text-xs">Feedback</span>
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {type === 'feedback' ? 'Provide Feedback' : 'Request Support'}
+            </DialogTitle>
+            <DialogDescription>
+              {type === 'feedback' 
+                ? 'Share your thoughts about our service or suggest improvements.'
+                : 'Describe the issue you\'re experiencing, and we\'ll get back to you.'}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subject</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Subject of your message" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Message</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Write your message here..." 
+                        className="min-h-[150px]" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Please be as detailed as possible.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit" className="gap-2">
+                  <Send className="h-4 w-4" />
+                  {type === 'feedback' ? 'Send Feedback' : 'Send Request'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
