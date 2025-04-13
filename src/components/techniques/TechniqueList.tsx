@@ -103,15 +103,15 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+        <p className="text-sm text-muted-foreground text-center sm:text-left">
           Showing {indexOfFirstTechnique + 1}-{Math.min(indexOfLastTechnique, filteredTechniques.length)} of {filteredTechniques.length} techniques
         </p>
         <Button 
           onClick={getNewSuggestions} 
           variant="outline" 
           size="sm" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh Suggestions

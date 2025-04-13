@@ -47,7 +47,7 @@ const TechniquePage: React.FC = () => {
   };
 
   return (
-    <div className="container max-w-4xl py-12">
+    <div className="container max-w-4xl py-8 md:py-12 px-4 md:px-6">
       <TechniqueHeader />
       <TechniqueFilters filter={filter} setFilter={setFilter} />
       <TechniqueList 
@@ -62,7 +62,7 @@ const TechniquePage: React.FC = () => {
       <FadeIn delay={0.4}>
         <div className="text-center">
           <Button 
-            className="mx-auto"
+            className="mx-auto w-full sm:w-auto"
             onClick={handleUpdateResearch}
             disabled={isLoading || isUpdating}
           >
@@ -77,7 +77,8 @@ const TechniquePage: React.FC = () => {
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
             Our research database now includes verified paper URLs and DOIs from reputable sources.
-            <span className="ml-1 text-accent font-medium">🔎 Click "Update Research Data" to refresh with latest validated sources.</span>
+            <span className="hidden sm:inline ml-1 text-accent font-medium">🔎 Click "Update Research Data" to refresh with latest validated sources.</span>
+            <span className="block sm:hidden mt-2 text-accent font-medium">🔎 Click to refresh with latest validated sources.</span>
           </p>
         </div>
       </FadeIn>
