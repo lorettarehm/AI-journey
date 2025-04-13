@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AssessmentNavigationProps {
   onPrevious: () => void;
@@ -17,9 +18,10 @@ const AssessmentNavigation = ({
 }: AssessmentNavigationProps) => {
   return (
     <div className="flex justify-between mt-12">
-      <button
+      <Button
         onClick={onPrevious}
         disabled={isFirstQuestion}
+        variant="ghost"
         className={`flex items-center ${
           isFirstQuestion 
             ? 'text-muted-foreground cursor-not-allowed' 
@@ -28,12 +30,13 @@ const AssessmentNavigation = ({
       >
         <ArrowLeft size={16} className="mr-2" />
         Previous
-      </button>
+      </Button>
       
-      <button
+      <Button
         onClick={onNext}
         disabled={!canProceed}
-        className={`btn-primary ${
+        variant="default"
+        className={`flex items-center ${
           !canProceed 
             ? 'opacity-50 cursor-not-allowed' 
             : ''
@@ -41,7 +44,7 @@ const AssessmentNavigation = ({
       >
         Next
         <ArrowRight size={16} className="ml-2" />
-      </button>
+      </Button>
     </div>
   );
 };

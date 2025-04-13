@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Question } from './AssessmentData';
 
@@ -13,6 +13,13 @@ const QuestionnaireCard = ({ question, onAnswer, currentAnswer }: QuestionnaireC
   const [selectedOption, setSelectedOption] = useState<number | undefined>(currentAnswer);
   const [animateAnswer, setAnimateAnswer] = useState(false);
   
+  // Immediately update the parent component when selectedOption changes
+  useEffect(() => {
+    if (selectedOption !== undefined) {
+      onAnswer(question.id, selectedOption);
+    }
+  }, [selectedOption, question.id, onAnswer]);
+  
   const handleSelect = (value: number) => {
     setSelectedOption(value);
     setAnimateAnswer(true);
@@ -20,7 +27,6 @@ const QuestionnaireCard = ({ question, onAnswer, currentAnswer }: QuestionnaireC
     // Reset animation state after animation completes
     setTimeout(() => {
       setAnimateAnswer(false);
-      onAnswer(question.id, value);
     }, 400);
   };
   

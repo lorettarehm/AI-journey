@@ -30,6 +30,11 @@ const AssessmentContent = ({
     return <div>No question available</div>;
   }
   
+  // Check if the current question has an answer
+  const hasCurrentAnswer = currentQuestion && 
+                          currentQuestion.id in answers && 
+                          answers[currentQuestion.id] !== undefined;
+  
   return (
     <>
       <AssessmentHeader />
@@ -51,7 +56,7 @@ const AssessmentContent = ({
         onPrevious={onPrevious}
         onNext={onNext}
         isFirstQuestion={currentQuestionIndex === 0}
-        canProceed={!!answers[currentQuestion.id]}
+        canProceed={hasCurrentAnswer}
       />
     </>
   );
