@@ -1,0 +1,93 @@
+# User Journey for "audhd.ai: Your Adaptive Neurodiversity Empowerment Companion"
+
+## 1. Introduction and Onboarding
+1.1 User downloads or accesses the app via a web portal or mobile application.  
+1.2 User is greeted with a minimalist landing page introducing the concept of **"audhd.ai: Your Adaptive Neurodiversity Empowerment Companion"**.
+   - Key features include:
+     - *Personalized self-assessment*.
+     - *Strength and weakness profiling*.
+     - *Technique recommendations*.
+     - *Tracking progress over time*.  
+1.3 User creates an account via:
+   - 1.3.1 Social login (Google/Facebook).
+   - 1.3.2 Email/password authentication.  
+1.4 On first login, the app walks the user through a setup process:
+   - 1.4.1 Users provide initial details, including strengths, weaknesses, goals, and challenges.
+   - 1.4.2 Users are prompted to set preferences for accessibility and appearance (e.g., color schemes via the "Colour Your Day" feature).
+
+---
+
+## 2. Dynamic Personalized Self-Assessment
+2.1 User completes an adaptive self-assessment questionnaire during their first session.
+   - 2.1.1 Questions are randomized and pulled from trusted resources like ADHD UK and Plymouth NHS.
+   - 2.1.2 Categories include focus, organization, stress, emotional regulation, and more.  
+2.2 Results are stored in the database, creating a baseline profile for the user.  
+2.3 The app visualizes results in simple, accessible charts, emphasizing strengths and areas of improvement.
+
+---
+
+## 3. Strength and Weakness Profiling
+3.1 The app generates a dynamic profile based on the self-assessment data and updates it over time.
+   - 3.1.1 Key metrics like focus duration, organization, and emotional regulation are displayed.
+   - 3.1.2 Users can track these metrics via a "Profile" page with interactive charts.  
+3.2 The app celebrates achievements and milestones, providing positive reinforcement.
+
+---
+
+## 4. Technique Recommendations
+4.1 The app autonomously scans the latest research on ADHD and Autism daily.
+   - 4.1.1 Research papers are fetched and analyzed using AI to extract actionable techniques.
+   - 4.1.2 Techniques are categorized (e.g., focus, sensory regulation, time management) and rated for difficulty and effectiveness.  
+4.2 Weekly, the app delivers personalized recommendations tailored to the user’s evolving profile.
+   - Example techniques include:
+     - **Pomodoro Method** for focus.
+     - **Body Doubling** for motivation.
+     - **Sensory Regulation** for managing overstimulation.  
+4.3 Users provide feedback on each technique (helpful/not helpful), which is stored and used to refine future recommendations.
+
+---
+
+## 5. Daily Check-ins
+5.1 Users are encouraged to complete daily check-ins to track their mood, focus, and energy levels.
+   - 5.1.1 Questions are pulled from the ADHD screening database.
+   - 5.1.2 Results help identify patterns and trends over time.  
+5.2 The app provides a quick summary of the user’s state and suggests techniques or strategies for the day.
+
+---
+
+## 6. Progress Tracking
+6.1 Users can view their progress over time on the "Profile" page.
+   - 6.1.1 Metrics like focus, emotional regulation, and task-switching are charted.
+   - 6.1.2 The app highlights improvements and areas needing attention.  
+6.2 An "Assessment History" section shows past self-assessments and their results.
+
+---
+
+## 7. Engagement and Gamification
+7.1 The app gamifies the experience by awarding badges for:
+   - 7.1.1 Completing daily check-ins consistently.
+   - 7.1.2 Providing feedback on techniques.
+   - 7.1.3 Reaching milestones in progress tracking.  
+7.2 Users can share achievements on social media (optional).
+
+---
+
+## 8. Customization and Accessibility
+8.1 Users can customize the app appearance via the "Colour Your Day" feature.
+   - 8.1.1 Options include selecting themes with a color wheel or hex code.
+   - 8.1.2 Dark mode and high-contrast mode are available for accessibility.  
+8.2 The app adapts its interface to user preferences, ensuring inclusivity.
+
+---
+
+## 9. Backend and Data Privacy
+9.1 All user data is securely stored with end-to-end encryption.  
+9.2 Users have full control over their data, with options to export or delete their profiles.  
+9.3 The app adheres to GDPR and other privacy regulations.
+
+---
+
+## 10. Future Updates and Feedback
+10.1 The app undergoes regular updates to integrate new research findings and user-requested features.  
+10.2 A feedback mechanism allows users to suggest improvements directly within the app.  
+10.3 The app ensures backward compatibility and seamless integration of new features.
