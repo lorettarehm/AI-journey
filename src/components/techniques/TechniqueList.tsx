@@ -11,7 +11,7 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { TechniqueType } from './useTechniques';
+import { TechniqueType } from './types';
 
 interface TechniqueListProps {
   techniques: TechniqueType[] | undefined;

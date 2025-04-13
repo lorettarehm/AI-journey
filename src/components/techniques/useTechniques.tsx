@@ -1,20 +1,12 @@
+
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { fetchAIRecommendations } from './services/aiRecommendationService';
+import { fetchTechniques, triggerResearchUpdate as triggerUpdate } from './services/techniqueService';
+import { TechniqueType } from './types';
 
-export interface TechniqueType {
-  technique_id: string;
-  title: string;
-  description: string;
-  implementation_steps?: string[];
-  category?: 'focus' | 'organization' | 'sensory' | 'social' | null;
-  difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | null;
-  journal?: string;
-  publication_date?: string;
-  url?: string;
-  doi?: string;
-}
+export type { TechniqueType } from './types';
 
 export const useTechniques = () => {
   const { user } = useAuth();
@@ -26,21 +18,7 @@ export const useTechniques = () => {
     isLoading: isLoadingAiRecommendations 
   } = useQuery({
     queryKey: ['aiTechniqueRecommendations', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      
-      // Call the edge function to generate recommendations
-      const { data, error } = await supabase.functions.invoke('generate-technique-recommendations', {
-        body: JSON.stringify({ userId: user.id })
-      });
-      
-      if (error) {
-        console.error('Error generating AI recommendations:', error);
-        return null;
-      }
-      
-      return data;
-    },
+    queryFn: async () => fetchAIRecommendations(user?.id),
     enabled: !!user,
   });
 
@@ -52,40 +30,13 @@ export const useTechniques = () => {
     refetch 
   } = useQuery({
     queryKey: ['techniques'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('technique_recommendations')
-        .select('*')
-        .order('title', { ascending: false })
-        .limit(50)
-      
-      if (error) throw error;
-      
-      return data ? shuffleArray(data as TechniqueType[]) : [];
-    }
+    queryFn: fetchTechniques
   });
-
-  // Fisher-Yates shuffle algorithm to randomize the order of techniques
-  const shuffleArray = (array: TechniqueType[]): TechniqueType[] => {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
-  };
 
   // Trigger the refactored edge function to fetch new research
   const triggerResearchUpdate = async () => {
     try {
-      // Call our edge function
-      const response = await supabase.functions.invoke('fetch-research', {
-        body: { searchQuery: 'adhd autism interventions recent expanded', limit: 50 }
-      });
-      
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Unknown error');
-      }
+      const result = await triggerUpdate();
       
       toast({
         title: "Research Updated",
@@ -95,11 +46,7 @@ export const useTechniques = () => {
       // Refetch techniques to display the latest
       await refetch();
       
-      // Return additional data for the caller
-      return {
-        count: response.data.count || (response.data.data?.length || 0),
-        message: response.data.message
-      };
+      return result;
     } catch (error) {
       console.error('Error updating research:', error);
       toast({
