@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface DailyCheckInProps {
   focusLevel: number;
@@ -24,43 +26,51 @@ const DailyCheckIn = ({
           </span>
         )}
       </div>
-      <div className="space-y-4">
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
-          <div className="w-full bg-secondary rounded-full h-2 mb-1">
-            <div 
-              className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${focusLevel}%` }}
-            ></div>
+      
+      {hasAssessment ? (
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
+            <div className="w-full bg-secondary rounded-full h-2 mb-1">
+              <div 
+                className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                style={{ width: `${focusLevel}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Not at all</span>
+              <span>Very focused</span>
+            </div>
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Not at all</span>
-            <span>Very focused</span>
+          
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
+            <div className="w-full bg-secondary rounded-full h-2 mb-1">
+              <div 
+                className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                style={{ width: `${energyLevel}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Low</span>
+              <span>High</span>
+            </div>
           </div>
         </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
-          <div className="w-full bg-secondary rounded-full h-2 mb-1">
-            <div 
-              className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${energyLevel}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Low</span>
-            <span>High</span>
+      ) : (
+        <div className="mt-4 space-y-4">
+          <p className="text-center text-sm text-muted-foreground">
+            Complete your first assessment to see your personal data
+          </p>
+          <div className="flex justify-center">
+            <Link to="/assessment">
+              <Button size="sm" className="mt-2">
+                Start Assessment
+              </Button>
+            </Link>
           </div>
         </div>
-        
-        {!hasAssessment && (
-          <div className="mt-4 text-center">
-            <span className="text-sm text-accent font-medium">
-              🔜 Complete your first assessment to see your data
-            </span>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

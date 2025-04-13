@@ -24,7 +24,12 @@ const Hero = () => {
         .limit(1)
         .maybeSingle();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching latest assessment:', error);
+        throw error;
+      }
+      
+      console.log('Latest assessment data:', data);
       return data;
     },
     enabled: !!user,
@@ -49,7 +54,12 @@ const Hero = () => {
         .eq('user_id', user.id)
         .gte('completed_at', subDays(new Date(), 7).toISOString());
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching weekly data:', error);
+        throw error;
+      }
+      
+      console.log('Weekly assessment data:', data);
       
       // Create a map of dates to completion status
       const assessmentMap = data.reduce((acc: Record<string, boolean>, result) => {
@@ -74,6 +84,13 @@ const Hero = () => {
       return days;
     },
     enabled: true // Always run this query to show mock data for non-logged in users
+  });
+
+  console.log('User data check:', { 
+    user: user?.id,
+    hasLatestAssessment: !!latestAssessment,
+    assessmentData: latestAssessment,
+    weeklyDataCount: weeklyData.length
   });
 
   return (
