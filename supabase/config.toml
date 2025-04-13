@@ -1,5 +1,4 @@
 
-# This file is responsible for configuring your Supabase project.
 project_id = "sjeaxjdujzdrlkkfdzjc"
 
 [api]
@@ -13,13 +12,6 @@ port = 54322
 [studio]
 port = 54323
 
-# Function that extracts text from uploaded documents
-[functions.extract-document-text]
+# Function for generating personalized technique recommendations
+[functions.generate-technique-recommendations]
 verify_jwt = true
-
-# Function to fetch and scrape web content
-[functions.fetch-content]
-verify_jwt = true
-
-[storage.avatars]
-# Create a bucket for storing user avatars

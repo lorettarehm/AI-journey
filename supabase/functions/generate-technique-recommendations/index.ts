@@ -17,7 +17,6 @@ const createServiceClient = () => {
 // Fetch comprehensive user data for personalized recommendations
 async function fetchUserData(supabase: any, userId: string) {
   try {
-    // Fetch data from multiple tables to build a comprehensive user profile
     const [
       assessments,
       chatHistory,
@@ -156,7 +155,7 @@ serve(async (req) => {
     // Generate RAG prompt
     const ragPrompt = createRAGPrompt(userData);
 
-    // Call Hugging Face API (or another LLM) to generate recommendation
+    // Call Hugging Face API to generate recommendation
     const HUGGING_FACE_API_KEY = Deno.env.get("HUGGING_FACE_API_KEY");
     const HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
 

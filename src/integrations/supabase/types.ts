@@ -36,6 +36,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_technique_recommendations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          modified_at: string
+          rationale: string
+          source_data: Json
+          technique_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          modified_at?: string
+          rationale: string
+          source_data: Json
+          technique_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          modified_at?: string
+          rationale?: string
+          source_data?: Json
+          technique_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assessment_results: {
         Row: {
           completed_at: string
