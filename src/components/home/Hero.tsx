@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +15,8 @@ const Hero = () => {
     queryFn: async () => {
       if (!user) return null;
       
+      console.log('Fetching latest assessment for user:', user.id);
+      
       const { data, error } = await supabase
         .from('assessment_results')
         .select('*')
@@ -29,7 +30,7 @@ const Hero = () => {
         throw error;
       }
       
-      console.log('Latest assessment data:', data);
+      console.log('Latest assessment data:', JSON.stringify(data, null, 2));
       return data;
     },
     enabled: !!user,
@@ -90,7 +91,6 @@ const Hero = () => {
     user: user?.id,
     hasLatestAssessment: !!latestAssessment,
     assessmentData: latestAssessment,
-    weeklyDataCount: weeklyData.length
   });
 
   return (

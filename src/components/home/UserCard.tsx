@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -20,6 +19,8 @@ const UserCard = ({
   weeklyData, 
   isAssessmentLoading 
 }: UserCardProps) => {
+  console.log('UserCard received latestAssessment:', JSON.stringify(latestAssessment, null, 2));
+
   // Calculate metrics based on the latest assessment
   const focusLevel = latestAssessment?.focus_level || 0;
   const energyLevel = latestAssessment?.energy_level || 0;
@@ -30,6 +31,15 @@ const UserCard = ({
   const lastAssessmentDate = latestAssessment ? 
     format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
     'Not available';
+
+  console.log('Calculated metrics:', {
+    focusLevel,
+    energyLevel,
+    emotionalState,
+    stressLevel,
+    creativityScore,
+    lastAssessmentDate
+  });
 
   if (!user) {
     return (
