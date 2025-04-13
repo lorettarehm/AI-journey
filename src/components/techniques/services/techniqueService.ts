@@ -18,13 +18,26 @@ export const fetchTechniques = async (): Promise<TechniqueType[]> => {
     // Only select columns that exist in the technique_recommendations table
     const { data, error } = await supabase
       .from('technique_recommendations')
-      .select('technique_id, title, description, category, effectiveness_score, difficulty_level, journal, publication_date, doi, url')
+      .select('technique_id, title, description, category, effectiveness_score, difficulty_level, journal, publication_date, url, implementation_steps')
       .order('title', { ascending: false })
       .limit(50);
     
     if (error) throw error;
     
-    return data ? shuffleArray(data as TechniqueType[]) : [];
+    const techniques = data ? data.map(technique => ({
+      technique_id: technique.technique_id || '',
+      title: technique.title || '',
+      description: technique.description || '',
+      category: technique.category as any || null,
+      difficulty_level: technique.difficulty_level as any || null,
+      effectiveness_score: technique.effectiveness_score || undefined,
+      journal: technique.journal || undefined,
+      publication_date: technique.publication_date || undefined,
+      url: technique.url || undefined,
+      implementation_steps: technique.implementation_steps || undefined,
+    })) : [];
+    
+    return shuffleArray(techniques as TechniqueType[]);
   } catch (error) {
     console.error('Error fetching techniques:', error);
     throw error;
