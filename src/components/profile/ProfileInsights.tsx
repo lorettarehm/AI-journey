@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { format } from 'date-fns'; // Ensure date-fns is imported
 import FadeIn from '@/components/ui/FadeIn';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
