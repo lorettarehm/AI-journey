@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MoonStar, Sun, Menu, X, MessageCircle } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useProfile } from '@/components/profile/settings/personal-info/useProfile';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -15,6 +16,7 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
+  const { profile } = useProfile();
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -64,6 +66,19 @@ const Header = () => {
     </>
   );
 
+  // Get display name - user's full name if available, otherwise just the app name
+  const getDisplayName = () => {
+    if (user && profile?.full_name) {
+      return (
+        <span>
+          <span className="text-accent">audhd.ai</span>
+          <span className="text-muted-foreground font-normal"> + {profile.full_name}</span>
+        </span>
+      );
+    }
+    return <span className="text-accent">audhd.ai</span>;
+  };
+
   return (
     <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -76,7 +91,7 @@ const Header = () => {
                 className="h-5 w-5 md:h-6 md:w-6" 
               />
             </div>
-            <span className="text-accent">audhd.ai</span>
+            {getDisplayName()}
           </Link>
           
           {/* Desktop Navigation */}
@@ -138,7 +153,7 @@ const Header = () => {
                         className="h-5 w-5" 
                       />
                     </div>
-                    <span className="text-accent">audhd.ai</span>
+                    {getDisplayName()}
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
                     <X className="h-5 w-5" />
