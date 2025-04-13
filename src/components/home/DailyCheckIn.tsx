@@ -17,7 +17,7 @@ const DailyCheckIn = ({
   return (
     <div className="bg-accent/10 rounded-2xl p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">Daily Check-in</h3>
+        <h3 className="text-xl font-semibold">Daily Assessment</h3>
         {hasAssessment && (
           <span className="text-xs text-muted-foreground">
             Last updated: {lastAssessmentDate}
