@@ -382,13 +382,6 @@ export type Database = {
             referencedRelation: "research_techniques"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "technique_metadata_technique_id_fkey"
-            columns: ["technique_id"]
-            isOneToOne: false
-            referencedRelation: "technique_recommendations"
-            referencedColumns: ["technique_id"]
-          },
         ]
       }
       user_characteristics: {
