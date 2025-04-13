@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,7 @@ export interface AssessmentState {
   completed: boolean;
   questions: Question[];
   loading: boolean;
+  saved: boolean;
 }
 
 export const useAssessment = (initialQuestions: Question[] = []) => {
@@ -22,7 +23,8 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
     answers: {},
     completed: false,
     questions: initialQuestions,
-    loading: initialQuestions.length === 0
+    loading: initialQuestions.length === 0,
+    saved: false
   });
   
   const { toast } = useToast();
@@ -54,7 +56,6 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
         ...prev,
         completed: true
       }));
-      saveAssessmentResults();
     }
   }, [state.currentQuestionIndex, state.questions.length]);
   
@@ -67,8 +68,8 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
     }
   }, [state.currentQuestionIndex]);
   
-  const saveAssessmentResults = async () => {
-    if (!user) return;
+  const saveAssessmentResults = useCallback(async () => {
+    if (!user || state.saved) return;
     
     try {
       const scores = calculateScores(state.answers, state.questions);
@@ -105,6 +106,8 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
         title: "Assessment Saved",
         description: "Your assessment results have been saved successfully.",
       });
+      
+      setState(prev => ({ ...prev, saved: true }));
     } catch (error) {
       console.error('Error saving assessment:', error);
       toast({
@@ -113,7 +116,7 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
         variant: "destructive",
       });
     }
-  };
+  }, [user, state.answers, state.questions, state.saved, toast]);
   
   const handleComplete = useCallback(() => {
     navigate('/profile');

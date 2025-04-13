@@ -16,7 +16,8 @@ const Assessment = () => {
     handleAnswer,
     handleNext,
     handlePrevious,
-    handleComplete
+    handleComplete,
+    saveAssessmentResults
   } = useAssessment();
   
   // Set questions in assessment state when loaded
@@ -25,6 +26,13 @@ const Assessment = () => {
       setQuestions(questions);
     }
   }, [loading, questions, setQuestions]);
+  
+  // Save assessment results when completed
+  React.useEffect(() => {
+    if (completed && Object.keys(answers).length > 0) {
+      saveAssessmentResults();
+    }
+  }, [completed, answers, saveAssessmentResults]);
   
   if (loading) {
     return <LoadingState />;
