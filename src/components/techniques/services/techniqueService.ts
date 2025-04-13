@@ -14,15 +14,17 @@ export const shuffleArray = (array: TechniqueType[]): TechniqueType[] => {
 
 export const fetchTechniques = async (): Promise<TechniqueType[]> => {
   try {
-    // Try with a simpler query to avoid the recursion issue
-    // Only select columns that exist in the technique_recommendations table
+    // Check which columns actually exist in the view by querying for them
     const { data, error } = await supabase
       .from('technique_recommendations')
-      .select('technique_id, title, description, category, effectiveness_score, difficulty_level, journal, publication_date, url, implementation_steps')
+      .select('technique_id, title, description, category, difficulty_level, effectiveness_score, journal, publication_date, implementation_steps, doi')
       .order('title', { ascending: false })
       .limit(50);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching techniques:', error);
+      throw error;
+    }
     
     const techniques = data ? data.map(technique => ({
       technique_id: technique.technique_id || '',
@@ -33,7 +35,8 @@ export const fetchTechniques = async (): Promise<TechniqueType[]> => {
       effectiveness_score: technique.effectiveness_score || undefined,
       journal: technique.journal || undefined,
       publication_date: technique.publication_date || undefined,
-      url: technique.url || undefined,
+      url: undefined, // We don't have URL in the view, so explicitly set it to undefined
+      doi: technique.doi || undefined,
       implementation_steps: technique.implementation_steps || undefined,
     })) : [];
     
