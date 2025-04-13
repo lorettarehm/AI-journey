@@ -16,7 +16,7 @@ import TechniqueCardHeader from './card/TechniqueCardHeader';
 import TechniqueCardDetails from './card/TechniqueCardDetails';
 import TechniqueCardFooter from './card/TechniqueCardFooter';
 import TechniqueNutshell from './card/TechniqueNutshell';
-import { TechniqueType } from './useTechniques';
+import { TechniqueType } from './types';
 import { useTechniqueInteractions } from './card/useTechniqueInteractions';
 
 interface TechniqueCardProps {

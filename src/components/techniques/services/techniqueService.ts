@@ -17,7 +17,7 @@ export const fetchTechniques = async (): Promise<TechniqueType[]> => {
     // Check which columns actually exist in the view by querying for them
     const { data, error } = await supabase
       .from('technique_recommendations')
-      .select('technique_id, title, description, category, difficulty_level, effectiveness_score, journal, publication_date, implementation_steps, doi')
+      .select('technique_id, title, description, category, difficulty_level, effectiveness_score, journal, publication_date, implementation_steps')
       .order('title', { ascending: false })
       .limit(50);
     
@@ -36,7 +36,7 @@ export const fetchTechniques = async (): Promise<TechniqueType[]> => {
       journal: technique.journal || undefined,
       publication_date: technique.publication_date || undefined,
       url: undefined, // We don't have URL in the view, so explicitly set it to undefined
-      doi: technique.doi || undefined,
+      doi: undefined, // We don't have DOI in the view, so explicitly set it to undefined
       implementation_steps: technique.implementation_steps || undefined,
     })) : [];
     
