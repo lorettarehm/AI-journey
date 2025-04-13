@@ -453,6 +453,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_insight_history: {
+        Row: {
+          assessment_id: string | null
+          created_at: string
+          general_insight: string
+          id: string
+          strengths: Json | null
+          user_id: string
+          weaknesses: Json | null
+        }
+        Insert: {
+          assessment_id?: string | null
+          created_at?: string
+          general_insight: string
+          id?: string
+          strengths?: Json | null
+          user_id: string
+          weaknesses?: Json | null
+        }
+        Update: {
+          assessment_id?: string | null
+          created_at?: string
+          general_insight?: string
+          id?: string
+          strengths?: Json | null
+          user_id?: string
+          weaknesses?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_insight_history_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       web_content_tags: {
         Row: {
           content_id: string
