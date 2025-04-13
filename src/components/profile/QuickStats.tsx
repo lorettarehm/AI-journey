@@ -5,6 +5,7 @@ import FadeIn from '@/components/ui/FadeIn';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { format } from 'date-fns';
 
 interface QuickStatsProps {
   assessmentCount: number;
@@ -71,7 +72,7 @@ const QuickStats = ({ assessmentCount, lastAssessmentDate }: QuickStatsProps) =>
               <span>Last Assessment</span>
             </div>
             <span className="font-semibold">
-              {lastAssessmentDate ? new Date(lastAssessmentDate).toLocaleDateString() : 'Never'}
+              {lastAssessmentDate ? format(new Date(lastAssessmentDate), 'dd/MM/yyyy') : 'Never'}
             </span>
           </div>
           <div className="flex justify-between items-center pb-3 border-b border-border">

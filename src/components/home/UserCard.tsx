@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -29,7 +30,7 @@ const UserCard = ({
   const creativityScore = latestAssessment?.creativity_score || 0;
   
   const lastAssessmentDate = latestAssessment ? 
-    format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
+    format(new Date(latestAssessment.completed_at), 'dd/MM/yyyy') : 
     'Not available';
 
   console.log('Calculated metrics:', {

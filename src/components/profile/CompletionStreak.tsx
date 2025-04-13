@@ -91,6 +91,7 @@ const CompletionStreak = () => {
       const date = subDays(new Date(), 6 - index);
       const dateStr = format(date, 'yyyy-MM-dd');
       const dayLabel = format(date, 'EEE');
+      const fullDate = format(date, 'dd/MM/yyyy');
       
       const hasAssessment = assessmentDates.some(assessmentDate => 
         format(new Date(assessmentDate), 'yyyy-MM-dd') === dateStr
@@ -98,6 +99,7 @@ const CompletionStreak = () => {
       
       return {
         date: dayLabel,
+        fullDate: fullDate,
         hasAssessment
       };
     });
@@ -152,7 +154,7 @@ const CompletionStreak = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{day.hasAssessment ? 'Assessment completed' : 'No assessment'}</p>
+                  <p>{day.fullDate} - {day.hasAssessment ? 'Assessment completed' : 'No assessment'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

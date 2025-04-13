@@ -25,7 +25,7 @@ const RecentInteractions = ({ interactions = [] }: RecentInteractionsProps) => {
             <div>
               <p className="font-medium">{interaction.technique_title}</p>
               <p className="text-xs text-muted-foreground">
-                {format(new Date(interaction.created_at), 'MMM d, yyyy - h:mm a')}
+                {format(new Date(interaction.created_at), 'dd/MM/yyyy - HH:mm')}
               </p>
             </div>
             {interaction.feedback && (

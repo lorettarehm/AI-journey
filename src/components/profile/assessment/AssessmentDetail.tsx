@@ -6,7 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import { format } from 'date-fns';
 
 interface AssessmentDetailProps {
@@ -24,7 +24,7 @@ const AssessmentDetail = ({ assessment, open, onOpenChange }: AssessmentDetailPr
         <DialogHeader>
           <DialogTitle>Assessment Details</DialogTitle>
           <DialogDescription>
-            Completed {format(new Date(assessment.completed_at), 'PPP')}
+            Completed {format(new Date(assessment.completed_at), 'dd/MM/yyyy')}
           </DialogDescription>
         </DialogHeader>
         

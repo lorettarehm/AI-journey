@@ -1,6 +1,7 @@
 
 import { Question } from '@/components/assessment/AssessmentData';
 import { AssessmentScores } from '@/utils/assessment/scoring';
+import { format } from 'date-fns';
 
 // Transform questions to a format suitable for database storage
 export const prepareQuestionsForStorage = (questions: Question[]) => {
@@ -16,10 +17,10 @@ export const prepareQuestionsForStorage = (questions: Question[]) => {
 
 // Generate a human-readable description of the assessment results
 export const generateAssessmentDescription = (scores: AssessmentScores) => {
-  const date = new Date().toLocaleDateString();
-  const time = new Date().toLocaleTimeString();
+  const formattedDate = format(new Date(), 'dd/MM/yyyy');
+  const time = format(new Date(), 'HH:mm');
   
-  let description = `Assessment completed on ${date} at ${time}. `;
+  let description = `Assessment completed on ${formattedDate} at ${time}. `;
   
   if (scores.focus > 70) {
     description += "Focus level is high. ";

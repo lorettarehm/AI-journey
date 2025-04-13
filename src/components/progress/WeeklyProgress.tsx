@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,9 +49,11 @@ const WeeklyProgress = () => {
         const date = subDays(new Date(), 6 - i);
         const dateStr = format(date, 'yyyy-MM-dd');
         const dayLabel = format(date, 'EEE');
+        const fullDate = format(date, 'dd/MM/yyyy');
         
         return {
           date: dayLabel,
+          fullDate: fullDate,
           count: assessmentMap[dateStr] || 0,
           completed: assessmentMap[dateStr] ? true : false
         };
@@ -82,24 +84,33 @@ const WeeklyProgress = () => {
       <CardContent>
         <div className="flex justify-between items-end h-32 mt-2">
           {weeklyData.map((day, i) => (
-            <div key={i} className="flex flex-1 flex-col items-center">
-              <div 
-                className={`w-full mx-1 rounded-t-lg transition-all duration-300 ${
-                  day.completed ? 'bg-accent' : 'bg-secondary'
-                }`} 
-                style={{ 
-                  height: `${day.count ? Math.min(Math.max(day.count * 20, 20), 80) : 10}%`,
-                  opacity: day.completed ? 1 : 0.5,
-                }}
-              ></div>
-              <span className={`text-xs mt-2 ${
-                format(new Date(), 'EEE') === day.date 
-                  ? 'font-bold text-primary' 
-                  : 'text-muted-foreground'
-              }`}>
-                {day.date}
-              </span>
-            </div>
+            <TooltipProvider key={i}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-1 flex-col items-center">
+                    <div 
+                      className={`w-full mx-1 rounded-t-lg transition-all duration-300 ${
+                        day.completed ? 'bg-accent' : 'bg-secondary'
+                      }`} 
+                      style={{ 
+                        height: `${day.count ? Math.min(Math.max(day.count * 20, 20), 80) : 10}%`,
+                        opacity: day.completed ? 1 : 0.5,
+                      }}
+                    ></div>
+                    <span className={`text-xs mt-2 ${
+                      format(new Date(), 'EEE') === day.date 
+                        ? 'font-bold text-primary' 
+                        : 'text-muted-foreground'
+                    }`}>
+                      {day.date}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{day.fullDate} - {day.completed ? 'Assessment completed' : 'No assessment'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
         <div className="flex justify-end mt-4">

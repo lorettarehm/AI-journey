@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import {
   Table,
   TableBody,
@@ -8,8 +8,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Eye } from 'lucide-react';
 import AssessmentDetail from './AssessmentDetail';
 
@@ -64,6 +64,9 @@ const AssessmentTable = ({ assessments }: AssessmentTableProps) => {
               <TableRow key={assessment.id}>
                 <TableCell>
                   {formatDistanceToNow(new Date(assessment.completed_at), { addSuffix: true })}
+                  <div className="text-xs text-muted-foreground">
+                    {format(new Date(assessment.completed_at), 'dd/MM/yyyy')}
+                  </div>
                 </TableCell>
                 <TableCell className="max-w-xs truncate" title={assessment.description || undefined}>
                   {assessment.description 
