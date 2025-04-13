@@ -73,7 +73,7 @@ const Hero = () => {
       
       return days;
     },
-    enabled: !!user // Only run this query when user is logged in
+    enabled: true // Always run this query to show mock data for non-logged in users
   });
 
   return (
