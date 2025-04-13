@@ -14,9 +14,10 @@ export const shuffleArray = (array: TechniqueType[]): TechniqueType[] => {
 
 export const fetchTechniques = async (): Promise<TechniqueType[]> => {
   try {
+    // Try with a simpler query to avoid the recursion issue
     const { data, error } = await supabase
       .from('technique_recommendations')
-      .select('*')
+      .select('technique_id, title, description, category, effectiveness_score, source_url, source_type, publication_date')
       .order('title', { ascending: false })
       .limit(50);
     
