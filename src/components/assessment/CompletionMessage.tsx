@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Check } from 'lucide-react';
 import FadeIn from '@/components/ui/FadeIn';
 

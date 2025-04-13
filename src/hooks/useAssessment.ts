@@ -15,6 +15,7 @@ export interface AssessmentState {
   questions: Question[];
   loading: boolean;
   saved: boolean;
+  saving: boolean;
 }
 
 export const useAssessment = (initialQuestions: Question[] = []) => {
@@ -24,7 +25,8 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
     completed: false,
     questions: initialQuestions,
     loading: initialQuestions.length === 0,
-    saved: false
+    saved: false,
+    saving: false
   });
   
   const { toast } = useToast();
@@ -69,7 +71,10 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
   }, [state.currentQuestionIndex]);
   
   const saveAssessmentResults = useCallback(async () => {
-    if (!user || state.saved) return;
+    if (!user || state.saved || state.saving || Object.keys(state.answers).length === 0) return;
+    
+    // Set saving state to true to prevent multiple simultaneous saves
+    setState(prev => ({ ...prev, saving: true }));
     
     try {
       const scores = calculateScores(state.answers, state.questions);
@@ -107,7 +112,7 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
         description: "Your assessment results have been saved successfully.",
       });
       
-      setState(prev => ({ ...prev, saved: true }));
+      setState(prev => ({ ...prev, saved: true, saving: false }));
     } catch (error) {
       console.error('Error saving assessment:', error);
       toast({
@@ -115,8 +120,9 @@ export const useAssessment = (initialQuestions: Question[] = []) => {
         description: "Failed to save your assessment results.",
         variant: "destructive",
       });
+      setState(prev => ({ ...prev, saving: false }));
     }
-  }, [user, state.answers, state.questions, state.saved, toast]);
+  }, [user, state.answers, state.questions, state.saved, state.saving, toast]);
   
   const handleComplete = useCallback(() => {
     navigate('/profile');
