@@ -15,9 +15,10 @@ export const shuffleArray = (array: TechniqueType[]): TechniqueType[] => {
 export const fetchTechniques = async (): Promise<TechniqueType[]> => {
   try {
     // Try with a simpler query to avoid the recursion issue
+    // Only select columns that exist in the technique_recommendations table
     const { data, error } = await supabase
       .from('technique_recommendations')
-      .select('technique_id, title, description, category, effectiveness_score, source_url, source_type, publication_date')
+      .select('technique_id, title, description, category, effectiveness_score, difficulty_level, journal, publication_date, doi, url')
       .order('title', { ascending: false })
       .limit(50);
     
