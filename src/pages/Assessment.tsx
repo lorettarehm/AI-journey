@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -68,16 +67,21 @@ const Assessment = () => {
     if (!user) return;
     
     try {
-      // Calculate aggregated scores
       const scores = calculateScores();
       
-      // Generate a description for this assessment
       const description = generateAssessmentDescription(scores);
       
-      // Generate scoring rationale
       const scoringRationale = generateScoringRationale(answers, scores);
       
-      // Save to Supabase
+      const questionsJson = questions.map(q => ({
+        id: q.id,
+        text: q.text,
+        type: q.type,
+        category: q.category || null,
+        source: q.source || null,
+        optionsCount: q.options.length
+      }));
+      
       const { error } = await supabase
         .from('assessment_results')
         .insert({
@@ -94,7 +98,7 @@ const Assessment = () => {
           pattern_recognition: scores.patternRecognition || 80,
           problem_solving: scores.problemSolving || 75,
           time_awareness: scores.timeAwareness || 40,
-          questions_asked: questions,
+          questions_asked: questionsJson,
           responses_given: answers,
           scoring_rationale: scoringRationale,
           description: description
@@ -117,7 +121,6 @@ const Assessment = () => {
   };
   
   const generateAssessmentDescription = (scores: Record<string, number>) => {
-    // Generate a brief description based on the assessment results
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
     
@@ -135,12 +138,10 @@ const Assessment = () => {
       description += "Energy level is low. ";
     }
     
-    // Add more details based on other scores if needed
     return description;
   };
   
   const generateScoringRationale = (answers: Record<string, number>, scores: Record<string, number>) => {
-    // Generate an explanation of how the answers were converted to scores
     return `
       Based on ${Object.keys(answers).length} questions answered, the following scores were calculated:
       
@@ -154,14 +155,11 @@ const Assessment = () => {
   };
   
   const calculateScores = () => {
-    // Calculate aggregate scores from answers
-    // This is a simplified version - in a real app you'd have more sophisticated scoring
     const allValues = Object.values(answers);
     const avg = allValues.length ? 
       allValues.reduce((sum, val) => sum + val, 0) / allValues.length : 
       50;
     
-    // Map question categories to scores
     const categoryScores: Record<string, number[]> = {};
     
     questions.forEach(question => {
@@ -174,12 +172,11 @@ const Assessment = () => {
       }
     });
     
-    // Calculate average for each category
     const scores: Record<string, number> = {};
     
     Object.entries(categoryScores).forEach(([category, values]) => {
       if (values.length) {
-        scores[category] = values.reduce((sum, val) => sum + val, 0) / values.length * 20; // Scale to 0-100
+        scores[category] = values.reduce((sum, val) => sum + val, 0) / values.length * 20;
       }
     });
     
@@ -187,14 +184,14 @@ const Assessment = () => {
       focus: scores.attention || avg * 20,
       energy: scores.hyperactivity || avg * 20,
       emotional: scores.emotional_regulation || avg * 20,
-      stress: 100 - (scores.executive_function || avg * 20), // Invert for stress
-      creativity: 70, // Default
+      stress: 100 - (scores.executive_function || avg * 20),
+      creativity: 70,
       focusDuration: scores.attention || 40,
       taskSwitching: scores.executive_function || 45,
       emotionalRegulation: scores.emotional_regulation || 60,
       organization: scores.organization || 50,
-      patternRecognition: 80, // Default
-      problemSolving: 75, // Default
+      patternRecognition: 80,
+      problemSolving: 75,
       timeAwareness: scores.executive_function || 35
     };
   };
