@@ -8,11 +8,17 @@ interface DailyCheckInProps {
   energyLevel: number;
   lastAssessmentDate: string;
   hasAssessment: boolean;
+  emotionalState?: number;
+  stressLevel?: number;
+  creativityScore?: number;
 }
 
 const DailyCheckIn = ({ 
   focusLevel, 
-  energyLevel, 
+  energyLevel,
+  emotionalState = 0,
+  stressLevel = 0,
+  creativityScore = 0,
   lastAssessmentDate,
   hasAssessment 
 }: DailyCheckInProps) => {
@@ -30,7 +36,7 @@ const DailyCheckIn = ({
       {hasAssessment ? (
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground mb-2">How focused do you feel today?</p>
+            <p className="text-sm text-muted-foreground mb-2">Focus Level</p>
             <div className="w-full bg-secondary rounded-full h-2 mb-1">
               <div 
                 className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
@@ -38,13 +44,13 @@ const DailyCheckIn = ({
               ></div>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Not at all</span>
-              <span>Very focused</span>
+              <span>Low</span>
+              <span>High</span>
             </div>
           </div>
           
           <div>
-            <p className="text-sm text-muted-foreground mb-2">How is your energy level?</p>
+            <p className="text-sm text-muted-foreground mb-2">Energy Level</p>
             <div className="w-full bg-secondary rounded-full h-2 mb-1">
               <div 
                 className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
@@ -56,6 +62,54 @@ const DailyCheckIn = ({
               <span>High</span>
             </div>
           </div>
+
+          {emotionalState > 0 && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Emotional State</p>
+              <div className="w-full bg-secondary rounded-full h-2 mb-1">
+                <div 
+                  className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: `${emotionalState}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Unstable</span>
+                <span>Stable</span>
+              </div>
+            </div>
+          )}
+
+          {stressLevel > 0 && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Stress Level</p>
+              <div className="w-full bg-secondary rounded-full h-2 mb-1">
+                <div 
+                  className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: `${stressLevel}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>High</span>
+                <span>Low</span>
+              </div>
+            </div>
+          )}
+
+          {creativityScore > 0 && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Creativity</p>
+              <div className="w-full bg-secondary rounded-full h-2 mb-1">
+                <div 
+                  className="bg-accent h-2 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: `${creativityScore}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Low</span>
+                <span>High</span>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-4 space-y-4">

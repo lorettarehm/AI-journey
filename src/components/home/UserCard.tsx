@@ -23,6 +23,10 @@ const UserCard = ({
   // Calculate metrics based on the latest assessment
   const focusLevel = latestAssessment?.focus_level || 0;
   const energyLevel = latestAssessment?.energy_level || 0;
+  const emotionalState = latestAssessment?.emotional_state || 0;
+  const stressLevel = latestAssessment?.stress_level || 0;
+  const creativityScore = latestAssessment?.creativity_score || 0;
+  
   const lastAssessmentDate = latestAssessment ? 
     format(new Date(latestAssessment.completed_at), 'MMM d, yyyy') : 
     'Not available';
@@ -54,6 +58,9 @@ const UserCard = ({
           <DailyCheckIn 
             focusLevel={focusLevel}
             energyLevel={energyLevel}
+            emotionalState={emotionalState}
+            stressLevel={stressLevel}
+            creativityScore={creativityScore}
             lastAssessmentDate={lastAssessmentDate}
             hasAssessment={!!latestAssessment}
           />
