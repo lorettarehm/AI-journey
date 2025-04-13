@@ -1,7 +1,7 @@
-
-import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 export interface TechniqueType {
   technique_id: string;
@@ -17,10 +17,40 @@ export interface TechniqueType {
 }
 
 export const useTechniques = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   
+  // Fetch AI-generated recommendations first
+  const { 
+    data: aiRecommendations, 
+    isLoading: isLoadingAiRecommendations 
+  } = useQuery({
+    queryKey: ['aiTechniqueRecommendations', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      // Call the edge function to generate recommendations
+      const { data, error } = await supabase.functions.invoke('generate-technique-recommendations', {
+        body: JSON.stringify({ userId: user.id })
+      });
+      
+      if (error) {
+        console.error('Error generating AI recommendations:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!user,
+  });
+
   // Fetch techniques from our database with random ordering
-  const { data: techniques, isLoading, isError, refetch } = useQuery({
+  const { 
+    data: techniques, 
+    isLoading, 
+    isError, 
+    refetch 
+  } = useQuery({
     queryKey: ['techniques'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,7 +61,6 @@ export const useTechniques = () => {
       
       if (error) throw error;
       
-      // Since we can't use RANDOM() directly, we'll shuffle the results in JavaScript
       return data ? shuffleArray(data as TechniqueType[]) : [];
     }
   });
@@ -84,8 +113,9 @@ export const useTechniques = () => {
 
   return {
     techniques,
-    isLoading,
+    isLoading: isLoading || isLoadingAiRecommendations,
     isError,
+    aiRecommendations,
     refetch,
     triggerResearchUpdate
   };

@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/ui/FadeIn";
-import { Loader2 } from "lucide-react";
+import { Loader2, SparklesIcon } from "lucide-react";
 import TechniqueHeader from './TechniqueHeader';
 import TechniqueFilters from './TechniqueFilters';
 import TechniqueList from './TechniqueList';
+import AIRecommendationCard from './AIRecommendationCard';
 import ResearchProcess from './ResearchProcess';
 import { useTechniques } from './useTechniques';
 import { useToast } from '@/hooks/use-toast';
@@ -13,11 +14,17 @@ import { useToast } from '@/hooks/use-toast';
 const TechniquePage: React.FC = () => {
   const [filter, setFilter] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const { techniques, isLoading, isError, refetch, triggerResearchUpdate } = useTechniques();
+  const { 
+    techniques, 
+    isLoading, 
+    isError, 
+    refetch, 
+    triggerResearchUpdate,
+    aiRecommendations 
+  } = useTechniques();
   const { toast } = useToast();
 
   useEffect(() => {
-    // If there are no techniques, automatically load them
     if (techniques && techniques.length === 0 && !isLoading) {
       handleUpdateResearch();
     }
@@ -49,6 +56,20 @@ const TechniquePage: React.FC = () => {
   return (
     <div className="container max-w-4xl py-8 md:py-12 px-4 md:px-6">
       <TechniqueHeader />
+      
+      {/* AI Recommendation Section */}
+      {aiRecommendations && (
+        <FadeIn delay={0.2}>
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <SparklesIcon className="mr-2 text-accent" />
+              <h2 className="text-xl font-bold">AI-Powered Recommendation</h2>
+            </div>
+            <AIRecommendationCard recommendation={aiRecommendations} />
+          </div>
+        </FadeIn>
+      )}
+
       <TechniqueFilters filter={filter} setFilter={setFilter} />
       <TechniqueList 
         techniques={techniques} 
