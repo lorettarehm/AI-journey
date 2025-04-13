@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
+import { X, AlertCircle, Info } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -53,6 +54,7 @@ const Auth = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setSignupSuccess(false);
     
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -68,9 +70,10 @@ const Auth = () => {
       if (error) throw error;
       
       if (data.user) {
+        setSignupSuccess(true);
         toast({
-          title: "Verification email sent",
-          description: "Please check your email to verify your account.",
+          title: "Account created",
+          description: "Your account has been created successfully.",
         });
       }
     } catch (err: any) {
@@ -183,8 +186,20 @@ const Auth = () => {
               <CardContent>
                 {error && (
                   <Alert variant="destructive" className="mb-4">
-                    <X className="h-4 w-4" />
+                    <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                
+                {signupSuccess && (
+                  <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
+                    <Info className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      Account created successfully! You can now sign in with your credentials.
+                      <br /><br />
+                      <strong>Note:</strong> Normally, you would need to confirm your email address before signing in.
+                      For development purposes, you can sign in directly.
+                    </AlertDescription>
                   </Alert>
                 )}
                 
