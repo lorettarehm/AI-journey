@@ -71,6 +71,12 @@ const Assessment = () => {
       // Calculate aggregated scores
       const scores = calculateScores();
       
+      // Generate a description for this assessment
+      const description = generateAssessmentDescription(scores);
+      
+      // Generate scoring rationale
+      const scoringRationale = generateScoringRationale(answers, scores);
+      
       // Save to Supabase
       const { error } = await supabase
         .from('assessment_results')
@@ -87,7 +93,11 @@ const Assessment = () => {
           organization: scores.organization || 50,
           pattern_recognition: scores.patternRecognition || 80,
           problem_solving: scores.problemSolving || 75,
-          time_awareness: scores.timeAwareness || 40
+          time_awareness: scores.timeAwareness || 40,
+          questions_asked: questions,
+          responses_given: answers,
+          scoring_rationale: scoringRationale,
+          description: description
         });
       
       if (error) throw error;
@@ -104,6 +114,43 @@ const Assessment = () => {
         variant: "destructive",
       });
     }
+  };
+  
+  const generateAssessmentDescription = (scores: Record<string, number>) => {
+    // Generate a brief description based on the assessment results
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+    
+    let description = `Assessment completed on ${date} at ${time}. `;
+    
+    if (scores.focus > 70) {
+      description += "Focus level is high. ";
+    } else if (scores.focus < 40) {
+      description += "Focus level is low. ";
+    }
+    
+    if (scores.energy > 70) {
+      description += "Energy level is high. ";
+    } else if (scores.energy < 40) {
+      description += "Energy level is low. ";
+    }
+    
+    // Add more details based on other scores if needed
+    return description;
+  };
+  
+  const generateScoringRationale = (answers: Record<string, number>, scores: Record<string, number>) => {
+    // Generate an explanation of how the answers were converted to scores
+    return `
+      Based on ${Object.keys(answers).length} questions answered, the following scores were calculated:
+      
+      Focus: Calculated from attention-related questions, resulting in a score of ${scores.focus}/100.
+      Energy: Derived from hyperactivity and impulsivity responses, scoring ${scores.energy}/100.
+      Emotional Regulation: Based on emotional control questions, scoring ${scores.emotional}/100.
+      Stress: Inverted from executive function responses, scoring ${scores.stress}/100.
+      
+      The raw responses were averaged within their categories and scaled to a 0-100 range.
+    `;
   };
   
   const calculateScores = () => {

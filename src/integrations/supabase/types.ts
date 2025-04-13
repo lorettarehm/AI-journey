@@ -40,6 +40,7 @@ export type Database = {
         Row: {
           completed_at: string
           creativity_score: number
+          description: string | null
           emotional_regulation: number
           emotional_state: number
           energy_level: number
@@ -49,6 +50,9 @@ export type Database = {
           organization: number
           pattern_recognition: number
           problem_solving: number
+          questions_asked: Json | null
+          responses_given: Json | null
+          scoring_rationale: string | null
           stress_level: number
           task_switching: number
           time_awareness: number
@@ -57,6 +61,7 @@ export type Database = {
         Insert: {
           completed_at?: string
           creativity_score: number
+          description?: string | null
           emotional_regulation: number
           emotional_state: number
           energy_level: number
@@ -66,6 +71,9 @@ export type Database = {
           organization: number
           pattern_recognition: number
           problem_solving: number
+          questions_asked?: Json | null
+          responses_given?: Json | null
+          scoring_rationale?: string | null
           stress_level: number
           task_switching: number
           time_awareness: number
@@ -74,6 +82,7 @@ export type Database = {
         Update: {
           completed_at?: string
           creativity_score?: number
+          description?: string | null
           emotional_regulation?: number
           emotional_state?: number
           energy_level?: number
@@ -83,6 +92,9 @@ export type Database = {
           organization?: number
           pattern_recognition?: number
           problem_solving?: number
+          questions_asked?: Json | null
+          responses_given?: Json | null
+          scoring_rationale?: string | null
           stress_level?: number
           task_switching?: number
           time_awareness?: number
