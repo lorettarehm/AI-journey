@@ -21,44 +21,6 @@ Empowering individuals with tools and knowledge for self-improvement and growth.
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js and npm installed.
-
-### Installation
-
-1. Clone the repository:  
-   ```bash
-   git clone https://github.com/lorettarehm/evolve-empowerment-journey.git
-   cd evolve-empowerment-journey
-   ```
-2. Install dependencies:  
-   ```bash
-   npm install
-   ```
-
-### Usage
-
-- Start the development server:  
-  ```bash
-  npm run dev
-  ```
-- Build the project:  
-  ```bash
-  npm run build
-  ```
-
-### Testing
-
-- Run tests:  
-  ```bash
-  npm test
-  ```
-
----
-
 ## Project Structure
 
 ```plaintext
