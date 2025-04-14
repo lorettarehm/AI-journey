@@ -2,6 +2,10 @@
 
 Empowering individuals with tools and knowledge for self-improvement and growth.
 
+:movie_camera: [Quick demo!](./core/audhdAI_vid.mp4)
+
+:sparkles: [Let's unlock your best self!](https://audhd.ai/)
+
 ---
 
 ## Features
@@ -37,5 +41,5 @@ evolve-empowerment-journey/
 
 ## License
 
-**Evolve Empowerment Journey © 2025 by Loretta Rehm**  
+**Evolve Empowerment Journey © 2025 by L Rehm**  
 This project is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
