@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, parseISO } from 'date-fns';
+import { meanBy } from 'lodash'; // Import lodash for calculating averages
 import LineChartDisplay from './charts/LineChartDisplay';
 import ChartEmptyState from './charts/ChartEmptyState';
 import { Button } from '@/components/ui/button';
@@ -63,6 +63,12 @@ const ProgressChart = () => {
     enabled: !!user,
   });
 
+  // Calculate historical averages for selected metrics
+  const historicalAverages = selectedMetrics.reduce((averages, metric) => {
+    averages[metric] = meanBy(assessments, metric) || 0;
+    return averages;
+  }, {});
+
   if (isLoading) {
     return (
       <Card>
@@ -101,15 +107,27 @@ const ProgressChart = () => {
             </Button>
           ))}
         </div>
-        
+
         {!assessments || assessments.length < 2 ? (
           <ChartEmptyState message="Complete at least 2 assessments to generate a progress chart." />
         ) : (
-          <LineChartDisplay 
-            data={assessments} 
-            chartConfig={METRICS} 
-            metrics={selectedMetrics}
-          />
+          <>
+            <LineChartDisplay 
+              data={assessments} 
+              chartConfig={METRICS} 
+              metrics={selectedMetrics}
+            />
+            <div className="mt-4">
+              <h4 className="text-lg font-semibold">Historical Averages</h4>
+              <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                {selectedMetrics.map(metric => (
+                  <li key={metric}>
+                    {metric.charAt(0).toUpperCase() + metric.slice(1)}: {historicalAverages[metric].toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
