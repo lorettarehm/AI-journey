@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
@@ -7,7 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
+// Maximum number of retries
+const MAX_RETRIES = 5;
+// Initial delay in milliseconds
+const INITIAL_DELAY = 1000;
 
 // Function to create a Supabase client with the service role key
 const createServiceClient = () => {
@@ -99,6 +101,55 @@ async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
   return extractedTechniques.length;
 }
 
+// Function to get available LLM models in order
+async function getLLMModels(supabase: any) {
+  const { data, error } = await supabase
+    .from('llm_models')
+    .select('*')
+    .eq('enabled', true)
+    .order('invocation_order', { ascending: true })
+    .limit(5);
+  
+  if (error) {
+    console.error("Error fetching LLM models:", error);
+    return [];
+  }
+  
+  return data || [];
+}
+
+// Function to call an LLM model API
+async function callLLMModel(model: any, prompt: string) {
+  try {
+    const response = await fetch(model.api_url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${model.api_key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 1024,
+          temperature: 0.7,
+          top_p: 0.9,
+          do_sample: true,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error calling ${model.model_name}:`, error);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -168,46 +219,45 @@ serve(async (req) => {
       User: ${message}
       Assistant:`;
 
-    console.log("Calling Hugging Face API with prompt:", fullPrompt);
+    console.log("Preparing to call LLM models with prompt:", fullPrompt);
     
-    // Get the API key
-    const HUGGING_FACE_API_KEY = Deno.env.get("HUGGING_FACE_API_KEY");
-    if (!HUGGING_FACE_API_KEY) {
-      throw new Error("HUGGING_FACE_API_KEY is not set in environment variables");
+    // Get available LLM models
+    const models = await getLLMModels(supabase);
+    
+    if (models.length === 0) {
+      throw new Error("No LLM models configured or enabled");
     }
-
-    // Call the Hugging Face API
-    const hfResponse = await fetch(HUGGING_FACE_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${HUGGING_FACE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: fullPrompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-          top_p: 0.9,
-          do_sample: true,
-        },
-      }),
-    });
-
-    if (!hfResponse.ok) {
-      const errorData = await hfResponse.text();
-      console.error("Hugging Face API error:", errorData);
-      throw new Error(`Hugging Face API error: ${hfResponse.status} - ${errorData}`);
+    
+    // Try each model in order until one succeeds
+    let aiResponse = "";
+    let success = false;
+    
+    for (const model of models) {
+      try {
+        console.log(`Trying model: ${model.model_name}`);
+        const hfData = await callLLMModel(model, fullPrompt);
+        
+        let generatedText = hfData[0]?.generated_text || "";
+        
+        // Extract only the assistant's response from the generated text
+        if (generatedText.includes("Assistant:")) {
+          generatedText = generatedText.split("Assistant:").pop()?.trim() || "";
+        }
+        
+        if (generatedText) {
+          aiResponse = generatedText;
+          success = true;
+          console.log(`Successfully generated response with ${model.model_name}`);
+          break;
+        }
+      } catch (error) {
+        console.error(`Error with model ${model.model_name}:`, error);
+        // Continue to the next model
+      }
     }
-
-    const hfData = await hfResponse.json();
-    console.log("Hugging Face API response:", hfData);
     
-    let aiResponse = hfData[0]?.generated_text || "";
-    
-    // Extract only the assistant's response from the generated text
-    if (aiResponse.includes("Assistant:")) {
-      aiResponse = aiResponse.split("Assistant:").pop()?.trim() || "";
+    if (!success) {
+      throw new Error("Your internet connection seems to be unstable. Please try again in 2 minutes");
     }
 
     console.log("Extracted AI response:", aiResponse);

@@ -18,6 +18,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WebContent from "./pages/WebContent";
+import LLMConfig from "./pages/LLMConfig";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <WebContent />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/llm-config" 
+                element={
+                  <ProtectedRoute>
+                    <LLMConfig />
                   </ProtectedRoute>
                 } 
               />
