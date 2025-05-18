@@ -15,7 +15,8 @@
 DROP VIEW IF EXISTS public.technique_recommendations;
 
 -- Create a new view with proper joins and no recursive references
-CREATE OR REPLACE VIEW public.technique_recommendations AS
+CREATE OR REPLACE VIEW public.technique_recommendations 
+WITH (security_invoker = on) AS
 SELECT 
   rt.id as technique_id,
   rt.title,
