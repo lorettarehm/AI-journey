@@ -1,36 +1,75 @@
+import { createClient } from "npm:@huggingface/inference@2.6.4";
 
-// Generate AI recommendation using Hugging Face API
-export async function generateAIRecommendation(ragPrompt: string) {
+const HF_TOKEN = Deno.env.get("HUGGING_FACE_API_KEY");
+const MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2";
+const FALLBACK_MODEL_ID = "gpt2";
+
+interface TechniqueData {
+  title: string;
+  description: string;
+}
+
+export async function generateAIRecommendation(prompt: string): Promise<{ 
+  aiRecommendation: string;
+  technique: TechniqueData;
+}> {
+  if (!HF_TOKEN) {
+    throw new Error("Hugging Face API key not configured");
+  }
+
+  const hf = createClient(HF_TOKEN);
+
   try {
-    // Call Hugging Face API to generate recommendation
-    const HUGGING_FACE_API_KEY = Deno.env.get("HUGGING_FACE_API_KEY");
-    const HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
-
-    const hfResponse = await fetch(HUGGING_FACE_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${HUGGING_FACE_API_KEY}`,
-        "Content-Type": "application/json",
+    const response = await hf.textGeneration({
+      model: MODEL_ID,
+      inputs: prompt,
+      parameters: {
+        max_new_tokens: 500,
+        temperature: 0.7,
+        top_p: 0.95,
       },
-      body: JSON.stringify({
-        inputs: ragPrompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-        },
-      }),
     });
 
-    if (!hfResponse.ok) {
-      throw new Error(`Hugging Face API error: ${hfResponse.status}`);
-    }
+    // Parse the generated text to extract technique and recommendation
+    const generatedText = response.generated_text;
+    
+    // Simple parsing logic - adjust based on your prompt structure
+    const [title, ...rest] = generatedText.split('\n');
+    const description = rest.join('\n');
 
-    const hfData = await hfResponse.json();
-    const aiRecommendation = hfData[0]?.generated_text || "";
-
-    return { aiRecommendation, technique: null };
+    return {
+      aiRecommendation: description,
+      technique: {
+        title: title.trim(),
+        description: description.trim()
+      }
+    };
   } catch (error) {
-    console.error("Error generating AI recommendation:", error);
-    throw error;
+    console.error("Primary model failed, attempting fallback:", error);
+
+    try {
+      // Fallback to a simpler model
+      const fallbackResponse = await hf.textGeneration({
+        model: FALLBACK_MODEL_ID,
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 200,
+          temperature: 0.7,
+        },
+      });
+
+      const fallbackText = fallbackResponse.generated_text;
+      
+      return {
+        aiRecommendation: fallbackText,
+        technique: {
+          title: "Personalized Technique Recommendation",
+          description: fallbackText
+        }
+      };
+    } catch (fallbackError) {
+      console.error("Fallback model also failed:", fallbackError);
+      throw new Error("Failed to generate recommendation with both primary and fallback models");
+    }
   }
 }
