@@ -10,6 +10,10 @@ import { storeRecommendation } from "./databaseService.ts";
 const MAX_RETRIES = 3;
 // Initial delay in milliseconds
 const INITIAL_DELAY = 1000;
+// Maximum consecutive failures before disabling a model
+const MAX_CONSECUTIVE_FAILURES = 5;
+// Time window for failure tracking (in milliseconds)
+const FAILURE_WINDOW = 300000; // 5 minutes
 
 // Sleep function for delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -21,6 +25,44 @@ const createServiceClient = () => {
   return createClient(supabaseUrl, supabaseServiceKey);
 };
 
+// Circuit breaker state
+const modelFailures = new Map<string, { count: number; lastFailure: number }>();
+
+// Check if a model should be temporarily disabled
+function isModelDisabled(modelName: string): boolean {
+  const failure = modelFailures.get(modelName);
+  if (!failure) return false;
+
+  const now = Date.now();
+  // Reset failures if outside the time window
+  if (now - failure.lastFailure > FAILURE_WINDOW) {
+    modelFailures.delete(modelName);
+    return false;
+  }
+
+  return failure.count >= MAX_CONSECUTIVE_FAILURES;
+}
+
+// Record a model failure
+function recordModelFailure(modelName: string) {
+  const now = Date.now();
+  const failure = modelFailures.get(modelName);
+  
+  if (!failure || now - failure.lastFailure > FAILURE_WINDOW) {
+    modelFailures.set(modelName, { count: 1, lastFailure: now });
+  } else {
+    modelFailures.set(modelName, {
+      count: failure.count + 1,
+      lastFailure: now
+    });
+  }
+}
+
+// Reset model failures
+function resetModelFailures(modelName: string) {
+  modelFailures.delete(modelName);
+}
+
 // Retry function with exponential backoff
 async function retryWithBackoff<T>(
   operation: () => Promise<T>,
@@ -30,7 +72,7 @@ async function retryWithBackoff<T>(
   try {
     return await operation();
   } catch (error) {
-    if (retries === 0 || !error.message.includes("404")) {
+    if (retries === 0) {
       throw error;
     }
     
@@ -39,6 +81,12 @@ async function retryWithBackoff<T>(
     
     return retryWithBackoff(operation, retries - 1, delay * 2);
   }
+}
+
+// Function to validate API key format
+function isValidAPIKey(apiKey: string): boolean {
+  // Add your API key validation logic here
+  return apiKey.length > 0 && apiKey.length < 1000;
 }
 
 // Function to get available LLM models in order
@@ -60,6 +108,14 @@ async function getLLMModels(supabase: any) {
 
 // Function to call an LLM model API
 async function callLLMModel(model: any, prompt: string) {
+  if (!isValidAPIKey(model.api_key)) {
+    throw new Error(`Invalid API key format for model ${model.model_name}`);
+  }
+
+  if (isModelDisabled(model.model_name)) {
+    throw new Error(`Model ${model.model_name} is temporarily disabled due to consecutive failures`);
+  }
+
   try {
     const response = await fetch(model.api_url, {
       method: "POST",
@@ -79,12 +135,15 @@ async function callLLMModel(model: any, prompt: string) {
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`API error (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
+    resetModelFailures(model.model_name); // Reset failures on success
     return data;
   } catch (error) {
+    recordModelFailure(model.model_name);
     console.error(`Error calling ${model.model_name}:`, error);
     throw error;
   }
@@ -100,7 +159,16 @@ serve(async (req) => {
     const { userId } = await req.json();
     
     if (!userId) {
-      throw new Error("User ID is required");
+      return new Response(
+        JSON.stringify({ 
+          error: "User ID is required",
+          details: "Please provide a valid user ID"
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
     }
 
     const supabase = createServiceClient();
@@ -109,7 +177,16 @@ serve(async (req) => {
     const userData = await fetchUserData(supabase, userId);
     
     if (!userData) {
-      throw new Error("Could not retrieve user data");
+      return new Response(
+        JSON.stringify({ 
+          error: "User data not found",
+          details: "Could not retrieve user data. Please try again later."
+        }),
+        { 
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
     }
 
     // Generate RAG prompt
@@ -119,13 +196,23 @@ serve(async (req) => {
     const models = await getLLMModels(supabase);
     
     if (models.length === 0) {
-      throw new Error("No LLM models configured or enabled");
+      return new Response(
+        JSON.stringify({ 
+          error: "No LLM models available",
+          details: "No language models are currently configured or enabled. Please contact support."
+        }),
+        { 
+          status: 503,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
     }
     
     // Try each model in order until one succeeds
     let aiRecommendation = "";
     let technique = null;
     let success = false;
+    let lastError = null;
     
     for (const model of models) {
       try {
@@ -159,12 +246,22 @@ serve(async (req) => {
         }
       } catch (error) {
         console.error(`Error with model ${model.model_name}:`, error);
+        lastError = error;
         // Continue to the next model
       }
     }
     
     if (!success) {
-      throw new Error("Your internet connection seems to be unstable. Please try again in 2 minutes");
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to generate recommendation",
+          details: `All available models failed. Last error: ${lastError?.message}. Please try again later.`
+        }),
+        { 
+          status: 503,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
     }
 
     // Store the recommendation
@@ -186,8 +283,8 @@ serve(async (req) => {
     console.error("Error in recommendation generation:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: "If this error persists, please try again later or contact support."
+        error: "Internal server error",
+        details: error.message
       }),
       { 
         status: 500, 
