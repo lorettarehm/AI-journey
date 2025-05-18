@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface QuestionOption {
@@ -81,7 +80,7 @@ export const sampleQuestions = [
 export const fetchRandomQuestions = async (count = 5): Promise<Question[]> => {
   try {
     const { data, error } = await supabase
-      .from('adhd_screening_questions')
+      .from('screening_questions')
       .select('id, question_text, category, score_type, source')
       .order('id')
       .limit(count);
