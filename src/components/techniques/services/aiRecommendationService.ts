@@ -42,37 +42,42 @@ export const fetchAIRecommendations = async (userId: string | undefined): Promis
   try {
     // Call the edge function with retry mechanism
     const result = await retryWithBackoff(async () => {
-      const { data, error } = await supabase.functions.invoke('generate-technique-recommendations', {
+      const response = await supabase.functions.invoke('generate-technique-recommendations', {
         body: JSON.stringify({ userId })
       });
       
-      if (error) {
-        // Log detailed error information
-        console.error('Edge function error:', {
-          message: error.message,
-          details: error.details,
-          status: error.status,
-          name: error.name
-        });
-        
-        // If the error contains a message about LLM models being unavailable,
-        // throw a more user-friendly error
-        if (error.message?.includes('No LLM models available') || 
-            error.message?.includes('Failed to generate recommendation')) {
-          throw new Error('Our recommendation system is temporarily unavailable. Please try again in a few minutes.');
+      if (response.error) {
+        // Check for specific error conditions
+        if (response.error.message?.includes('No LLM models available') || 
+            response.status === 503) {
+          throw new Error('Our AI recommendation system is temporarily unavailable. Please try again in a few minutes. Our team has been notified.');
         }
         
-        throw error;
+        // Log detailed error information
+        console.error('Edge function error:', {
+          message: response.error.message,
+          details: response.error.details,
+          status: response.status,
+          name: response.error.name
+        });
+        
+        throw response.error;
       }
       
-      return data;
+      return response.data;
     });
     
     return result;
   } catch (error) {
+    // Log the error for debugging
     console.error('Error in AI recommendation service:', error);
     
-    // Return null and let the UI handle the error state
-    return null;
+    // If it's our custom error message, return null to display the user-friendly message
+    if (error.message?.includes('temporarily unavailable')) {
+      return null;
+    }
+    
+    // For other errors, throw to be caught by the error boundary
+    throw error;
   }
 };

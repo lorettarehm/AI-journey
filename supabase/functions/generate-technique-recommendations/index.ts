@@ -114,29 +114,44 @@ async function checkModelHealth(model: any): Promise<boolean> {
 
 // Function to get available LLM models in order
 async function getLLMModels(supabase: any) {
-  const { data, error } = await supabase
-    .from('llm_models')
-    .select('*')
-    .eq('enabled', true)
-    .order('invocation_order', { ascending: true });
-  
-  if (error) {
-    console.error("Error fetching LLM models:", error);
+  try {
+    const { data, error } = await supabase
+      .from('llm_models')
+      .select('*')
+      .eq('enabled', true)
+      .order('invocation_order', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching LLM models:", error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      console.error("No enabled LLM models found in the database");
+      return [];
+    }
+
+    // Filter out models that fail the health check
+    const healthyModels = [];
+    for (const model of data) {
+      if (!isValidAPIKey(model.api_key)) {
+        console.error(`Invalid API key format for model ${model.model_name}`);
+        continue;
+      }
+
+      const isHealthy = await checkModelHealth(model);
+      if (isHealthy) {
+        healthyModels.push(model);
+      } else {
+        console.warn(`Model ${model.model_name} failed health check, skipping...`);
+      }
+    }
+    
+    return healthyModels;
+  } catch (error) {
+    console.error("Error in getLLMModels:", error);
     return [];
   }
-
-  // Filter out models that fail the health check
-  const healthyModels = [];
-  for (const model of data || []) {
-    const isHealthy = await checkModelHealth(model);
-    if (isHealthy) {
-      healthyModels.push(model);
-    } else {
-      console.warn(`Model ${model.model_name} failed health check, skipping...`);
-    }
-  }
-  
-  return healthyModels;
 }
 
 // Function to call an LLM model API
@@ -239,7 +254,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: "No LLM models available",
-          details: "No language models are currently operational. Our team has been notified and is working to restore service."
+          details: "Our AI recommendation system is temporarily unavailable. Please try again in a few minutes. Our team has been notified."
         }),
         { 
           status: 503,
@@ -297,7 +312,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: "Failed to generate recommendation",
-          details: `Unable to generate recommendation. Attempted models: ${attemptedModels.join(", ")}. Last error: ${lastError?.message}. Please try again later.`
+          details: "Our AI recommendation system is temporarily unavailable. Please try again in a few minutes. Our team has been notified."
         }),
         { 
           status: 503,
@@ -326,7 +341,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: "Internal server error",
-        details: error.message
+        details: "An unexpected error occurred. Please try again later."
       }),
       { 
         status: 500, 
