@@ -3,22 +3,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders } from "./cors.ts";
 import { fetchUserData } from "./userDataService.ts";
 import { createRAGPrompt } from "./promptGenerator.ts";
-import { generateAIRecommendation } from "./aiService.ts";
 import { storeRecommendation } from "./databaseService.ts";
+import { getLLMModels, callLLMModel, retryWithBackoff, sleep } from "./llmService.ts";
 
-// Maximum number of retries
-const MAX_RETRIES = 3;
-// Initial delay in milliseconds
-const INITIAL_DELAY = 1000;
 // Maximum consecutive failures before disabling a model
 const MAX_CONSECUTIVE_FAILURES = 5;
 // Time window for failure tracking (in milliseconds)
 const FAILURE_WINDOW = 300000; // 5 minutes
 // Timeout for model health check (in milliseconds)
 const HEALTH_CHECK_TIMEOUT = 5000;
-
-// Sleep function for delay
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Create a Supabase client with the service role key
 const createServiceClient = () => {
@@ -65,26 +58,6 @@ function resetModelFailures(modelName: string) {
   modelFailures.delete(modelName);
 }
 
-// Retry function with exponential backoff
-async function retryWithBackoff<T>(
-  operation: () => Promise<T>,
-  retries = MAX_RETRIES,
-  delay = INITIAL_DELAY
-): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    if (retries === 0) {
-      throw error;
-    }
-    
-    console.log(`Retrying operation. Attempts remaining: ${retries}. Delay: ${delay}ms`);
-    await sleep(delay);
-    
-    return retryWithBackoff(operation, retries - 1, delay * 2);
-  }
-}
-
 // Function to validate API key format
 function isValidAPIKey(apiKey: string): boolean {
   return apiKey.length > 0 && apiKey.length < 1000;
@@ -109,98 +82,6 @@ async function checkModelHealth(model: any): Promise<boolean> {
   } catch (error) {
     console.error(`Health check failed for ${model.model_name}:`, error);
     return false;
-  }
-}
-
-// Function to get available LLM models in order
-async function getLLMModels(supabase: any) {
-  try {
-    const { data, error } = await supabase
-      .from('llm_models')
-      .select('*')
-      .eq('enabled', true)
-      .order('invocation_order', { ascending: true });
-    
-    if (error) {
-      console.error("Error fetching LLM models:", error);
-      return [];
-    }
-
-    if (!data || data.length === 0) {
-      console.error("No enabled LLM models found in the database");
-      return [];
-    }
-
-    // Filter out models that fail the health check
-    const healthyModels = [];
-    for (const model of data) {
-      if (!isValidAPIKey(model.api_key)) {
-        console.error(`Invalid API key format for model ${model.model_name}`);
-        continue;
-      }
-
-      const isHealthy = await checkModelHealth(model);
-      if (isHealthy) {
-        healthyModels.push(model);
-      } else {
-        console.warn(`Model ${model.model_name} failed health check, skipping...`);
-      }
-    }
-    
-    return healthyModels;
-  } catch (error) {
-    console.error("Error in getLLMModels:", error);
-    return [];
-  }
-}
-
-// Function to call an LLM model API
-async function callLLMModel(model: any, prompt: string) {
-  if (!isValidAPIKey(model.api_key)) {
-    throw new Error(`Invalid API key format for model ${model.model_name}`);
-  }
-
-  if (isModelDisabled(model.model_name)) {
-    throw new Error(`Model ${model.model_name} is temporarily disabled due to consecutive failures`);
-  }
-
-  try {
-    console.log(`Calling ${model.model_name} at ${model.api_url}`);
-    
-    const response = await fetch(model.api_url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${model.api_key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-          top_p: 0.9,
-          do_sample: true,
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API error response for ${model.model_name}:`, {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText
-      });
-      throw new Error(`API error (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json();
-    resetModelFailures(model.model_name); // Reset failures on success
-    return data;
-  } catch (error) {
-    recordModelFailure(model.model_name);
-    console.error(`Error calling ${model.model_name}:`, error);
-    throw error;
   }
 }
 
@@ -271,6 +152,16 @@ serve(async (req) => {
     let attemptedModels = [];
     
     for (const model of models) {
+      if (!isValidAPIKey(model.api_key)) {
+        console.error(`Invalid API key format for model ${model.model_name}`);
+        continue;
+      }
+
+      if (isModelDisabled(model.model_name)) {
+        console.warn(`Model ${model.model_name} is temporarily disabled due to consecutive failures`);
+        continue;
+      }
+
       try {
         console.log(`Attempting to generate recommendation with model: ${model.model_name}`);
         const response = await callLLMModel(model, ragPrompt);
@@ -297,10 +188,12 @@ serve(async (req) => {
           };
           
           success = true;
+          resetModelFailures(model.model_name);
           console.log(`Successfully generated recommendation with ${model.model_name}`);
           break;
         }
       } catch (error) {
+        recordModelFailure(model.model_name);
         console.error(`Error with model ${model.model_name}:`, error);
         lastError = error;
         attemptedModels.push(model.model_name);
@@ -312,7 +205,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: "Failed to generate recommendation",
-          details: "Our AI recommendation system is temporarily unavailable. Please try again in a few minutes. Our team has been notified."
+          details: "All available models failed. Last error: " + (lastError?.message || "Unknown error")
         }),
         { 
           status: 503,
