@@ -47,7 +47,21 @@ export const fetchAIRecommendations = async (userId: string | undefined): Promis
       });
       
       if (error) {
-        console.error('Edge function error:', error);
+        // Log detailed error information
+        console.error('Edge function error:', {
+          message: error.message,
+          details: error.details,
+          status: error.status,
+          name: error.name
+        });
+        
+        // If the error contains a message about LLM models being unavailable,
+        // throw a more user-friendly error
+        if (error.message?.includes('No LLM models available') || 
+            error.message?.includes('Failed to generate recommendation')) {
+          throw new Error('Our recommendation system is temporarily unavailable. Please try again in a few minutes.');
+        }
+        
         throw error;
       }
       
@@ -57,7 +71,8 @@ export const fetchAIRecommendations = async (userId: string | undefined): Promis
     return result;
   } catch (error) {
     console.error('Error in AI recommendation service:', error);
-    // Return null instead of throwing to prevent UI crashes
+    
+    // Return null and let the UI handle the error state
     return null;
   }
 };

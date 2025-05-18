@@ -14,6 +14,8 @@ const INITIAL_DELAY = 1000;
 const MAX_CONSECUTIVE_FAILURES = 5;
 // Time window for failure tracking (in milliseconds)
 const FAILURE_WINDOW = 300000; // 5 minutes
+// Timeout for model health check (in milliseconds)
+const HEALTH_CHECK_TIMEOUT = 5000;
 
 // Sleep function for delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -85,8 +87,29 @@ async function retryWithBackoff<T>(
 
 // Function to validate API key format
 function isValidAPIKey(apiKey: string): boolean {
-  // Add your API key validation logic here
   return apiKey.length > 0 && apiKey.length < 1000;
+}
+
+// Function to check if a model endpoint is healthy
+async function checkModelHealth(model: any): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT);
+
+    const response = await fetch(model.api_url, {
+      method: "HEAD",
+      signal: controller.signal,
+      headers: {
+        "Authorization": `Bearer ${model.api_key}`,
+      },
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    console.error(`Health check failed for ${model.model_name}:`, error);
+    return false;
+  }
 }
 
 // Function to get available LLM models in order
@@ -95,15 +118,25 @@ async function getLLMModels(supabase: any) {
     .from('llm_models')
     .select('*')
     .eq('enabled', true)
-    .order('invocation_order', { ascending: true })
-    .limit(5);
+    .order('invocation_order', { ascending: true });
   
   if (error) {
     console.error("Error fetching LLM models:", error);
     return [];
   }
+
+  // Filter out models that fail the health check
+  const healthyModels = [];
+  for (const model of data || []) {
+    const isHealthy = await checkModelHealth(model);
+    if (isHealthy) {
+      healthyModels.push(model);
+    } else {
+      console.warn(`Model ${model.model_name} failed health check, skipping...`);
+    }
+  }
   
-  return data || [];
+  return healthyModels;
 }
 
 // Function to call an LLM model API
@@ -117,6 +150,8 @@ async function callLLMModel(model: any, prompt: string) {
   }
 
   try {
+    console.log(`Calling ${model.model_name} at ${model.api_url}`);
+    
     const response = await fetch(model.api_url, {
       method: "POST",
       headers: {
@@ -136,6 +171,11 @@ async function callLLMModel(model: any, prompt: string) {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`API error response for ${model.model_name}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
       throw new Error(`API error (${response.status}): ${errorText}`);
     }
 
@@ -192,14 +232,14 @@ serve(async (req) => {
     // Generate RAG prompt
     const ragPrompt = createRAGPrompt(userData);
 
-    // Get available LLM models
+    // Get available and healthy LLM models
     const models = await getLLMModels(supabase);
     
     if (models.length === 0) {
       return new Response(
         JSON.stringify({ 
           error: "No LLM models available",
-          details: "No language models are currently configured or enabled. Please contact support."
+          details: "No language models are currently operational. Our team has been notified and is working to restore service."
         }),
         { 
           status: 503,
@@ -213,10 +253,11 @@ serve(async (req) => {
     let technique = null;
     let success = false;
     let lastError = null;
+    let attemptedModels = [];
     
     for (const model of models) {
       try {
-        console.log(`Trying model: ${model.model_name}`);
+        console.log(`Attempting to generate recommendation with model: ${model.model_name}`);
         const response = await callLLMModel(model, ragPrompt);
         
         // Process the response based on the model
@@ -247,6 +288,7 @@ serve(async (req) => {
       } catch (error) {
         console.error(`Error with model ${model.model_name}:`, error);
         lastError = error;
+        attemptedModels.push(model.model_name);
         // Continue to the next model
       }
     }
@@ -255,7 +297,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: "Failed to generate recommendation",
-          details: `All available models failed. Last error: ${lastError?.message}. Please try again later.`
+          details: `Unable to generate recommendation. Attempted models: ${attemptedModels.join(", ")}. Last error: ${lastError?.message}. Please try again later.`
         }),
         { 
           status: 503,
