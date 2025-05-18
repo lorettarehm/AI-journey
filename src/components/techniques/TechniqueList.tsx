@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Loader2, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ interface TechniqueListProps {
   isLoading: boolean;
   isError: boolean;
   filter: string | null;
+  difficultyFilter: string | null;
   refetch: () => void;
   triggerResearchUpdate: () => Promise<void>;
 }
@@ -29,6 +29,7 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
   isLoading, 
   isError, 
   filter,
+  difficultyFilter,
   refetch,
   triggerResearchUpdate
 }) => {
@@ -37,9 +38,13 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
   const [errorDetails, setErrorDetails] = useState<any>(null);
   const techniquesPerPage = 4;
   
-  // Filter techniques by category
+  // Filter techniques by category and difficulty
   const filteredTechniques = techniques ? 
-    (filter ? techniques.filter(tech => tech.category === filter) : techniques) : 
+    techniques.filter(tech => {
+      const matchesCategory = filter ? tech.category === filter : true;
+      const matchesDifficulty = difficultyFilter ? tech.difficulty_level === difficultyFilter : true;
+      return matchesCategory && matchesDifficulty;
+    }) : 
     [];
     
   // Get current techniques
@@ -130,7 +135,7 @@ const TechniqueList: React.FC<TechniqueListProps> = ({
   if (filteredTechniques.length === 0) {
     return (
       <div className="text-center my-12">
-        <p className="text-muted-foreground">No techniques found. Try updating the research data.</p>
+        <p className="text-muted-foreground">No techniques found matching your filters. Try changing your filter criteria or updating the research data.</p>
         <Button 
           variant="outline" 
           className="mt-4"

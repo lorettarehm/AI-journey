@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/ui/FadeIn";
@@ -13,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const TechniquePage: React.FC = () => {
   const [filter, setFilter] = useState<string | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const { 
     techniques, 
@@ -70,12 +70,18 @@ const TechniquePage: React.FC = () => {
         </FadeIn>
       )}
 
-      <TechniqueFilters filter={filter} setFilter={setFilter} />
+      <TechniqueFilters 
+        filter={filter} 
+        setFilter={setFilter} 
+        difficultyFilter={difficultyFilter}
+        setDifficultyFilter={setDifficultyFilter}
+      />
       <TechniqueList 
         techniques={techniques} 
         isLoading={isLoading} 
         isError={isError} 
         filter={filter}
+        difficultyFilter={difficultyFilter}
         refetch={refetch}
         triggerResearchUpdate={handleUpdateResearch}
       />
