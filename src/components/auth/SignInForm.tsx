@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,9 +9,10 @@ import { toast } from '@/hooks/use-toast';
 
 interface SignInFormProps {
   defaultEmail?: string;
+  onForgotPassword?: () => void;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ defaultEmail = '' }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ defaultEmail = '', onForgotPassword }) => {
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -68,6 +68,16 @@ const SignInForm: React.FC<SignInFormProps> = ({ defaultEmail = '' }) => {
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
+            {onForgotPassword && (
+              <Button 
+                variant="link" 
+                className="px-0 text-sm" 
+                type="button"
+                onClick={onForgotPassword}
+              >
+                Forgot password?
+              </Button>
+            )}
           </div>
           <Input
             id="password"

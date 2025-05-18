@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import AboutPrivacy from "./pages/AboutPrivacy";
 import About from "./pages/About";
+import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -34,6 +34,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/about" element={<About />} />
               <Route path="/about-privacy" element={<AboutPrivacy />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route 
                 path="/assessment" 
                 element={
