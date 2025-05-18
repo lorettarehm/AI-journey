@@ -1,0 +1,52 @@
+# audhd.ai Project Interactions
+
+This file contains a record of all interactions with the audhd.ai project.
+
+## Interaction History
+
+### Initial Project Setup
+- Created a basic vanilla Vite template
+- Renamed the app from "Evolve" to "EUvolve"
+- Changed the blue color palette to Teal
+- Renamed the app throughout the code to "audhd.ai" instead of "EUvolve"
+
+### Authentication Setup
+- Connected to Supabase project "LRAPP"
+- Created profiles table with user information
+- Implemented email authentication
+- Added Google and Facebook login options
+
+### Assessment Tracking
+- Created assessment_results table to store user assessments
+- Implemented functionality to track completed assessments
+- Added visualization of assessment progress over time
+
+### Technique Interaction Tracking
+- Created technique_interactions table to store user interactions with techniques
+- Added functionality to track positive and negative feedback on techniques
+- Implemented UI to show interaction counts with up/down icons
+
+### Theme Customization
+- Added "Colour your day" feature (renamed from "Pick your mood")
+- Implemented dark mode toggle
+- Added color wheel and hex code input for custom theme colors
+
+### Research Integration
+- Created database tables for research papers, techniques, and metadata
+- Implemented functionality to scan and analyze scientific research
+- Added AI profiling to match techniques to user behavior
+
+### ADHD Screening Questions
+- Added questions from ADHD UK and Plymouth NHS sources
+- Created database table to store screening questions
+- Implemented random question selection for assessments
+
+### Code Refactoring
+- Refactored Assessment.tsx into smaller components
+- Refactored Profile.tsx into smaller components
+- Refactored TechniquePage.tsx into smaller components
+
+### Bug Fixes
+- Fixed build errors in FadeIn component
+- Fixed technique interaction tracking functionality
+- Fixed AI recommendation generation in Edge Functions
