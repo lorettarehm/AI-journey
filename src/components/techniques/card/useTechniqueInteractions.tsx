@@ -27,7 +27,8 @@ export const useTechniqueInteractions = (techniqueId?: string) => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase
+      // Fetch user's current feedback
+      const { data: userFeedback, error: userError } = await supabase
         .from('technique_interactions')
         .select('feedback')
         .eq('technique_id', techniqueId)
@@ -35,28 +36,29 @@ export const useTechniqueInteractions = (techniqueId?: string) => {
         .order('created_at', { ascending: false })
         .limit(1);
       
-      if (error) throw error;
+      if (userError) throw userError;
       
-      if (data && data.length > 0) {
-        setCurrentFeedback(data[0].feedback);
+      if (userFeedback && userFeedback.length > 0) {
+        setCurrentFeedback(userFeedback[0].feedback);
       }
       
-      // Also fetch the counts
-      const { data: statsData, error: statsError } = await supabase
+      // Fetch all feedback for counting
+      const { data: allFeedback, error: statsError } = await supabase
         .from('technique_interactions')
-        .select('feedback, count(*)')
+        .select('feedback')
         .eq('technique_id', techniqueId)
-        .group('feedback');
+        .not('feedback', 'is', null);
       
       if (statsError) throw statsError;
       
-      if (statsData) {
-        const helpfulCount = statsData.find(item => item.feedback === 'helpful')?.count || 0;
-        const notHelpfulCount = statsData.find(item => item.feedback === 'not-helpful')?.count || 0;
+      if (allFeedback) {
+        // Count feedback manually
+        const helpfulCount = allFeedback.filter(item => item.feedback === 'helpful').length;
+        const notHelpfulCount = allFeedback.filter(item => item.feedback === 'not-helpful').length;
         
         setInteractionStats({
-          helpfulCount: Number(helpfulCount),
-          notHelpfulCount: Number(notHelpfulCount)
+          helpfulCount,
+          notHelpfulCount
         });
       }
     } catch (error) {
