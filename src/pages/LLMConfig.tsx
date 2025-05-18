@@ -57,6 +57,54 @@ interface LLMModel {
   updated_at: string;
 }
 
+// Function to validate API key format based on common patterns
+const validateAPIKey = (apiKey: string, modelName: string): { isValid: boolean; error?: string } => {
+  if (!apiKey) {
+    return { isValid: false, error: 'API key is required' };
+  }
+
+  // Remove any whitespace
+  const cleanKey = apiKey.trim();
+
+  // Check for minimum length
+  if (cleanKey.length < 20) {
+    return { isValid: false, error: 'API key seems too short' };
+  }
+
+  // Check for common API key patterns based on model name
+  if (modelName.toLowerCase().includes('openai')) {
+    if (!cleanKey.startsWith('sk-')) {
+      return { isValid: false, error: 'OpenAI API keys should start with "sk-"' };
+    }
+  } else if (modelName.toLowerCase().includes('anthropic')) {
+    if (!cleanKey.startsWith('sk-ant-')) {
+      return { isValid: false, error: 'Anthropic API keys should start with "sk-ant-"' };
+    }
+  } else if (modelName.toLowerCase().includes('mistral')) {
+    // Add specific validation for Mistral if needed
+  }
+
+  // Check for invalid characters
+  if (!/^[A-Za-z0-9_-]+$/.test(cleanKey)) {
+    return { isValid: false, error: 'API key contains invalid characters' };
+  }
+
+  return { isValid: true };
+};
+
+// Function to validate API URL
+const validateAPIURL = (url: string): { isValid: boolean; error?: string } => {
+  try {
+    const urlObj = new URL(url);
+    if (!urlObj.protocol.startsWith('http')) {
+      return { isValid: false, error: 'URL must use HTTP or HTTPS protocol' };
+    }
+    return { isValid: true };
+  } catch {
+    return { isValid: false, error: 'Invalid URL format' };
+  }
+};
+
 const LLMConfig = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -65,6 +113,11 @@ const LLMConfig = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
+  const [validationErrors, setValidationErrors] = useState<{
+    model_name?: string;
+    api_key?: string;
+    api_url?: string;
+  }>({});
   
   // Form state for adding/editing models
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,7 +139,6 @@ const LLMConfig = () => {
       }
 
       try {
-        // This is a simple check - in a real app, you'd have a more robust admin check
         const { data, error } = await supabase.rpc('get_user_role');
         
         if (error) {
@@ -146,6 +198,38 @@ const LLMConfig = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+
+    // Clear validation error when field is modified
+    setValidationErrors(prev => ({
+      ...prev,
+      [name]: undefined
+    }));
+  };
+
+  // Validate form data
+  const validateForm = (): boolean => {
+    const errors: {
+      model_name?: string;
+      api_key?: string;
+      api_url?: string;
+    } = {};
+
+    if (!formData.model_name.trim()) {
+      errors.model_name = 'Model name is required';
+    }
+
+    const apiKeyValidation = validateAPIKey(formData.api_key, formData.model_name);
+    if (!apiKeyValidation.isValid) {
+      errors.api_key = apiKeyValidation.error;
+    }
+
+    const apiUrlValidation = validateAPIURL(formData.api_url);
+    if (!apiUrlValidation.isValid) {
+      errors.api_url = apiUrlValidation.error;
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Open dialog for adding a new model
@@ -158,6 +242,7 @@ const LLMConfig = () => {
       api_url: '',
       enabled: true
     });
+    setValidationErrors({});
     setIsDialogOpen(true);
   };
 
@@ -171,16 +256,17 @@ const LLMConfig = () => {
       api_url: model.api_url,
       enabled: model.enabled
     });
+    setValidationErrors({});
     setIsDialogOpen(true);
   };
 
   // Save model (add or update)
   const handleSaveModel = async () => {
     try {
-      if (!formData.model_name || !formData.api_key || !formData.api_url) {
+      if (!validateForm()) {
         toast({
           title: 'Validation Error',
-          description: 'All fields are required',
+          description: 'Please correct the errors in the form',
           variant: 'destructive',
         });
         return;
@@ -191,9 +277,9 @@ const LLMConfig = () => {
         const { error } = await supabase
           .from('llm_models')
           .update({
-            model_name: formData.model_name,
-            api_key: formData.api_key,
-            api_url: formData.api_url,
+            model_name: formData.model_name.trim(),
+            api_key: formData.api_key.trim(),
+            api_url: formData.api_url.trim(),
             enabled: formData.enabled,
             updated_at: new Date().toISOString()
           })
@@ -214,9 +300,9 @@ const LLMConfig = () => {
         const { error } = await supabase
           .from('llm_models')
           .insert({
-            model_name: formData.model_name,
-            api_key: formData.api_key,
-            api_url: formData.api_url,
+            model_name: formData.model_name.trim(),
+            api_key: formData.api_key.trim(),
+            api_url: formData.api_url.trim(),
             enabled: formData.enabled,
             invocation_order: nextOrder
           });
@@ -614,6 +700,9 @@ const LLMConfig = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., Mistral-7B-Instruct-v0.2"
               />
+              {validationErrors.model_name && (
+                <p className="text-sm text-destructive">{validationErrors.model_name}</p>
+              )}
             </div>
             
             <div className="grid gap-2">
@@ -626,6 +715,9 @@ const LLMConfig = () => {
                 placeholder="Enter API key"
                 type="password"
               />
+              {validationErrors.api_key && (
+                <p className="text-sm text-destructive">{validationErrors.api_key}</p>
+              )}
             </div>
             
             <div className="grid gap-2">
@@ -637,6 +729,9 @@ const LLMConfig = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., https://api-inference.huggingface.co/models/..."
               />
+              {validationErrors.api_url && (
+                <p className="text-sm text-destructive">{validationErrors.api_url}</p>
+              )}
             </div>
             
             <div className="flex items-center space-x-2">
