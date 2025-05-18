@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -16,8 +15,10 @@ import TechniqueCardHeader from './card/TechniqueCardHeader';
 import TechniqueCardDetails from './card/TechniqueCardDetails';
 import TechniqueCardFooter from './card/TechniqueCardFooter';
 import TechniqueNutshell from './card/TechniqueNutshell';
+import TechniqueCardFeedback from './card/TechniqueCardFeedback';
 import { TechniqueType } from './types';
 import { useTechniqueInteractions } from './card/useTechniqueInteractions';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface TechniqueCardProps {
   technique: TechniqueType;
@@ -25,7 +26,8 @@ interface TechniqueCardProps {
 
 const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const { handleInteraction } = useTechniqueInteractions();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { handleInteraction, interactionStats, currentFeedback } = useTechniqueInteractions(technique.technique_id);
 
   const handleOpenSection = (section: string) => {
     if (openSection === section) {
@@ -33,7 +35,9 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
     } else {
       setOpenSection(section);
       // Record interaction only when opening a section
-      handleInteraction(technique.technique_id, technique.title);
+      if (technique.technique_id && technique.title) {
+        handleInteraction(technique.technique_id, technique.title);
+      }
     }
   };
 
@@ -47,7 +51,24 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
         />
         
         <div className="px-6 py-4">
-          <TechniqueNutshell descriptionText={technique.description} />
+          <div className="flex justify-between items-start mb-4">
+            <TechniqueNutshell descriptionText={technique.description} />
+            
+            <div className="flex flex-col items-end ml-4 text-xs">
+              {interactionStats.helpfulCount > 0 && (
+                <div className="flex items-center mb-1 text-green-600 dark:text-green-400">
+                  <ThumbsUp size={12} className="mr-1" />
+                  <span>{interactionStats.helpfulCount}</span>
+                </div>
+              )}
+              {interactionStats.notHelpfulCount > 0 && (
+                <div className="flex items-center text-red-600 dark:text-red-400">
+                  <ThumbsDown size={12} className="mr-1" />
+                  <span>{interactionStats.notHelpfulCount}</span>
+                </div>
+              )}
+            </div>
+          </div>
           
           <Accordion type="single" collapsible className="mt-4">
             <AccordionItem value="implementation" className="border-b-0">
@@ -114,6 +135,16 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({ technique }) => {
               </Table>
             </div>
           )}
+          
+          <div className="flex justify-between items-center mt-4">
+            <TechniqueCardFeedback 
+              open={feedbackOpen}
+              setOpen={setFeedbackOpen}
+              techniqueId={technique.technique_id}
+              techniqueName={technique.title}
+              type="feedback"
+            />
+          </div>
         </div>
         
         <TechniqueCardFooter techniqueId={technique.technique_id || ''} />
