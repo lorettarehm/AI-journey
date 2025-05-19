@@ -26,10 +26,8 @@ if   echo "$COMMIT_TITLE" | grep -qiE "^(BREAKING CHANGE|MAJOR|!)"; then
 elif echo "$COMMIT_TITLE" | grep -qiE "^(feat|feature|minor)"; then
   MINOR=$(( MINOR + 1 )); PATCH=0
 else
-  echo "⚙️  step5.8⚙️"
   PATCH=$(( PATCH + 1 ))
 fi
-echo "⚙️  step6⚙️"
 NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 NEW_TAG="${IMAGE_NAME}@v${NEW_VERSION}"
 
