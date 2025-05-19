@@ -28,8 +28,8 @@ const LLMTestingPage: React.FC = () => {
               <li>Select an LLM model from the dropdown</li>
               <li>Enter your prompt in the text area</li>
               <li>Click "Generate curl Command"</li>
-              <li>Copy the generated command</li>
-              <li>Paste and run the command in your terminal</li>
+              <li>A popup will appear with the curl command</li>
+              <li>Copy the command and run it in your terminal</li>
             </ol>
             <p className="mt-4 text-sm text-muted-foreground">
               This tool helps you test API calls directly, which can be useful for debugging or verifying API keys.
