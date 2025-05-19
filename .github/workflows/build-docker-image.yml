@@ -54,9 +54,8 @@ jobs:
           IMAGE_NAME:           ${{ env.IMAGE_NAME }}
           GITHUB_REPO_OWNER:    ${{ github.repository_owner }}
         run: |
-          # This script MUST echo "new_tag=..." at the end:
-          NEW_TAG=$(bash ./.github/scripts/release-and-build.sh)
-          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          bash ./.github/scripts/release-and-build.sh
+          echo "new_version=$(< latest_version.txt)" >> $GITHUB_OUTPUT
 
       # scan the freshly pushed tag
       - name: Install Trivy
@@ -67,12 +66,9 @@ jobs:
       - name: Scan pushed image
         run: |
           REPO_URI=ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}
-          TAG=${{ steps.release_build_push.outputs.new_tag }}
-          VERSION=${TAG##*@v}              # strip everything through "@v"
+          VERSION=${{ steps.release_build_push.outputs.new_version }}
           echo "🔍 Scanning ${REPO_URI}:${VERSION}"
-          trivy image \
-            --exit-code 1 \
-            --severity HIGH,CRITICAL \
+          trivy image --exit-code 1 --severity HIGH,CRITICAL \
             "${REPO_URI}:${VERSION}"
 
       - name: Upload latest version
@@ -92,7 +88,8 @@ jobs:
       - name: Build changelog
         id: changelog
         run: |
-          log=$(git log "${{ steps.prev.outputs.prev_tag }}"..${{ steps.release_build_push.outputs.new_tag }} \
+          NEW_TAG=${{ env.IMAGE_NAME }}:${{ steps.release_build_push.outputs.new_version }}
+          log=$(git log "${{ steps.prev.outputs.prev_tag }}"..$NEWTAG \
                  --pretty=format:'- %s')
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$log"          >> $GITHUB_OUTPUT
@@ -116,8 +113,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag:  ${{ steps.release_build_push.outputs.new_tag }}
-          name: Release ${{ steps.release_build_push.outputs.new_tag }}
+          tag:  ${{ env.IMAGE_NAME }}:${{ steps.release_build_push.outputs.new_version }}
+          name: Release  ${{ env.IMAGE_NAME }}:${{ steps.release_build_push.outputs.new_version }}
           body: |
             ## 📝 Changelog
             ${{ steps.changelog.outputs.changelog }}
@@ -128,3 +125,4 @@ jobs:
             ) — ${{ fromJson(steps.pr.outputs.result).title }}
 
             ${{ fromJson(steps.pr.outputs.result).body }}
+ 
