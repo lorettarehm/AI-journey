@@ -2,18 +2,15 @@
 set -euo pipefail
 
 echo "🛠 Starting web-app build for commit $GITHUB_SHA"
-echo "⚙️  step1⚙️"
+
 # 1) make sure we have all tags locally
 git fetch --tags
-echo "⚙️  step2⚙️"
 # 2) if this was a manual dispatch (no “before”), diff against HEAD^
 if [[ -z "${GITHUB_EVENT_BEFORE:-}" ]]; then
   GITHUB_EVENT_BEFORE=$(git rev-parse HEAD^)
 fi
-echo "⚙️  step3⚙️"
 
 REPO_URI="ghcr.io/${GITHUB_REPO_OWNER}/${IMAGE_NAME}"
-echo "⚙️  step4⚙️"
 # 3) find last semver tag (format: NAME@vX.Y.Z)
 LAST_TAG=$(git tag --list "${IMAGE_NAME}@v*.*.*" | sort -V | tail -n1)
 if [[ -n "$LAST_TAG" ]]; then
@@ -22,19 +19,15 @@ if [[ -n "$LAST_TAG" ]]; then
 else
   MAJOR=0; MINOR=0; PATCH=0
 fi
-echo "⚙️  step5⚙️"
 # 4) bump rule from the commit title
 COMMIT_TITLE=$(git log -1 --pretty=format:'%s')
-echo "⚙️  step5.5⚙️"
 if   echo "$COMMIT_TITLE" | grep -qiE "^(BREAKING CHANGE|MAJOR|!)"; then
-  echo "⚙️  step5.6⚙️"
-  (( MAJOR++ )); MINOR=0; PATCH=0
+  MAJOR=$(( MAJOR + 1 )); MINOR=0; PATCH=0
 elif echo "$COMMIT_TITLE" | grep -qiE "^(feat|feature|minor)"; then
-  echo "⚙️  step5.7⚙️"
-  (( MINOR++ )); PATCH=0
+  MINOR=$(( MINOR + 1 )); PATCH=0
 else
   echo "⚙️  step5.8⚙️"
-  (( PATCH++ ))
+  PATCH=$(( PATCH + 1 ))
 fi
 echo "⚙️  step6⚙️"
 NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
