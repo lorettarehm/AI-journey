@@ -125,4 +125,4 @@ jobs:
             ) — ${{ fromJson(steps.pr.outputs.result).title }}
 
             ${{ fromJson(steps.pr.outputs.result).body }}
- 
+

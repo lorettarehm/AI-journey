@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "🛠 Starting web-app build for commit $GITHUB_SHA"
+
 # 1) make sure we have all tags locally
 git fetch --tags
 # 2) if this was a manual dispatch (no “before”), diff against HEAD^
@@ -29,6 +31,8 @@ fi
 NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 NEW_TAG="${IMAGE_NAME}@v${NEW_VERSION}"
 
+echo "  ↪︎ bumping $LAST_TAG → $NEW_VERSION"
+
 # 5) build & push only the version tag
 docker build -t "${REPO_URI}:${NEW_VERSION}" .
 docker push "${REPO_URI}:${NEW_VERSION}"
@@ -36,6 +40,8 @@ docker push "${REPO_URI}:${NEW_VERSION}"
 # 6) annotate + push the Git tag
 git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
 
+echo "$NEW_VERSION" > latest_version.txt
+
 git push origin --tags
 
-echo "${NEW_TAG}"
+echo "✅ Done: pushed ${REPO_URI}:${NEW_VERSION} and tag $NEW_TAG"
