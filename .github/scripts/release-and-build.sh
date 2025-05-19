@@ -10,7 +10,7 @@ if [[ -z "${GITHUB_EVENT_BEFORE:-}" ]]; then
   GITHUB_EVENT_BEFORE=$(git rev-parse HEAD^)
 fi
 
-REPO_URI="ghcr.io/${GITHUB_REPO_OWNER}/${IMAGE_NAME}"
+REPO_URI="${REPO}"
 # 3) find last semver tag (format: NAME@vX.Y.Z)
 LAST_TAG=$(git tag --list "${IMAGE_NAME}@v*.*.*" | sort -V | tail -n1)
 if [[ -n "$LAST_TAG" ]]; then
@@ -45,3 +45,5 @@ echo "$NEW_VERSION" > latest_version.txt
 git push origin --tags
 
 echo "✅ Done: pushed ${REPO_URI}:${NEW_VERSION} and tag $NEW_TAG"
+
+echo "new_tag=${NEW_TAG}"

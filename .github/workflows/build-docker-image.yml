@@ -1,4 +1,3 @@
----
 name: 0 🚀 Build, Version & Push Web App Image
 run-name: ➡️ ${{ github.ref }} (${{
   github.event_name }})
@@ -14,17 +13,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write     # for pushing back Git tags
-  actions: write      # for upload-artifact
-  deployments: write  # if you wire this up to Deployments API
-  packages: write     # forgot this for oci
+  contents: write     # for pushing back Git tags & creating the release
+  packages: write     # for pushing to GHCR
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME:       aijourney-webapp
-      GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+      REPO:             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
 
     steps:
       - name: Checkout full history & tags
@@ -48,14 +45,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ────────────────────────────────────────────────────────────────────
       - name: Release, Build & Push
+        id: release_build_push
         env:
           GITHUB_SHA:           ${{ github.sha }}
           GITHUB_EVENT_BEFORE:  ${{ github.event.before }}
           IMAGE_NAME:           ${{ env.IMAGE_NAME }}
-          GITHUB_REPO_OWNER:    ${{ env.GITHUB_REPO_OWNER }}
-        run: bash ./.github/scripts/release-and-build.sh
+          GITHUB_REPO_OWNER:    ${{ github.repository_owner }}
+        run: |
+          # This script MUST echo "new_tag=..." at the end:
+          NEW_TAG=$(bash ./.github/scripts/release-and-build.sh)
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
+      # scan the freshly pushed tag
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
@@ -63,14 +66,64 @@ jobs:
 
       - name: Scan pushed image
         run: |
-          REPO_URI=ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}
-          VERSION=$(< latest_version.txt)
-          echo "🔍 Scanning ${REPO_URI}:${VERSION}"
-          trivy image --exit-code 1 --severity HIGH,CRITICAL \
-            "${REPO_URI}:${VERSION}"
+          TAG=${{ steps.release_build_push.outputs.new_tag }}
+          VERSION=${TAG##*@v}              # strip everything through "@v"
+          echo "🔍 Scanning ${{ env.REPO }}:$VERSION"
+          trivy image \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            "${{ env.REPO }}:${VERSION}"
 
       - name: Upload latest version
         uses: actions/upload-artifact@v4
         with:
           name: webapp-latest-version
           path: latest_version.txt
+
+      # ────────────────────────────────────────────────────────────────────
+      # now build up the changelog + find the PR
+      - name: Find previous tag
+        id: prev
+        run: |
+          prev=$(git tag --list '*@v*.*.*' --sort=-v:refname | sed -n '2q')
+          echo "prev_tag=$prev" >> $GITHUB_OUTPUT
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          log=$(git log "${{ steps.prev.outputs.prev_tag }}"..${{ steps.release_build_push.outputs.new_tag }} \
+                 --pretty=format:'- %s')
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$log"          >> $GITHUB_OUTPUT
+          echo "EOF"           >> $GITHUB_OUTPUT
+
+      - name: Find PR for this tag
+        id: pr
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sha = context.payload.ref.replace('refs/tags/','');
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              commit_sha: sha
+            });
+            return prs.data.length ? prs.data[0] : {};
+
+      # ────────────────────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag:  ${{ steps.release_build_push.outputs.new_tag }}
+          name: Release ${{ steps.release_build_push.outputs.new_tag }}
+          body: |
+            ## 📝 Changelog
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## 🔗 Source Pull Request
+            [#${{ fromJson(steps.pr.outputs.result).number }}](
+              ${{ fromJson(steps.pr.outputs.result).html_url }}
+            ) — ${{ fromJson(steps.pr.outputs.result).title }}
+
+            ${{ fromJson(steps.pr.outputs.result).body }}
