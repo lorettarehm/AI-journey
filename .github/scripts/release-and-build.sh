@@ -25,11 +25,15 @@ fi
 echo "⚙️  step5⚙️"
 # 4) bump rule from the commit title
 COMMIT_TITLE=$(git log -1 --pretty=format:'%s')
+echo "⚙️  step5.5⚙️"
 if   echo "$COMMIT_TITLE" | grep -qiE "^(BREAKING CHANGE|MAJOR|!)"; then
+  echo "⚙️  step5.6⚙️"
   (( MAJOR++ )); MINOR=0; PATCH=0
 elif echo "$COMMIT_TITLE" | grep -qiE "^(feat|feature|minor)"; then
+  echo "⚙️  step5.7⚙️"
   (( MINOR++ )); PATCH=0
 else
+  echo "⚙️  step5.8⚙️"
   (( PATCH++ ))
 fi
 echo "⚙️  step6⚙️"
