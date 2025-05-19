@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME:       aijourney-webapp
-      REPO:             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+      GITHUB_REPO_OWNER: ${{ github.repository_owner }}
 
     steps:
       - name: Checkout full history & tags
@@ -66,13 +66,14 @@ jobs:
 
       - name: Scan pushed image
         run: |
+          REPO_URI=ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}
           TAG=${{ steps.release_build_push.outputs.new_tag }}
           VERSION=${TAG##*@v}              # strip everything through "@v"
-          echo "🔍 Scanning ${{ env.REPO }}:$VERSION"
+          echo "🔍 Scanning ${REPO_URI}:${VERSION}"
           trivy image \
             --exit-code 1 \
             --severity HIGH,CRITICAL \
-            "${{ env.REPO }}:${VERSION}"
+            "${REPO_URI}:${VERSION}"
 
       - name: Upload latest version
         uses: actions/upload-artifact@v4
