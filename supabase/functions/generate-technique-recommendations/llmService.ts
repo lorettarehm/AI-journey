@@ -8,6 +8,7 @@ const INITIAL_DELAY = 1000;
 // Function to get available LLM models in order
 export async function getLLMModels(supabase: any) {
   try {
+    console.log("Fetching enabled LLM models...");
     const { data, error } = await supabase
       .from('llm_models')
       .select('*')
@@ -24,6 +25,7 @@ export async function getLLMModels(supabase: any) {
       return [];
     }
     
+    console.log(`Found ${data.length} enabled LLM models`);
     return data;
   } catch (error) {
     console.error("Error in getLLMModels:", error);
@@ -53,7 +55,11 @@ export function generateCurlCommand(model: any, prompt: string): string {
 export async function callLLMModel(model: any, prompt: string) {
   try {
     console.log(`Calling ${model.model_name} at ${model.api_url}`);
-    console.log(`Test with curl: ${generateCurlCommand(model, prompt)}`);
+    
+    // Log a curl command for debugging (with masked API key)
+    const maskedApiKey = model.api_key.substring(0, 4) + '...' + model.api_key.substring(model.api_key.length - 4);
+    const debugCurlCommand = generateCurlCommand({...model, api_key: maskedApiKey}, prompt);
+    console.log(`Test with curl (API key masked): ${debugCurlCommand}`);
     
     const response = await fetch(model.api_url, {
       method: "POST",
@@ -83,6 +89,7 @@ export async function callLLMModel(model: any, prompt: string) {
     }
 
     const data = await response.json();
+    console.log(`Successful response from ${model.model_name}:`, JSON.stringify(data).substring(0, 200) + '...');
     return data;
   } catch (error) {
     console.error(`Error calling ${model.model_name}:`, error);

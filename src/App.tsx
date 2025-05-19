@@ -19,6 +19,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WebContent from "./pages/WebContent";
 import LLMConfig from "./pages/LLMConfig";
+import DebugLLM from "./pages/DebugLLM";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <LLMConfig />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/debug/llm" 
+                element={
+                  <ProtectedRoute>
+                    <DebugLLM />
                   </ProtectedRoute>
                 } 
               />

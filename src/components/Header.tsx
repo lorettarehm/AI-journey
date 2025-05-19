@@ -1,14 +1,22 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MoonStar, Sun, Menu, X, MessageCircle } from 'lucide-react';
+import { MoonStar, Sun, Menu, X, MessageCircle, Bug } from 'lucide-react';
 import ThemeSelector from '@/components/ui/ThemeSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useProfile } from '@/components/profile/settings/personal-info/useProfile';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -17,10 +25,34 @@ const Header = () => {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const { profile } = useProfile();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase.rpc('get_user_role');
+        
+        if (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data === 'supabase_admin');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const NavLinks = () => (
     <>
@@ -60,6 +92,23 @@ const Header = () => {
             onClick={() => setIsOpen(false)}
           >
             Profile
+          </Link>
+          {isAdmin && (
+            <Link 
+              to="/admin/llm-config" 
+              className={`text-sm transition-colors hover:text-primary ${location.pathname === '/admin/llm-config' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              LLM Config
+            </Link>
+          )}
+          <Link 
+            to="/debug/llm" 
+            className={`text-sm transition-colors hover:text-primary ${location.pathname === '/debug/llm' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
+            onClick={() => setIsOpen(false)}
+          >
+            <Bug className="h-4 w-4 inline mr-1" />
+            Debug
           </Link>
         </>
       )}
@@ -114,14 +163,49 @@ const Header = () => {
                   <MessageCircle className="h-5 w-5" />
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={signOut}
-                className="hidden sm:inline-flex"
-              >
-                Sign Out
-              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 mr-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url || ''} alt="Profile" />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/settings">Settings</Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/llm-config">LLM Configuration</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/debug/llm">
+                      <Bug className="h-4 w-4 mr-2" />
+                      Debug Tools
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <Link to="/auth" className="hidden sm:block">

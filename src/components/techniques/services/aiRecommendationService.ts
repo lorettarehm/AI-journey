@@ -42,14 +42,19 @@ export const fetchAIRecommendations = async (userId: string | undefined): Promis
   try {
     // Call the edge function with retry mechanism
     const result = await retryWithBackoff(async () => {
+      console.log('Calling generate-technique-recommendations edge function...');
+      
       const response = await supabase.functions.invoke('generate-technique-recommendations', {
         body: JSON.stringify({ userId })
       });
+      
+      console.log('Edge function response:', response);
       
       if (response.error) {
         // Check for specific error conditions
         if (response.error.message?.includes('No LLM models available') || 
             response.status === 503) {
+          console.error('LLM availability error:', response.error);
           throw new Error('Our AI recommendation system is temporarily unavailable. Please try again in a few minutes. Our team has been notified.');
         }
         
