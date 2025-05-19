@@ -1,0 +1,64 @@
+name: 📦 Release on Tag
+
+on:
+  push:
+    # fires only on tags like NAME@vX.Y.Z
+    tags:
+      - '*@v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history & tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find previous tag
+        id: prev
+        run: |
+          prev=$(git tag --list '*@v*.*.*' --sort=-v:refname | sed -n '2q')
+          echo "prev_tag=$prev" >> $GITHUB_OUTPUT
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          log=$(git log "${{ steps.prev.outputs.prev_tag }}"..${{ github.ref_name }} \
+                  --pretty=format:'- %s')
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$log"          >> $GITHUB_OUTPUT
+          echo "EOF"           >> $GITHUB_OUTPUT
+
+      - name: Find PR for this tag
+        id: pr
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sha = context.payload.ref.replace('refs/tags/','');
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              commit_sha: sha
+            });
+            return prs.data.length ? prs.data[0] : {};
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag:  ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 📝 Changelog
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## 🔗 Source Pull Request
+            [#${{ fromJson(steps.pr.outputs.result).number }}](
+              ${{ fromJson(steps.pr.outputs.result).html_url }}
+            ) — ${{ fromJson(steps.pr.outputs.result).title }}
+
+            ${{ fromJson(steps.pr.outputs.result).body }}
