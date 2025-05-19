@@ -35,7 +35,7 @@ docker push "${REPO_URI}:${NEW_VERSION}"
 
 # 6) annotate + push the Git tag
 git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
-echo "$NEW_VERSION" > latest_version.txt
+
 git push origin --tags
 
-echo "new_tag=${NEW_TAG}"
+echo "${NEW_TAG}"
