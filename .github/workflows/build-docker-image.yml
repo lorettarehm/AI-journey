@@ -17,6 +17,7 @@ permissions:
   contents: write     # for pushing back Git tags
   actions: write      # for upload-artifact
   deployments: write  # if you wire this up to Deployments API
+  packages: write     # forgot this for oci
 
 jobs:
   build:
