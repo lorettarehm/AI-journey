@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 import DailyCheckIn from './DailyCheckIn';
 import WeeklyProgressChart from './WeeklyProgressChart';
 import FadeIn from '@/components/ui/FadeIn';
+import { useHasAssessmentToday } from '@/hooks/useHasAssessmentToday';
 
 interface UserCardProps {
   user: User | null;
@@ -21,6 +22,9 @@ const UserCard = ({
   isAssessmentLoading 
 }: UserCardProps) => {
   console.log('UserCard received latestAssessment:', JSON.stringify(latestAssessment, null, 2));
+  
+  // Check if user has completed an assessment today
+  const { hasAssessmentToday } = useHasAssessmentToday();
 
   // Calculate metrics based on the latest assessment
   const focusLevel = latestAssessment?.focus_level || 0;
@@ -74,6 +78,7 @@ const UserCard = ({
             creativityScore={creativityScore}
             lastAssessmentDate={lastAssessmentDate}
             hasAssessment={!!latestAssessment}
+            hasAssessmentToday={hasAssessmentToday}
           />
           <WeeklyProgressChart data={weeklyData} />
         </div>

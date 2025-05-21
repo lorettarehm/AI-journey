@@ -11,6 +11,7 @@ interface DailyCheckInProps {
   emotionalState?: number;
   stressLevel?: number;
   creativityScore?: number;
+  hasAssessmentToday?: boolean;
 }
 
 const DailyCheckIn = ({ 
@@ -20,7 +21,8 @@ const DailyCheckIn = ({
   stressLevel = 0,
   creativityScore = 0,
   lastAssessmentDate,
-  hasAssessment 
+  hasAssessment,
+  hasAssessmentToday = false
 }: DailyCheckInProps) => {
   return (
     <div className="bg-accent/10 rounded-2xl p-6 mb-6">
@@ -119,7 +121,7 @@ const DailyCheckIn = ({
           <div className="flex justify-center">
             <Link to="/assessment">
               <Button size="sm" className="mt-2">
-                Start Assessment
+                {hasAssessmentToday ? "Re-take Self-Assessment" : "Start Assessment"}
               </Button>
             </Link>
           </div>

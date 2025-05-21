@@ -7,8 +7,12 @@ import Features from '@/components/home/Features';
 import { Link } from 'react-router-dom';
 import FadeIn from '@/components/ui/FadeIn';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useHasAssessmentToday } from '@/hooks/useHasAssessmentToday';
 
 const Index = () => {
+  const { user } = useAuth();
+  const { hasAssessmentToday } = useHasAssessmentToday();
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -30,7 +34,10 @@ const Index = () => {
                   Start with a simple assessment and discover strategies tailored specifically to you.
                 </p>
                 <Link to="/assessment">
-                  <Button size="lg">Start Your Assessment</Button>
+                  <Button size="lg">{user && hasAssessmentToday 
+                    ? "Re-take Self-Assessment" 
+                    : "Start Your Assessment"}
+                  </Button>
                 </Link>
               </div>
             </FadeIn>
