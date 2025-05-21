@@ -73,7 +73,7 @@ async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
     
     // If no description found in a specific sentence, use a generic one
     if (!description) {
-      description = `A technique for neurodivergent individuals mentioned in AI coaching.`;
+      description = `A technique for neurodivergent individuals mentioned in AIva Chat.`;
     }
     
     // Check if technique already exists to avoid duplicates
@@ -90,7 +90,7 @@ async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
         description: description,
         category: "focus", // Default category
         difficulty_level: "beginner", // Default difficulty
-        journal: "AI Coach Suggestion",
+        journal: "AIva Chat Suggestion",
         publication_date: new Date().toISOString().split('T')[0]
       });
       

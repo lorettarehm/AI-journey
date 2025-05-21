@@ -84,7 +84,7 @@ const Header = () => {
             className={`text-sm transition-colors hover:text-primary ${location.pathname === '/chat' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
             onClick={() => setIsOpen(false)}
           >
-            AI Coach
+            AIva Chat
           </Link>
           <Link 
             to="/profile" 
