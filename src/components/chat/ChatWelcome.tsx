@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const ChatWelcome: React.FC = () => {
@@ -19,7 +18,7 @@ const ChatWelcome: React.FC = () => {
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
       </div>
-      <h3 className="text-lg font-medium mb-2">Welcome to your AI Coach</h3>
+      <h3 className="text-lg font-medium mb-2">Welcome to your **AIva** Coach</h3>
       <p className="text-muted-foreground text-sm max-w-md">
         Get personalized support for ADHD, autism, and other neurodivergent conditions. 
         Ask questions, request strategies, or just have a supportive conversation.

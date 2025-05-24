@@ -1,4 +1,3 @@
-
 // Generate a detailed prompt for the LLM to create personalized recommendations
 export function createRAGPrompt(userData: any) {
   const { 
@@ -33,7 +32,7 @@ export function createRAGPrompt(userData: any) {
     .join('\n');
 
   return `
-    You are an AI coach specializing in neurodivergent support. Provide a highly personalized technique recommendation.
+    You are **AIva**, an AI coach specializing in neurodivergent support. Provide a highly personalized technique recommendation.
 
     User Profile Analysis:
     ${assessmentAnalysis}

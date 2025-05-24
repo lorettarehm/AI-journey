@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +42,7 @@ const ChatSummary: React.FC = () => {
   const generateChatSummary = () => {
     if (isSummaryLoading) return "Loading your conversation summary...";
     if (!chatSummaryData || chatSummaryData.messages.length === 0) {
-      return "Welcome to your AI coach. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
+      return "Welcome to your **AIva** coach. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
     }
 
     // Extract key topics from assistant messages
@@ -87,11 +86,11 @@ const ChatSummary: React.FC = () => {
       .slice(0, 3);
     
     if (techniqueMatches.length > 0) {
-      summary += `The coach has suggested strategies like ${techniqueMatches.join(', ')}. `;
+      summary += `The **AIva** coach has suggested strategies like ${techniqueMatches.join(', ')}. `;
     }
     
     // Add closing statement
-    summary += "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The AI coach is here to help you implement sustainable changes that work with your natural thinking style.";
+    summary += "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The **AIva** coach is here to help you implement sustainable changes that work with your natural thinking style.";
     
     return summary;
   };
@@ -100,7 +99,7 @@ const ChatSummary: React.FC = () => {
 
   return (
     <div className="w-80 border-r bg-muted/20 p-4 hidden md:block">
-      <h3 className="font-medium mb-2">Your Coach Summary</h3>
+      <h3 className="font-medium mb-2">Your **AIva** Summary</h3>
       <p className="text-sm text-muted-foreground whitespace-pre-line">
         {chatSummary}
       </p>
