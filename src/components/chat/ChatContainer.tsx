@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ChatMessagesList from './ChatMessagesList';
 import ChatInput from './ChatInput';
@@ -17,9 +16,9 @@ const ChatContainer: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="px-4 py-3 border-b bg-background">
-        <h2 className="text-lg font-medium">AIva Neurodiversity Chat</h2>
+        <h2 className="text-lg font-medium">AIva - let's talk...</h2>
         <p className="text-sm text-muted-foreground">
-          Chat with your AIva Chat to get personalized support and strategies
+          Chat with AIva to get personalized content
         </p>
       </div>
       

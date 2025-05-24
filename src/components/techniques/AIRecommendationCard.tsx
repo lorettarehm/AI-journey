@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SparklesIcon } from "lucide-react";
@@ -22,7 +21,7 @@ const AIRecommendationCard: React.FC<AIRecommendationCardProps> = ({ recommendat
           <CardTitle className="text-lg">Personalized Technique</CardTitle>
         </div>
         <CardDescription>
-          Custom-tailored recommendation based on your unique profile
+          Custom-tailored recommendation from **AIva** based on your unique profile
         </CardDescription>
       </CardHeader>
       <CardContent>

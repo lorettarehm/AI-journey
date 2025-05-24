@@ -1,4 +1,3 @@
-
 // Generate a detailed prompt for the LLM to create personalized recommendations
 export function createRAGPrompt(userData: any) {
   const { 
@@ -33,7 +32,7 @@ export function createRAGPrompt(userData: any) {
     .join('\n');
 
   return `
-    You are an AIva Chat assistant specializing in neurodivergent support. Provide a highly personalized technique recommendation.
+    You are AIva, an AI assistant specializing in neurodivergent support. Provide a highly personalized technique recommendation, Leverage your knowledge of the user and extensive expertise on neurodivergent techniques and tools for support, rooting them on psychiatry and powerful questions techniques.
 
     User Profile Analysis:
     ${assessmentAnalysis}

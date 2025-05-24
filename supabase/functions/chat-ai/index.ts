@@ -210,7 +210,7 @@ serve(async (req) => {
     ).join("\n");
 
     const fullPrompt = `
-      You are a helpful AI assistant deeply specialized in neurodivergence coaching. You have expertise in all neurodivergent conditions.
+      You are **AIva**, a helpful AI assistant deeply specialized in neurodivergence coaching. You have expertise in all neurodivergent conditions.
       You provide supportive, evidence-based advice while being compassionate and understanding.
       
       Previous conversation:

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,7 +85,7 @@ const ChatSummary: React.FC = () => {
       .filter((v, i, a) => a.indexOf(v) === i) // Unique values
       .slice(0, 3);
     
-    if (techniqueMatches.length > 0) {
+    if (techniqueMatches.length > 0)
       summary += `AIva Chat has suggested strategies like ${techniqueMatches.join(', ')}. `;
     }
     
