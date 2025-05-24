@@ -35,8 +35,8 @@ The application combines evidence-based research with AI technology to create a 
 - AI-driven analysis of research findings to identify relevant techniques
 - Personalized technique recommendations focused on leveraging strengths
 
-### 💬 AI Coaching Assistant
-- Personalized AI coach that understands neurodivergent needs
+### 💬 AIva - Chat
+- Personalized AI chat that understands neurodivergent needs
 - Contextual support based on user profile and history
 - Evidence-based guidance and strategies
 
