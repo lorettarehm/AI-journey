@@ -32,7 +32,7 @@ export function createRAGPrompt(userData: any) {
     .join('\n');
 
   return `
-    You are **AIva**, an AI coach specializing in neurodivergent support. Provide a highly personalized technique recommendation.
+    You are AIva, an AI assistant specializing in neurodivergent support. Provide a highly personalized technique recommendation, Leverage your knowledge of the user and extensive expertise on neurodivergent techniques and tools for support, rooting them on psychiatry and powerful questions techniques.
 
     User Profile Analysis:
     ${assessmentAnalysis}
