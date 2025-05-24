@@ -84,7 +84,7 @@ const Header = () => {
             className={`text-sm transition-colors hover:text-primary ${location.pathname === '/chat' ? 'text-primary font-medium' : 'text-muted-foreground'}`}
             onClick={() => setIsOpen(false)}
           >
-            AI Coach
+            AIva Chat
           </Link>
           <Link 
             to="/profile" 
@@ -261,7 +261,7 @@ const Header = () => {
                     <div className="grid gap-2 grid-cols-2">
                       <Link to="/chat" className="col-span-1" onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full">
-                          <MessageCircle className="h-5 w-5 mr-2" /> Chat
+                          <MessageCircle className="h-5 w-4 mr-2" /> Chat
                         </Button>
                       </Link>
                       <Button 
