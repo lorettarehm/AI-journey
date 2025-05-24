@@ -164,7 +164,20 @@ serve(async (req) => {
 
       try {
         console.log(`Attempting to generate recommendation with model: ${model.model_name}`);
-        const response = await callLLMModel(model, ragPrompt);
+        
+        // Add more detailed logging
+        console.log(`API URL: ${model.api_url}`);
+        console.log(`API Key (first 4 chars): ${model.api_key.substring(0, 4)}...`);
+        
+        // Check model health before attempting to call
+        const isHealthy = await checkModelHealth(model);
+        if (!isHealthy) {
+          console.warn(`Model ${model.model_name} failed health check, skipping`);
+          recordModelFailure(model.model_name);
+          continue;
+        }
+        
+        const response = await retryWithBackoff(() => callLLMModel(model, ragPrompt));
         
         // Process the response based on the model
         let generatedText = "";
@@ -174,7 +187,15 @@ serve(async (req) => {
           generatedText = response.generated_text;
         } else if (typeof response === 'string') {
           generatedText = response;
+        } else if (response.choices && response.choices[0]?.text) {
+          // Handle OpenAI-like response format
+          generatedText = response.choices[0].text;
+        } else if (response.choices && response.choices[0]?.message?.content) {
+          // Handle OpenAI chat completion format
+          generatedText = response.choices[0].message.content;
         }
+        
+        console.log(`Generated text (first 100 chars): ${generatedText.substring(0, 100)}...`);
         
         if (generatedText) {
           // Simple parsing logic - adjust based on your prompt structure
@@ -191,6 +212,9 @@ serve(async (req) => {
           resetModelFailures(model.model_name);
           console.log(`Successfully generated recommendation with ${model.model_name}`);
           break;
+        } else {
+          console.warn(`Model ${model.model_name} returned empty response`);
+          recordModelFailure(model.model_name);
         }
       } catch (error) {
         recordModelFailure(model.model_name);
@@ -205,7 +229,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: "Failed to generate recommendation",
-          details: "All available models failed. Last error: " + (lastError?.message || "Unknown error")
+          details: `All available models failed. Attempted models: ${attemptedModels.join(', ')}. Last error: ${lastError?.message || "Unknown error"}`
         }),
         { 
           status: 503,
@@ -234,7 +258,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: "Internal server error",
-        details: "An unexpected error occurred. Please try again later."
+        details: error.message || "An unexpected error occurred. Please try again later."
       }),
       { 
         status: 500, 

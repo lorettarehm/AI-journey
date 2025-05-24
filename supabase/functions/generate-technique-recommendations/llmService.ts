@@ -61,8 +61,13 @@ export async function callLLMModel(model: any, prompt: string) {
     const debugCurlCommand = generateCurlCommand({...model, api_key: maskedApiKey}, prompt);
     console.log(`Test with curl (API key masked): ${debugCurlCommand}`);
     
+    // Set a timeout for the fetch request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const response = await fetch(model.api_url, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         "Authorization": `Bearer ${model.api_key}`,
         "Content-Type": "application/json",
@@ -77,6 +82,8 @@ export async function callLLMModel(model: any, prompt: string) {
         },
       }),
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
