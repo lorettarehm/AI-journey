@@ -18,7 +18,7 @@ const ChatContainer: React.FC = () => {
       <div className="px-4 py-3 border-b bg-background">
         <h2 className="text-lg font-medium">AIva - let's talk...</h2>
         <p className="text-sm text-muted-foreground">
-          Chat with your **AIva** coach to get personalized support and strategies
+          Chat with AIva to get personalized content
         </p>
       </div>
       
