@@ -37,8 +37,8 @@ The application combines evidence-based research with AI technology to create a 
 
 ### 💬 AIva - Chat
 - Personalized AI chat that understands neurodivergent needs
-- Contextual support based on user profile and history
-- Evidence-based guidance and strategies
+- Contextual replies, based on user profile and history
+- Evidence-based information
 
 ### 🎨 Customization and Accessibility
 - "Colour your day" feature with custom theme options
