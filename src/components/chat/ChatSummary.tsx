@@ -99,7 +99,7 @@ const ChatSummary: React.FC = () => {
 
   return (
     <div className="w-80 border-r bg-muted/20 p-4 hidden md:block">
-      <h3 className="font-medium mb-2">Your **AIva** Summary</h3>
+      <h3 className="font-medium mb-2"> You... in a nutshell </h3>
       <p className="text-sm text-muted-foreground whitespace-pre-line">
         {chatSummary}
       </p>
