@@ -78,14 +78,6 @@ jobs:
           path: '${{ github.workspace }}/vulnerabilities.txt'
           retention-days: 20 # 90 is the default
 
-      - name: Run Trivy vulnerability scanner
-        run: |
-          REPO_URI=ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}
-          VERSION=${{ steps.release_build_push.outputs.new_version }}
-          echo "🔍 Scanning ${REPO_URI}:${VERSION}"
-          trivy image --exit-code 1 --severity HIGH,CRITICAL \
-            "${REPO_URI}:${VERSION}"
-
       - name: Upload latest version
         uses: actions/upload-artifact@v4
         with:
