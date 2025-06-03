@@ -253,7 +253,14 @@ serve(async (req) => {
     // Try each model in order until one succeeds
     let aiResponse = "";
     let success = false;
-    const failedAttempts: any[] = [];
+    const failedAttempts: Array<{
+      model: string;
+      api_url: string;
+      request_payload: object;
+      response_data?: object;
+      error?: string;
+      timestamp: string;
+    }> = [];
     
     for (const model of models) {
       try {
@@ -331,7 +338,10 @@ serve(async (req) => {
     console.error("Error in chat-ai function:", error);
     
     // Check if this is a structured error with debug details
-    const errorResponse: any = { 
+    const errorResponse: { 
+      error: string;
+      debugInfo?: object;
+    } = { 
       error: error.message || "An unknown error occurred" 
     };
     

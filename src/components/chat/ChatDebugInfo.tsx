@@ -54,7 +54,14 @@ const ChatDebugInfo: React.FC<ChatDebugInfoProps> = ({ debugInfo }) => {
                 <div>
                   <span className="font-medium">Failed LLM Attempts:</span>
                   <div className="mt-2 space-y-3">
-                    {debugInfo.responseData.failedAttempts.map((attempt: any, index: number) => (
+                    {debugInfo.responseData.failedAttempts.map((attempt: {
+                      model: string;
+                      api_url: string;
+                      request_payload: object;
+                      response_data?: object;
+                      error?: string;
+                      timestamp: string;
+                    }, index: number) => (
                       <div key={index} className="border border-amber-300 bg-amber-50 p-3 rounded">
                         <div className="text-sm font-medium mb-2">
                           Attempt {index + 1}: {attempt.model} ({attempt.api_url})
