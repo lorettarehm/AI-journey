@@ -111,16 +111,31 @@ export const useMessageOperations = (
     } catch (error) {
       console.error('Error sending message:', error);
       
+      // Extract debug information if available from error response
+      let debugData = null;
+      let errorMessage = error.message;
+      
+      // Check if the error has debug information from the API response
+      if (error?.details?.data?.debugInfo) {
+        debugData = error.details.data.debugInfo;
+      } else if (error?.details?.data?.error) {
+        errorMessage = error.details.data.error;
+        if (error.details.data.debugInfo) {
+          debugData = error.details.data.debugInfo;
+        }
+      }
+      
       setDebugInfo(prev => ({
         status: 'error',
         processingTime: `${((Date.now() - startTime) / 1000).toFixed(2)}s`,
-        requestLog: prev.requestLog + `Error: ${error.message}\n`,
-        error: error.message
+        requestLog: prev.requestLog + `Error: ${errorMessage}\n`,
+        error: errorMessage,
+        responseData: debugData || prev.responseData
       }));
       
       toast({
         title: 'Failed to send message',
-        description: 'Please try again later',
+        description: debugData ? 'Check debug information for details' : 'Please try again later',
         variant: 'destructive',
       });
       
