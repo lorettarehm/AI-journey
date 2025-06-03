@@ -85,10 +85,10 @@ describe('ChatSummary Helper Functions', () => {
     });
 
     it('should use consistent AIva terminology', () => {
-      const closingStatement = "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The **AIva** coach is here to help you implement sustainable changes that work with your natural thinking style.";
+      const closingStatement = "Remember that neurodivergent traits also bring significant strengths and unique perspectives. AIva Chat is here to help you implement sustainable changes that work with your natural thinking style.";
       
-      expect(closingStatement).toContain('**AIva** coach');
-      expect(closingStatement).not.toContain('AIva Chat');
+      expect(closingStatement).toContain('AIva Chat');
+      expect(closingStatement).not.toContain('**AIva** coach');
       expect(closingStatement).not.toContain('AI assistant');
     });
   });
