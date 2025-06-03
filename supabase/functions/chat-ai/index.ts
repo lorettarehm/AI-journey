@@ -151,32 +151,46 @@ async function callLLMModel(model: any, prompt: string) {
 }
 
 serve(async (req) => {
+  console.log("Chat AI handler: Request received");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log("Chat AI handler: Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("Chat AI handler: Parsing JSON from request body");
     const { message, conversationId, userId } = await req.json();
+    console.log("Chat AI handler: Request parsed successfully", { hasMessage: !!message, hasConversationId: !!conversationId, hasUserId: !!userId });
     
     // Create a supabase client with the service role
+    console.log("Chat AI handler: Creating Supabase client");
     const supabase = createServiceClient();
     
     // Validate inputs
+    console.log("Chat AI handler: Validating inputs");
     if (!message) {
+      console.log("Chat AI handler: Validation failed - message is required");
       throw new Error("Message is required");
     }
     if (!userId) {
+      console.log("Chat AI handler: Validation failed - user ID is required");
       throw new Error("User ID is required");
     }
+    console.log("Chat AI handler: Input validation passed");
     
     // Get the conversation history if a conversation ID is provided
+    console.log("Chat AI handler: Preparing conversation handling");
     let history = [];
     let currentConversationId = conversationId;
 
     if (currentConversationId) {
+      console.log("Chat AI handler: Existing conversation detected, fetching history", { conversationId: currentConversationId });
       history = await getConversationHistory(supabase, currentConversationId);
+      console.log("Chat AI handler: Conversation history retrieved", { historyLength: history.length });
     } else {
+      console.log("Chat AI handler: Creating new conversation for user", { userId });
       // Create a new conversation
       const { data: conversation, error: conversationError } = await supabase
         .from("chat_conversations")
@@ -185,13 +199,16 @@ serve(async (req) => {
         .single();
 
       if (conversationError) {
+        console.log("Chat AI handler: Error creating conversation", { error: conversationError });
         throw new Error(`Error creating conversation: ${conversationError.message}`);
       }
       
       currentConversationId = conversation.id;
+      console.log("Chat AI handler: New conversation created", { conversationId: currentConversationId });
     }
 
     // Store the user message
+    console.log("Chat AI handler: Saving user message to database");
     const { error: userMessageError } = await supabase
       .from("chat_messages")
       .insert({
@@ -201,10 +218,13 @@ serve(async (req) => {
       });
 
     if (userMessageError) {
+      console.log("Chat AI handler: Error saving user message", { error: userMessageError });
       throw new Error(`Error saving user message: ${userMessageError.message}`);
     }
+    console.log("Chat AI handler: User message saved successfully");
 
     // Format the conversation history for the LLM
+    console.log("Chat AI handler: Formatting prompt for LLM");
     const formattedPrompt = history.map(msg => 
       `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
     ).join("\n");
@@ -220,27 +240,35 @@ serve(async (req) => {
       Assistant:`;
 
     console.log("Preparing to call LLM models with prompt:", fullPrompt);
+    console.log("Chat AI handler: Prompt formatting completed");
     
     // Get available LLM models
+    console.log("Chat AI handler: Fetching available LLM models");
     const models = await getLLMModels(supabase);
     
     if (models.length === 0) {
+      console.log("Chat AI handler: No LLM models available");
       throw new Error("No LLM models configured or enabled");
     }
+    console.log("Chat AI handler: LLM models retrieved", { modelCount: models.length });
     
     // Try each model in order until one succeeds
+    console.log("Chat AI handler: Starting LLM model processing loop");
     let aiResponse = "";
     let success = false;
     
     for (const model of models) {
       try {
         console.log(`Trying model: ${model.model_name}`);
+        console.log("Chat AI handler: Calling LLM model", { modelName: model.model_name });
         const hfData = await callLLMModel(model, fullPrompt);
         
+        console.log("Chat AI handler: Processing LLM response");
         let generatedText = hfData[0]?.generated_text || "";
         
         // Extract only the assistant's response from the generated text
         if (generatedText.includes("Assistant:")) {
+          console.log("Chat AI handler: Extracting assistant response from generated text");
           generatedText = generatedText.split("Assistant:").pop()?.trim() || "";
         }
         
@@ -248,27 +276,38 @@ serve(async (req) => {
           aiResponse = generatedText;
           success = true;
           console.log(`Successfully generated response with ${model.model_name}`);
+          console.log("Chat AI handler: LLM response generation successful", { modelName: model.model_name });
           break;
+        } else {
+          console.log("Chat AI handler: LLM returned empty response, continuing to next model");
         }
       } catch (error) {
         console.error(`Error with model ${model.model_name}:`, error);
+        console.log("Chat AI handler: Error with model, trying next", { modelName: model.model_name, error: error.message });
         // Continue to the next model
       }
     }
     
     if (!success) {
+      console.log("Chat AI handler: All LLM models failed to generate response");
       throw new Error("Your internet connection seems to be unstable. Please try again in 2 minutes");
     }
 
     console.log("Extracted AI response:", aiResponse);
+    console.log("Chat AI handler: AI response processing completed successfully");
 
     // Extract and save any techniques mentioned in the AI's response
+    console.log("Chat AI handler: Extracting and saving techniques from AI response");
     const techniquesCount = await extractAndSaveTechniques(supabase, aiResponse);
     if (techniquesCount > 0) {
       console.log(`Saved ${techniquesCount} new techniques from chat response`);
+      console.log("Chat AI handler: Techniques extraction completed", { techniquesCount });
+    } else {
+      console.log("Chat AI handler: No new techniques found in response");
     }
     
     // Store the AI response
+    console.log("Chat AI handler: Saving AI response to database");
     const { error: assistantMessageError } = await supabase
       .from("chat_messages")
       .insert({
@@ -279,9 +318,12 @@ serve(async (req) => {
 
     if (assistantMessageError) {
       console.error("Error saving assistant message:", assistantMessageError);
+      console.log("Chat AI handler: Error saving AI response", { error: assistantMessageError });
       throw new Error(`Error saving assistant message: ${assistantMessageError.message}`);
     }
+    console.log("Chat AI handler: AI response saved successfully");
 
+    console.log("Chat AI handler: Preparing success response");
     return new Response(
       JSON.stringify({
         response: aiResponse,
@@ -293,6 +335,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error in chat-ai function:", error);
+    console.log("Chat AI handler: Error occurred, returning error response", { error: error.message });
     return new Response(
       JSON.stringify({ error: error.message || "An unknown error occurred" }),
       {
