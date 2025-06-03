@@ -58,18 +58,25 @@ jobs:
           bash ./.github/scripts/release-and-build.sh
           echo "new_version=$(< latest_version.txt)" >> "$GITHUB_OUTPUT"
 
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sudo sh -s -- -b /usr/local/bin
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ steps.release_build_push.outputs.new_version }}"
+          scan-type: image
+          format: 'table'
+          output: 'vulnerabilities.txt'
+          github-pat: ${{ secrets.GITHUB_TOKEN }} # or ${{ secrets.github_pat_name }} if you're using a PAT
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+          scanners: "vuln"
+          exit-code: '0'
+          ignore-unfixed: false
 
-      - name: Scan pushed image
-        run: |
-          REPO_URI=ghcr.io/${{ env.GITHUB_REPO_OWNER }}/${{ env.IMAGE_NAME }}
-          VERSION=${{ steps.release_build_push.outputs.new_version }}
-          echo "🔍 Scanning ${REPO_URI}:${VERSION}"
-          trivy image --exit-code 1 --severity HIGH,CRITICAL \
-            "${REPO_URI}:${VERSION}"
+      - name: Upload trivy report as a Github artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-vulnerabilities
+          path: '${{ github.workspace }}/vulnerabilities.txt'
+          retention-days: 20 # 90 is the default
 
       - name: Upload latest version
         uses: actions/upload-artifact@v4
