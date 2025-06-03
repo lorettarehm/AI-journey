@@ -123,12 +123,12 @@ const ChatSummary: React.FC = () => {
   // Helper function to build techniques summary
   const buildTechniquesSummary = (techniqueMatches: string[]): string => {
     if (techniqueMatches.length === 0) return "";
-    return `The **AIva** coach has suggested strategies like ${techniqueMatches.join(', ')}. `;
+    return `Your **Chat Companion** has suggested strategies like ${techniqueMatches.join(', ')}. `;
   };
 
   // Helper function to get closing statement
   const getClosingStatement = (): string => {
-    return "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The **AIva** coach is here to help you implement sustainable changes that work with your natural thinking style.";
+    return "Remember that neurodivergent traits also bring significant strengths and unique perspectives. Your **Chat Companion** is here to help you implement sustainable changes that work with your natural thinking style.";
   };
 
   // Memoized derived data for performance
@@ -156,7 +156,7 @@ const ChatSummary: React.FC = () => {
     
     // Handle no data or empty messages
     if (!chatSummaryData || chatSummaryData.messages.length === 0) {
-      return "Welcome to your **AIva** coach. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
+      return "Welcome to your **Chat Companion**. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
     }
 
     // Build personalized summary (max ~200 words)
@@ -174,7 +174,7 @@ const ChatSummary: React.FC = () => {
 
   return (
     <div className="w-80 border-r bg-muted/20 p-4 hidden md:block" role="complementary" aria-label="Chat conversation summary">
-      <h3 className="font-medium mb-2" aria-label="Your AIva conversation summary">Your AIva Summary</h3>
+      <h3 className="font-medium mb-2" aria-label="Your Chat Companion conversation summary">Your Chat Companion Summary</h3>
       <p className="text-sm text-muted-foreground whitespace-pre-line" aria-live="polite">
         {chatSummary}
       </p>
