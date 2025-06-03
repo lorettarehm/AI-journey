@@ -42,7 +42,7 @@ const ChatSummary: React.FC = () => {
   const generateChatSummary = () => {
     if (isSummaryLoading) return "Loading your conversation summary...";
     if (!chatSummaryData || chatSummaryData.messages.length === 0) {
-      return "Welcome to your AIva Chat. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
+      return "Welcome to your **AIva** coach. This is where you'll see a summary of your conversations and personalized insights based on your interactions.";
     }
 
     // Extract key topics from assistant messages
@@ -85,12 +85,12 @@ const ChatSummary: React.FC = () => {
       .filter((v, i, a) => a.indexOf(v) === i) // Unique values
       .slice(0, 3);
     
-    if (techniqueMatches.length > 0)
-      summary += `AIva Chat has suggested strategies like ${techniqueMatches.join(', ')}. `;
+    if (techniqueMatches.length > 0) {
+      summary += `The **AIva** coach has suggested strategies like ${techniqueMatches.join(', ')}. `;
     }
     
     // Add closing statement
-    summary += "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The AIva Chat is here to help you implement sustainable changes that work with your natural thinking style.";
+    summary += "Remember that neurodivergent traits also bring significant strengths and unique perspectives. The **AIva** coach is here to help you implement sustainable changes that work with your natural thinking style.";
     
     return summary;
   };
