@@ -73,7 +73,7 @@ async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
     
     // If no description found in a specific sentence, use a generic one
     if (!description) {
-      description = `A technique for neurodivergent individuals mentioned in AIva Chat.`;
+      description = `A technique for neurodivergent individuals mentioned in Chat Companion.`;
     }
     
     // Check if technique already exists to avoid duplicates
@@ -90,7 +90,7 @@ async function extractAndSaveTechniques(supabase: any, aiResponse: string) {
         description: description,
         category: "focus", // Default category
         difficulty_level: "beginner", // Default difficulty
-        journal: "AIva Chat Suggestion",
+        journal: "Chat Companion Suggestion",
         publication_date: new Date().toISOString().split('T')[0]
       });
       
@@ -210,7 +210,7 @@ serve(async (req) => {
     ).join("\n");
 
     const fullPrompt = `
-      You are **AIva**, a helpful AI assistant deeply specialized in neurodivergence coaching. You have expertise in all neurodivergent conditions.
+      You are **AIva**, a helpful Chat Companion deeply specialized in neurodivergent support. You have expertise in all neurodivergent conditions.
       You provide supportive, evidence-based advice while being compassionate and understanding.
       
       Previous conversation:

@@ -21,7 +21,7 @@ const AIRecommendationCard: React.FC<AIRecommendationCardProps> = ({ recommendat
           <CardTitle className="text-lg">Personalized Technique</CardTitle>
         </div>
         <CardDescription>
-          Custom-tailored recommendation from **AIva** based on your unique profile
+          Custom-tailored recommendation from your **Chat Companion** based on your unique profile
         </CardDescription>
       </CardHeader>
       <CardContent>

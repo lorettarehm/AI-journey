@@ -16,9 +16,9 @@ const ChatContainer: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="px-4 py-3 border-b bg-background">
-        <h2 className="text-lg font-medium">AIva - let's talk...</h2>
+        <h2 className="text-lg font-medium">Chat Companion - let's talk...</h2>
         <p className="text-sm text-muted-foreground">
-          Chat with AIva to get personalized content
+          Chat with your Chat Companion to get personalized content
         </p>
       </div>
       
