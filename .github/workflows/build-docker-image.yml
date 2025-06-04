@@ -93,12 +93,19 @@ jobs:
       - name: Build changelog
         id: changelog
         run: |
-          NEW_TAG=${{ env.IMAGE_NAME }}:${{ steps.release_build_push.outputs.new_version }}
-          log=$(git log "${{ steps.prev.outputs.prev_tag }}"..$NEWTAG \
-                 --pretty=format:'- %s')
+          PREV_TAG="${{ steps.prev.outputs.prev_tag }}"
+          CURR_TAG="aijourney-webapp@v${{ steps.release_build_push.outputs.new_version }}"
+
+          if [[ -z "$PREV_TAG" ]]; then
+            echo "No previous tag found — using full history"
+            log=$(git log --pretty=format:'- %s')
+          else
+            log=$(git log "$PREV_TAG".."$CURR_TAG" --pretty=format:'- %s')
+          fi
+
           echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
           echo "$log"           >> "$GITHUB_OUTPUT"
-          echo "EOF"            >> "$GITHUB_OUTPUT"
+          echo "EOF"            >> "$GITHUB_OUTPUT"            >> "$GITHUB_OUTPUT"
 
       - name: Find PR for this tag
         id: pr
