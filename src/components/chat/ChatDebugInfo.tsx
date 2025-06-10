@@ -50,6 +50,53 @@ const ChatDebugInfo: React.FC<ChatDebugInfoProps> = ({ debugInfo }) => {
                   </pre>
                 </div>
               )}
+              {debugInfo?.responseData?.failedAttempts && debugInfo.responseData.failedAttempts.length > 0 && (
+                <div>
+                  <span className="font-medium">Failed LLM Attempts:</span>
+                  <div className="mt-2 space-y-3">
+                    {debugInfo.responseData.failedAttempts.map((attempt: {
+                      model: string;
+                      api_url: string;
+                      request_payload: object;
+                      response_data?: object;
+                      error?: string;
+                      timestamp: string;
+                    }, index: number) => (
+                      <div key={index} className="border border-amber-300 bg-amber-50 p-3 rounded">
+                        <div className="text-sm font-medium mb-2">
+                          Attempt {index + 1}: {attempt.model} ({attempt.api_url})
+                        </div>
+                        <div className="space-y-2 text-xs">
+                          <div>
+                            <span className="font-medium">Request Payload:</span>
+                            <pre className="mt-1 p-2 bg-white rounded border overflow-x-auto">
+                              {JSON.stringify(attempt.request_payload, null, 2)}
+                            </pre>
+                          </div>
+                          {attempt.response_data && (
+                            <div>
+                              <span className="font-medium">Response Data:</span>
+                              <pre className="mt-1 p-2 bg-white rounded border overflow-x-auto">
+                                {JSON.stringify(attempt.response_data, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                          {attempt.error && (
+                            <div>
+                              <span className="font-medium text-red-600">Error:</span>
+                              <span className="text-red-600 ml-2">{attempt.error}</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-medium">Timestamp:</span>
+                            <span className="ml-2">{new Date(attempt.timestamp).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
