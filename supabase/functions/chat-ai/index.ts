@@ -120,6 +120,25 @@ async function getLLMModels(supabase: any) {
 
 // Function to call an LLM model API
 async function callLLMModel(model: any, prompt: string) {
+  const requestPayload = {
+    inputs: prompt,
+    parameters: {
+      max_new_tokens: 1024,
+      temperature: 0.7,
+      top_p: 0.9,
+      do_sample: true,
+    },
+  };
+
+  const debugInfo = {
+    model: model.model_name,
+    api_url: model.api_url,
+    request_payload: requestPayload,
+    response_data: null,
+    error: null,
+    timestamp: new Date().toISOString(),
+  };
+
   try {
     const response = await fetch(model.api_url, {
       method: "POST",
@@ -127,25 +146,28 @@ async function callLLMModel(model: any, prompt: string) {
         "Authorization": `Bearer ${model.api_key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-          top_p: 0.9,
-          do_sample: true,
-        },
-      }),
+      body: JSON.stringify(requestPayload),
     });
 
+    const data = await response.json();
+    debugInfo.response_data = data;
+
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorMessage = `API error: ${response.status} - ${data?.error || 'Unknown error'}`;
+      debugInfo.error = errorMessage;
+      const error = new Error(errorMessage);
+      (error as any).debugInfo = debugInfo;
+      throw error;
     }
 
-    const data = await response.json();
+    (data as any).debugInfo = debugInfo;
     return data;
   } catch (error) {
     console.error(`Error calling ${model.model_name}:`, error);
+    if (!(error as any).debugInfo) {
+      debugInfo.error = error.message;
+      (error as any).debugInfo = debugInfo;
+    }
     throw error;
   }
 }
@@ -231,6 +253,14 @@ serve(async (req) => {
     // Try each model in order until one succeeds
     let aiResponse = "";
     let success = false;
+    const failedAttempts: Array<{
+      model: string;
+      api_url: string;
+      request_payload: object;
+      response_data?: object;
+      error?: string;
+      timestamp: string;
+    }> = [];
     
     for (const model of models) {
       try {
@@ -252,12 +282,25 @@ serve(async (req) => {
         }
       } catch (error) {
         console.error(`Error with model ${model.model_name}:`, error);
+        // Collect debug information from failed attempt
+        if ((error as any).debugInfo) {
+          failedAttempts.push((error as any).debugInfo);
+        }
         // Continue to the next model
       }
     }
     
     if (!success) {
-      throw new Error("Your internet connection seems to be unstable. Please try again in 2 minutes");
+      const errorDetails = {
+        message: "All LLM models failed. Please check the debug information for details.",
+        failedAttempts,
+        modelsAttempted: models.length,
+        timestamp: new Date().toISOString(),
+      };
+      
+      const error = new Error(errorDetails.message);
+      (error as any).errorDetails = errorDetails;
+      throw error;
     }
 
     console.log("Extracted AI response:", aiResponse);
@@ -293,8 +336,21 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error in chat-ai function:", error);
+    
+    // Check if this is a structured error with debug details
+    const errorResponse: { 
+      error: string;
+      debugInfo?: object;
+    } = { 
+      error: error.message || "An unknown error occurred" 
+    };
+    
+    if ((error as any).errorDetails) {
+      errorResponse.debugInfo = (error as any).errorDetails;
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message || "An unknown error occurred" }),
+      JSON.stringify(errorResponse),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
